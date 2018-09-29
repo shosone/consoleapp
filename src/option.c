@@ -158,7 +158,7 @@ decodeOptions(
                     break;
                 }
                 else{
-                    *memo = '='; /* もとに戻す */
+                    *memo = '='; /* 分割した文字列をもとに戻す */
                 }
             }
         }
@@ -169,13 +169,19 @@ decodeOptions(
                 ret = OUT_OF_MEMORY;
                 goto free_and_exit;
             }
-            if(!((*new_argv)[*new_argc-1] = (char *)malloc(sizeof(char)*strlen(copy_src)))){
+            if(!((*new_argv)[*new_argc-1] = (char *)malloc(sizeof(char)*(strlen(copy_src)+1)))){
                 ret = OUT_OF_MEMORY;
                 goto free_and_exit;
             }
-            strcpy((*new_argv)[*new_argc-1], copy_src);
+            if(delim != '\0'){
+                (*new_argv)[*new_argc-1][0] = '\n'; // あまり良いやり方ではないかもしれないが、この情報はjudgeDestinationで必要になる
+                strcpy(&((*new_argv)[*new_argc-1][1]), copy_src);
+            }
+            else{
+                strcpy((*new_argv)[*new_argc-1], copy_src);
+            }
             if(&copy_src[strlen(copy_src)] != last_null_ptr){
-                copy_src[strlen(copy_src)] = delim; /* もとに戻す */
+                copy_src[strlen(copy_src)] = delim; /* 分割した文字列をもとに戻す */
             }
         }while(a_part_of_condition && 
                 (((copy_src = strtok(NULL, ",")) && (delim = ',')) ||
@@ -262,7 +268,7 @@ adaptContentsChecker(
 static int
 judgeDestination(
         sFLAG_PROPERY_DB *flag_prop_db,
-        char *str)
+        char **str)
 {
     /* return values */
     const int OPT_GRP_DBs_CONTENTS =  0;
@@ -282,7 +288,7 @@ judgeDestination(
     static int current_flags_contents_num_min = 0;
 
     for(int i=0; i<flag_prop_db->entry_num; i++){
-        if(strcmp(flag_prop_db->entries[i].short_form, str) == 0 || strcmp(flag_prop_db->entries[i].long_form, str) == 0){
+        if(strcmp(flag_prop_db->entries[i].short_form, *str) == 0 || strcmp(flag_prop_db->entries[i].long_form, *str) == 0){
             if(!opt_grp_dbs_contents_is_empty){
                 lock_opt_grp_dbs_contents = 1;
             }
@@ -297,6 +303,19 @@ judgeDestination(
             current_flags_contents_num_max        = flag_prop_db->entries[i].content_num_max;
             current_flags_contents_num_min        = flag_prop_db->entries[i].content_num_min;
             return OPT_GRPs_FLAG;
+        }
+    }
+
+    /* 文字列の先頭の改行コードはdecodeOptionsにてこの関数のために付属された情報で本来の文字列には先頭の改行コードは存在しない */
+    if(*str[0] == '\n'){
+        if(current_flags_contents_num >= current_flags_contents_num_max){
+            return TOO_MANY_CONTENTS;
+        }
+        else{
+            /* 先頭の改行コードを削除 */
+            *str = &(*str[1]);
+            current_flags_contents_num++;
+            return OPT_GRPs_CONTENTS;
         }
     }
 
@@ -347,7 +366,7 @@ groupingOpt(
     }
 
     for(int i=0; i<new_argc; i++){
-        switch(judgeDestination(flag_prop_db, new_argv[i])){
+        switch(judgeDestination(flag_prop_db, &new_argv[i])){
             case 0: /* OPT_GRP_DBs_CONTENTS */
                 if(add2optGrpDB_contents(*opt_grp_db, new_argv[i]) == 1){
                     ret = OUT_OF_MEMORY;

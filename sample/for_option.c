@@ -23,7 +23,6 @@ void regFlagProp(sFLAG_PROPERY_DB *flag_prop_db){
 #if DEBUG
 void debug(int groupingOpt_ret, sOPT_GROUP_DB *opt_grp_db){
     printf("#################### debug info #########################\n");
-    printf("comment out line 34 of sample.c if this infomation is anoying.\n");
     printf("groupingOpt returns %d\n", groupingOpt_ret);
     if(opt_grp_db == NULL){
         printf("opt_grp_db is NULL\n");

@@ -3,12 +3,14 @@ Consoleapp is c library for console applications.
 
 ## consoleapp/option
 Functions that check error of option of console application and grouping contents attached to option are summarized.
+### dependancy
 ### struct reference
 ### function reference
 ### sample code
 
 ## consoleapp/interactive
 Functions that facilitate the implementation of interactive functions in the console application are summarized.
+### dependancy
 ### struct reference
 ### function reference
 ### sample code
