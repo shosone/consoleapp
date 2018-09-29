@@ -178,6 +178,8 @@ void regFlagProp(sFLAG_PROPERY_DB *flag_prop_db){
     addFlagProp2DB(flag_prop_db, "-i", "--interactive", 1,       1, chkOptInteractive);
 }
 ```
+### demo
+![result](https://github.com/shosone/consoleapp/doc/option_demo.gif)
 
 ## consoleapp/interactive
 Functions that facilitate the implementation of interactive functions in the console application are summarized.
@@ -191,6 +193,8 @@ T.B.D.
 
 ## introduction
 Please read Makefile. Introduction of autotools is under consideration.
+
+![result](https://github.com/shosone/consoleapp/doc/installation.gif)
 
 ## contents
 <pre>
