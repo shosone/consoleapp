@@ -10,11 +10,11 @@ alwaysReturnTrue(
 
 sFLAG_PROPERY_DB
 *genFlagPropDB(
-        int entry_num)
+        int prop_num)
 {
     sFLAG_PROPERY_DB *flag_prop_db;
 
-    if(entry_num == 0){
+    if(prop_num == 0){
         return NULL;
     }
 
@@ -22,25 +22,25 @@ sFLAG_PROPERY_DB
         return NULL;
     }
 
-    flag_prop_db -> entry_num = entry_num;
+    flag_prop_db -> prop_num = prop_num;
 
-    if(!(flag_prop_db->entries = (sFLAG_PROPERY *)calloc(entry_num, sizeof(sFLAG_PROPERY)))){
+    if(!(flag_prop_db->props = (sFLAG_PROPERY *)calloc(prop_num, sizeof(sFLAG_PROPERY)))){
         free(flag_prop_db);
         return NULL;
     }
 
-    for(int i=0; i<entry_num; i++){
-        flag_prop_db -> entries[i].short_form       = NULL;
-        flag_prop_db -> entries[i].long_form        = NULL;
-        flag_prop_db -> entries[i].contents_checker = alwaysReturnTrue;
-        flag_prop_db -> entries[i].appeared_yet     = 0;
+    for(int i=0; i<prop_num; i++){
+        flag_prop_db -> props[i].short_form       = NULL;
+        flag_prop_db -> props[i].long_form        = NULL;
+        flag_prop_db -> props[i].contents_checker = alwaysReturnTrue;
+        flag_prop_db -> props[i].appeared_yet     = 0;
     }
 
     return flag_prop_db;
 }
 
 int
-add2FlagPropDB(
+addFlagProp2DB(
         sFLAG_PROPERY_DB *db,
         char             *short_form,
         char             *long_form,
@@ -55,7 +55,7 @@ add2FlagPropDB(
     const int MIN_BIGGER_THAN_MAX = 3;
 
     static int idx = 0;
-    sFLAG_PROPERY *flag_prop = &(db -> entries[idx]);
+    sFLAG_PROPERY *flag_prop = &(db -> props[idx]);
 
     if(short_form == NULL){
         return FLAG_NAME_IS_NULL;
@@ -100,8 +100,8 @@ void
 freeFlagPropDB(
         sFLAG_PROPERY_DB *db)
 {
-    for(int i=0; i < db->entry_num; i++){
-        freeFlagProp(&(db->entries[i]));
+    for(int i=0; i < db->prop_num; i++){
+        freeFlagProp(&(db->props[i]));
     }
     free(db);
 }
@@ -112,20 +112,20 @@ static void
 initOptGroupDB(
         sOPT_GROUP_DB *opt_grp_db)
 {
-    opt_grp_db -> opt_grp_num = 0;
-    opt_grp_db -> opt_grps    = NULL;
-    opt_grp_db -> content_num = 0;
-    opt_grp_db -> contents    = NULL;
+    opt_grp_db -> grp_num      = 0;
+    opt_grp_db -> grps         = NULL;
+    opt_grp_db -> flagless_num = 0;
+    opt_grp_db -> flagless     = NULL;
 }
 
 static void
 initOptGroup(
-        sOPT_GROUP *opt_grp)
+        sOPT_GROUP *grp)
 {
-    opt_grp -> flag        = NULL;
-    opt_grp -> content_num = 0;
-    opt_grp -> contents    = NULL;
-    opt_grp -> err_code    = 0;
+    grp -> flag        = NULL;
+    grp -> content_num = 0;
+    grp -> contents    = NULL;
+    grp -> err_code    = 0;
 }
 
 static int /* 0:success, 1: out of memory */
@@ -149,10 +149,10 @@ decodeOptions(
         int   a_part_of_condition = 0;
         char  delim               = '\0';
 
-        for(int db_i = 0; db_i<db->entry_num; db_i++){
+        for(int db_i = 0; db_i<db->prop_num; db_i++){
             char *memo = strchr(copy_src, '=');
             if(memo){
-                if(strcmp(db->entries[db_i].long_form, strtok(copy_src, "=")) == 0){
+                if(strcmp(db->props[db_i].long_form, strtok(copy_src, "=")) == 0){
                     a_part_of_condition = 1;
                     delim = '=';
                     break;
@@ -206,11 +206,11 @@ add2optGrpDB_contents(
     const int SUCCESS       = 0;
     const int OUT_OF_MEMORY = 1;
 
-    opt_grp_db -> content_num += 1;
-    if(!(opt_grp_db -> contents = (char **)reallocarray(opt_grp_db->contents, opt_grp_db->content_num, sizeof(char *)))){
+    opt_grp_db -> flagless_num += 1;
+    if(!(opt_grp_db -> flagless = (char **)reallocarray(opt_grp_db->flagless, opt_grp_db->flagless_num, sizeof(char *)))){
         return OUT_OF_MEMORY;
     }
-    opt_grp_db -> contents[opt_grp_db->content_num-1] = str;
+    opt_grp_db -> flagless[opt_grp_db->flagless_num-1] = str;
     return SUCCESS;
 }
 
@@ -222,12 +222,12 @@ add2optGrpDB_OptGrps_Flag(
     const int SUCCESS       = 0;
     const int OUT_OF_MEMORY = 1;
 
-    opt_grp_db -> opt_grp_num += 1;
-    if(!(opt_grp_db -> opt_grps = (sOPT_GROUP*)reallocarray(opt_grp_db->opt_grps, opt_grp_db->opt_grp_num, sizeof(sOPT_GROUP)))){
+    opt_grp_db -> grp_num += 1;
+    if(!(opt_grp_db -> grps = (sOPT_GROUP*)reallocarray(opt_grp_db->grps, opt_grp_db->grp_num, sizeof(sOPT_GROUP)))){
         return OUT_OF_MEMORY;
     }
-    initOptGroup(&(opt_grp_db -> opt_grps[opt_grp_db->opt_grp_num-1]));
-    opt_grp_db -> opt_grps[opt_grp_db->opt_grp_num-1].flag = str;
+    initOptGroup(&(opt_grp_db -> grps[opt_grp_db->grp_num-1]));
+    opt_grp_db -> grps[opt_grp_db->grp_num-1].flag = str;
     return SUCCESS;
 }
 
@@ -239,12 +239,12 @@ add2optGrpDB_OptGrps_Contents(
     const int SUCCESS       = 0;
     const int OUT_OF_MEMORY = 1;
 
-    sOPT_GROUP *current_opt_grp  = &(opt_grp_db -> opt_grps[opt_grp_db->opt_grp_num - 1]);
-    current_opt_grp -> content_num++;
-    if(!(current_opt_grp->contents = (char **)reallocarray(current_opt_grp->contents, current_opt_grp->content_num, sizeof(char *)))){
+    sOPT_GROUP *current_grp  = &(opt_grp_db -> grps[opt_grp_db->grp_num - 1]);
+    current_grp -> content_num++;
+    if(!(current_grp->contents = (char **)reallocarray(current_grp->contents, current_grp->content_num, sizeof(char *)))){
         return OUT_OF_MEMORY;
     }
-    current_opt_grp->contents[current_opt_grp->content_num-1] = str;
+    current_grp->contents[current_grp->content_num-1] = str;
     return SUCCESS;
 }
 
@@ -253,12 +253,12 @@ adaptContentsChecker(
         sFLAG_PROPERY_DB *flag_prop_db,
         sOPT_GROUP_DB    *opt_grp_db)
 {
-    for(int i=0; i<opt_grp_db->opt_grp_num; i++){
-        sOPT_GROUP *opt_grp = &(opt_grp_db -> opt_grps[i]);
-        for(int j=0; j<flag_prop_db->entry_num; j++){
-            sFLAG_PROPERY *prop = &(flag_prop_db -> entries[j]);
-            if(strcmp(prop->short_form, opt_grp->flag) == 0 || strcmp(prop->long_form, opt_grp->flag) == 0){
-                opt_grp->err_code = prop->contents_checker(opt_grp->contents, opt_grp->content_num);
+    for(int i=0; i<opt_grp_db->grp_num; i++){
+        sOPT_GROUP *grp = &(opt_grp_db -> grps[i]);
+        for(int j=0; j<flag_prop_db->prop_num; j++){
+            sFLAG_PROPERY *prop = &(flag_prop_db -> props[j]);
+            if(strcmp(prop->short_form, grp->flag) == 0 || strcmp(prop->long_form, grp->flag) == 0){
+                grp->err_code = prop->contents_checker(grp->contents, grp->content_num);
                 break;
             }
         }
@@ -287,21 +287,21 @@ judgeDestination(
     static int current_flags_contents_num_max = 0;
     static int current_flags_contents_num_min = 0;
 
-    for(int i=0; i<flag_prop_db->entry_num; i++){
-        if(strcmp(flag_prop_db->entries[i].short_form, *str) == 0 || strcmp(flag_prop_db->entries[i].long_form, *str) == 0){
+    for(int i=0; i<flag_prop_db->prop_num; i++){
+        if(strcmp(flag_prop_db->props[i].short_form, *str) == 0 || strcmp(flag_prop_db->props[i].long_form, *str) == 0){
             if(!opt_grp_dbs_contents_is_empty){
                 lock_opt_grp_dbs_contents = 1;
             }
-            if(flag_prop_db->entries[i].appeared_yet){
+            if(flag_prop_db->props[i].appeared_yet){
                 return DUPLICATE_SAME_FLAG;
             }
             if(current_flags_contents_num < current_flags_contents_num_min){
                 return TOO_LITTLE_CONTENTS;
             }
-            flag_prop_db->entries[i].appeared_yet = 1;
-            current_flags_contents_num            = 0;
-            current_flags_contents_num_max        = flag_prop_db->entries[i].content_num_max;
-            current_flags_contents_num_min        = flag_prop_db->entries[i].content_num_min;
+            flag_prop_db->props[i].appeared_yet = 1;
+            current_flags_contents_num          = 0;
+            current_flags_contents_num_max      = flag_prop_db->props[i].content_num_max;
+            current_flags_contents_num_min      = flag_prop_db->props[i].content_num_min;
             return OPT_GRPs_FLAG;
         }
     }
@@ -334,9 +334,9 @@ judgeDestination(
 
 int
 groupingOpt(
+        sFLAG_PROPERY_DB *flag_prop_db,
         int               argc,
         char            **argv,
-        sFLAG_PROPERY_DB *flag_prop_db,
         sOPT_GROUP_DB   **opt_grp_db) 
 {
     /* return values */
@@ -430,13 +430,13 @@ void
 freeOptGroupDB(
         sOPT_GROUP_DB *opt_grp_db)
 {
-    for(int i=0; i<opt_grp_db->content_num; i++){
-        free(opt_grp_db -> contents[i]);
+    for(int i=0; i<opt_grp_db->flagless_num; i++){
+        free(opt_grp_db -> flagless[i]);
     }
-    free(opt_grp_db->contents);
-    for(int i=0; i<opt_grp_db->opt_grp_num; i++){
-        freeOptGroup(&(opt_grp_db->opt_grps[i]));
+    free(opt_grp_db->flagless);
+    for(int i=0; i<opt_grp_db->grp_num; i++){
+        freeOptGroup(&(opt_grp_db->grps[i]));
     }
-    free(opt_grp_db->opt_grps);
+    free(opt_grp_db->grps);
     free(opt_grp_db);
 }

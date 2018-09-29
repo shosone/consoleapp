@@ -16,7 +16,7 @@ int main(int argc, char *argv[]){
     int               groupingOpt_ret;
 
     regFlagProp(flag_prop_db);
-    groupingOpt_ret = groupingOpt(argc, argv, flag_prop_db, &opt_grp_db);
+    groupingOpt_ret = groupingOpt(flag_prop_db, argc, argv, &opt_grp_db);
 
 #if DEBUG
     debug(groupingOpt_ret, opt_grp_db);
@@ -51,13 +51,13 @@ int main(int argc, char *argv[]){
             exit(100);
     }
 
-    for(int i=0; i<opt_grp_db->opt_grp_num; i++){
-        switch(opt_grp_db->opt_grps[i].err_code){
+    for(int i=0; i<opt_grp_db->grp_num; i++){
+        switch(opt_grp_db->grps[i].err_code){
             case 0: /* success */
                 break;
 
             case 1: 
-                fprintf(stderr, "error: the history size \"%s\" specified with the option \"%s\" is an invalid value\n", opt_grp_db->opt_grps[i].contents[0], opt_grp_db->opt_grps[i].flag);
+                fprintf(stderr, "error: the history size \"%s\" specified with the option \"%s\" is an invalid value\n", opt_grp_db->grps[i].contents[0], opt_grp_db->grps[i].flag);
                 exit(2);
                 break;
 
@@ -67,10 +67,10 @@ int main(int argc, char *argv[]){
         }
     }
 
-    for(int i=0;i<opt_grp_db->opt_grp_num;i++){
-        char *flag       = opt_grp_db -> opt_grps[i].flag;
-        char **contents  = opt_grp_db -> opt_grps[i].contents;
-        int  content_num = opt_grp_db -> opt_grps[i].content_num;
+    for(int i=0;i<opt_grp_db->grp_num;i++){
+        char *flag       = opt_grp_db -> grps[i].flag;
+        char **contents  = opt_grp_db -> grps[i].contents;
+        int  content_num = opt_grp_db -> grps[i].content_num;
 
         if(strcmp(flag, "-h") == 0 || strcmp(flag, "--help") == 0){
             printUsage();
