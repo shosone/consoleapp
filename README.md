@@ -191,7 +191,7 @@ T.B.D.
 T.B.D.
 ### sample code
 
-## introduction
+## installation
 Please read Makefile. Introduction of autotools is under consideration.
 
 ![installation](https://github.com/shosone/consoleapp/doc/installation.gif)
