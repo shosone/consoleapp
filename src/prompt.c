@@ -44,23 +44,26 @@ getch(void)
 }
 
 sRwhCtx*
-genRwhCtx(void)
+genRwhCtx(int history_size)
 {
-    sRwhCtx *ctx;
+    sRwhCtx *ctx = NULL;
 
-    ctx = (sRwhCtx*)malloc(sizeof(sRwhCtx));
-
-    ctx -> entry_max = DEFAULT_HIST_ENTRY_MAX;
-    ctx -> history       = (char **)calloc(DEFAULT_HIST_ENTRY_MAX, sizeof(char *));
-    ctx -> sc_head       = (char *)malloc(sizeof(char) * strlen(DEFAULT_SC_HEAD));
-    ctx -> sc_tail       = (char *)malloc(sizeof(char) * strlen(DEFAULT_SC_TAIL));
-    ctx -> sc_next_block = (char *)malloc(sizeof(char) * strlen(DEFAULT_SC_NEXT_BLOCK));
-    ctx -> sc_prev_block = (char *)malloc(sizeof(char) * strlen(DEFAULT_SC_PREV_BLOCK));
-    ctx -> sc_completion = (char *)malloc(sizeof(char) * strlen(DEFAULT_SC_COMPLETION)); 
-    ctx -> sc_dive_hist  = (char *)malloc(sizeof(char) * strlen(DEFAULT_SC_DIVE_HIST)); 
-    ctx -> sc_float_hist = (char *)malloc(sizeof(char) * strlen(DEFAULT_SC_FLOAT_HIST)); 
-
-    memset(ctx -> history, 0x00, DEFAULT_HIST_ENTRY_MAX);
+    if(!(ctx = (sRwhCtx*)malloc(sizeof(sRwhCtx)))){
+        return NULL;
+    }
+    ctx -> entry_max = history_size;
+    if(!(ctx -> history       = (char **)calloc(history_size, sizeof(char *)))){
+        free(ctx);
+        return NULL;
+    }
+    memset(ctx -> history, 0x00, history_size);
+    ctx -> sc_head       = malloc(sizeof(char)*strlen(DEFAULT_SC_HEAD));
+    ctx -> sc_tail       = malloc(sizeof(char)*strlen(DEFAULT_SC_TAIL));
+    ctx -> sc_next_block = malloc(sizeof(char)*strlen(DEFAULT_SC_NEXT_BLOCK));
+    ctx -> sc_prev_block = malloc(sizeof(char)*strlen(DEFAULT_SC_PREV_BLOCK));
+    ctx -> sc_completion = malloc(sizeof(char)*strlen(DEFAULT_SC_COMPLETION));
+    ctx -> sc_dive_hist  = malloc(sizeof(char)*strlen(DEFAULT_SC_DIVE_HIST));
+    ctx -> sc_float_hist = malloc(sizeof(char)*strlen(DEFAULT_SC_FLOAT_HIST));
     strcpy(ctx -> sc_head,       DEFAULT_SC_HEAD);
     strcpy(ctx -> sc_tail,       DEFAULT_SC_TAIL);
     strcpy(ctx -> sc_next_block, DEFAULT_SC_NEXT_BLOCK);
@@ -68,7 +71,6 @@ genRwhCtx(void)
     strcpy(ctx -> sc_completion, DEFAULT_SC_COMPLETION);
     strcpy(ctx -> sc_dive_hist,  DEFAULT_SC_DIVE_HIST);
     strcpy(ctx -> sc_float_hist, DEFAULT_SC_FLOAT_HIST);
-
     return ctx;
 }
 

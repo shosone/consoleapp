@@ -116,7 +116,7 @@ void print(int str_num, char **strs){
 }
 
 void interactive(int hist_entory_size){
-    sRwhCtx *ctx = genRwhCtx();
+    sRwhCtx *ctx = genRwhCtx(30);
     char *line;
 
     printf("input \"help\" to display help\n");

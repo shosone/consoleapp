@@ -14,8 +14,6 @@
 #define BUG_REPORT() (fprintf(stderr, "error: there is a bug! (%s, %s, %d)", __FILE__, __FUNCTION__, __LINE__))
 #endif
 
-#define DEFAULT_HIST_ENTRY_MAX 100
-
 extern const char DEFAULT_SC_HEAD[];
 extern const char DEFAULT_SC_TAIL[];
 extern const char DEFAULT_SC_NEXT_BLOCK[];
@@ -37,7 +35,7 @@ typedef struct _sRwhCtx{
 }sRwhCtx;
 
 extern sRwhCtx*
-genRwhCtx(void);
+genRwhCtx(int history_size);
 
 extern void
 freeRwhCtx(sRwhCtx *ctx);
