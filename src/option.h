@@ -58,7 +58,7 @@ addFlagProp2DB( /* sFLAG_PROPERY_DBのエントリを追加する関数 */
         char             *long_form,      /* [in] オプションの詳細形式 */
         int              content_num_min, /* オプションに付属するコンテンツの最少数 */
         int              content_num_max, /* オプションに付属するコンテンツの最大数 */
-        int             (*contents_checker)(char **contents, int content_num)); /* オプションのコンテンツをチェックするコールバック関数 */
+        int            (*contents_checker)(char **contents, int content_num)); /* オプションのコンテンツをチェックするコールバック関数 */
 
 extern void
 freeFlagPropDB( /* sFLAG_PROPERY_DBのメンバのメモリ領域を再帰的に開放する関数 */

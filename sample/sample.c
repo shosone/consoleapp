@@ -2,8 +2,11 @@
 #include <stdlib.h>
 #include <string.h>
 #include "../src/option.h"
-#include "../src/interactive.h"
+#include "../src/prompt.h"
+
+#define DEBUG 1
 #include "for_option.c"
+#include "for_prompt.c"
 
 void printUsage(void);
 void printVersion(void);
@@ -19,7 +22,7 @@ int main(int argc, char *argv[]){
     groupingOpt_ret = groupingOpt(flag_prop_db, argc, argv, &opt_grp_db);
 
 #if DEBUG
-    debug(groupingOpt_ret, opt_grp_db);
+    debugInfo1(groupingOpt_ret, opt_grp_db);
 #endif
 
     switch(groupingOpt_ret){
@@ -107,7 +110,14 @@ void printVersion(void){
 }
 
 void interactive(int hist_entory_size){
+    sRwhCtx *ctx = genRwhCtx();
+    char *line;
     while(1){
+#if DEBUG
+    debugInfo2(ctx);
+#endif
+        line = rwh(ctx, ">> ");
+        freeRwhCtx(ctx);
     }
 }
 
