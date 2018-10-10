@@ -12,7 +12,7 @@ sFLAG_PROPERY_DB
 *genFlagPropDB(
         int prop_num)
 {
-    sFLAG_PROPERY_DB *flag_prop_db;
+    sFLAG_PROPERY_DB *flag_prop_db = NULL;
 
     if(prop_num == 0){
         return NULL;
@@ -26,6 +26,7 @@ sFLAG_PROPERY_DB
 
     if(!(flag_prop_db->props = (sFLAG_PROPERY *)calloc(prop_num, sizeof(sFLAG_PROPERY)))){
         free(flag_prop_db);
+        flag_prop_db = NULL;
         return NULL;
     }
 
@@ -72,6 +73,7 @@ addFlagProp2DB(
 
     if(long_form && !(flag_prop->long_form = (char *)malloc(sizeof(char)*strlen(long_form)))){
         free(flag_prop->short_form);
+        flag_prop->short_form = NULL;
         return OUT_OF_MEMORY;
     }
     strcpy(flag_prop->long_form, long_form);
@@ -93,7 +95,9 @@ freeFlagProp(
         sFLAG_PROPERY *flag_prop)
 {
     free(flag_prop -> short_form);
+    flag_prop -> short_form = NULL;
     free(flag_prop -> long_form);
+    flag_prop -> long_form = NULL;
 }
 
 void
@@ -104,6 +108,7 @@ freeFlagPropDB(
         freeFlagProp(&(db->props[i]));
     }
     free(db);
+    db = NULL;
 }
 
 /* ============================================== */
@@ -165,7 +170,7 @@ decodeOptions(
 
         do{
             (*new_argc)++;
-            if(!((*new_argv) = (char **)reallocarray((*new_argv), (*new_argc), sizeof(char *)))){
+            if(!((*new_argv) = (char **)reallocarray(*new_argv, (*new_argc), sizeof(char *)))){
                 ret = OUT_OF_MEMORY;
                 goto free_and_exit;
             }
@@ -193,8 +198,10 @@ decodeOptions(
 free_and_exit:
     for(int i=0; i<*new_argc; i++){
         free((*new_argv)[i]);
+        (*new_argv)[i] = NULL;
     }
     free(*new_argv);
+    *new_argv = NULL;
     return ret;
 }
 
@@ -391,7 +398,7 @@ groupingOpt(
     initOptGroupDB(*opt_grp_db);
 
     int    new_argc;
-    char **new_argv;
+    char **new_argv = NULL;
     int    ret;
 
     ret = decodeOptions(flag_prop_db, argc, argv, &new_argc, &new_argv);
@@ -449,6 +456,7 @@ groupingOpt(
             ret = TOO_LITTLE_CONTENTS;
             goto free_and_exit;
 
+        case 0:
         default:
             break;
     }
@@ -467,11 +475,13 @@ freeOptGroup(
         sOPT_GROUP *opt_grp)
 {
     free(opt_grp->flag);
+    opt_grp->flag = NULL;
     for(int i=0; i<opt_grp->content_num; i++){
         free(opt_grp->contents[i]);
+        opt_grp->contents[i] = NULL;
     }
     free(opt_grp->contents);
-    free(opt_grp);
+    opt_grp->contents = NULL;
 }
 
 void
@@ -480,11 +490,15 @@ freeOptGroupDB(
 {
     for(int i=0; i<opt_grp_db->flagless_num; i++){
         free(opt_grp_db -> flagless[i]);
+        opt_grp_db -> flagless[i] = NULL;
     }
-    free(opt_grp_db->flagless);
+    free(opt_grp_db -> flagless);
+    opt_grp_db -> flagless = NULL;
     for(int i=0; i<opt_grp_db->grp_num; i++){
         freeOptGroup(&(opt_grp_db->grps[i]));
     }
-    free(opt_grp_db->grps);
+    free(opt_grp_db -> grps);
+    opt_grp_db -> grps = NULL;
     free(opt_grp_db);
+    opt_grp_db = NULL;
 }

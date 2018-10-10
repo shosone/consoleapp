@@ -44,7 +44,7 @@ void debugInfo1(int groupingOpt_ret, sOPT_GROUP_DB *opt_grp_db){
         printf("opt_grp_db -> opt_grps[%d].err_code = %d\n", i, err_code);
         printf("opt_grp_db -> opt_grps[%d].flag = %s\n", i, flag);
         printf("opt_grp_db -> opt_grps[%d].content_num = %d\n", i, content_num);
-        for(int j=0;j<flagless_num;j++){
+        for(int j=0;j<content_num;j++){
             printf("opt_grp_db -> opt_grps[%d].contents[%d] = %s\n", i, j, contents[j]);
         }
     }
