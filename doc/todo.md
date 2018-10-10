@@ -9,6 +9,7 @@
 - --help=aでaがhelpのコンテンツとして扱われない
 - -hvi というようなオプションの指定ができるようにする
 - ./sample -h -i -hでコアダンプになった
+- judgeDestination()のコンテンツの数を数える処理はcheckContentsNum()にて行うので不要
 
 ## リファクタ
 - option.cの中身全体的に
