@@ -1,6 +1,5 @@
 #include <stdlib.h>
 #include "../src/option.h"
-#define DEBUG 1
 
 int chkOptInteractive(char **contents, int dont_care){
     const int SUCCESS        = 0;
@@ -21,8 +20,8 @@ void regFlagProp(sFLAG_PROPERY_DB *flag_prop_db){
 }
 
 #if DEBUG
-void debug(int groupingOpt_ret, sOPT_GROUP_DB *opt_grp_db){
-    printf("#################### debug info #########################\n");
+void debugInfo1(int groupingOpt_ret, sOPT_GROUP_DB *opt_grp_db){
+    printf("#################### debug info 1 ########################\n");
     printf("groupingOpt returns %d\n", groupingOpt_ret);
     if(opt_grp_db == NULL){
         printf("opt_grp_db is NULL\n");
