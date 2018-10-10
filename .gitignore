@@ -52,7 +52,6 @@ Mkfile.old
 dkms.conf
 
 # my settings
-pwman
-pwman_debug
 tags
 *~
+sample
