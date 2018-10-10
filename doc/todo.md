@@ -3,17 +3,15 @@
 ## ファイル追加
 
 ## 実装
-- sample.cへinteractiveオプション指定時の動作を実装
+- [1] sample.cへinteractiveオプション指定時の動作を実装
 
 ## 修正
-- --help=aでaがhelpのコンテンツとして扱われない
-- -hvi というようなオプションの指定ができるようにする
-- ./sample -h -i -hでコアダンプになった
-- judgeDestination()のコンテンツの数を数える処理はcheckContentsNum()にて行うので不要
+- [2] -hvi というようなオプションの指定ができるようにする
+- [3] ./sample -h -i -hでコアダンプになった
+- [4] judgeDestination()のコンテンツの数を数える処理はcheckContentsNum()にて行うので不要
 
 ## リファクタ
-- option.cの中身全体的に
-- readlineWithHistory
+- [5] option.cの中身全体的に
 
 ## 検討
-- autotoolsの導入
+- [7] autotoolsの導入
