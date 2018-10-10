@@ -266,6 +266,40 @@ adaptContentsChecker(
 }
 
 static int
+checkContentsNum(
+        sFLAG_PROPERY_DB *flag_prop_db,
+        sOPT_GROUP_DB    *opt_grp_db)
+{
+    /* return values */
+    const int SUCCESS = 0;
+    const int TOO_MANY_CONTENTS    = 1;
+    const int TOO_LITTLE_CONTENTS  = 2;
+
+    for(int i=0; i<opt_grp_db->grp_num; i++){
+        char *flag = opt_grp_db -> grps[i].flag;
+
+        sFLAG_PROPERY *props = flag_prop_db -> props;
+        while(strcmp(props->short_form, flag) != 0 && strcmp(props->long_form, flag) != 0){
+            props++;
+        }
+
+        int num = opt_grp_db -> grps[i].content_num;
+        int min = props -> content_num_min;
+        int max = props -> content_num_max;
+
+        if(num < min){
+            return TOO_LITTLE_CONTENTS;
+        }
+
+        if(num > max){
+            return TOO_MANY_CONTENTS;
+        }
+    }
+
+    return SUCCESS;
+}
+
+static int
 judgeDestination(
         sFLAG_PROPERY_DB *flag_prop_db,
         char **str)
@@ -279,8 +313,8 @@ judgeDestination(
     const int TOO_LITTLE_CONTENTS  = -3;
 
     /* flags */
-    static int opt_grp_dbs_contents_is_empty = 1;
-    static int lock_opt_grp_dbs_contents     = 0;
+    static int opt_grp_dbs_contents_is_empty   = 1;
+    static int lock_opt_grp_dbs_contents       = 0;
 
     /* memos */
     static int current_flags_contents_num     = 0;
@@ -403,6 +437,20 @@ groupingOpt(
             default:
                 BUG_REPORT();
         }
+    }
+
+    ret = checkContentsNum(flag_prop_db, *opt_grp_db);
+    switch(ret){
+        case 1:
+            ret = TOO_MANY_CONTENTS;
+            goto free_and_exit;
+
+        case 2:
+            ret = TOO_LITTLE_CONTENTS;
+            goto free_and_exit;
+
+        default:
+            break;
     }
 
     adaptContentsChecker(flag_prop_db, *opt_grp_db);
