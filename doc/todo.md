@@ -12,6 +12,7 @@ ENV [10]: これこれを導入した
 ## IMP(LEMENT)
 - [1] sample.cへinteractiveオプション指定時の動作を実装
 - [2] -hvi というようなオプションの指定ができるようにする
+- [3] prompt.cのrwiとかその他諸々の実装
 
 ## (BUG )FIX
 
