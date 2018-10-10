@@ -26,12 +26,12 @@ all:
 sample: sample.c libconsoleapp_debug.a
 	$(CC) $(CFLAGS_DEBUG) -I$(INC_PATH) -L$(LIB_PATH_DEBUG) -o$(SAMPLE_SRC_PATH)/$@ $(SAMPLE_SRC_PATH)/sample.c -lconsoleapp_debug -lreadline
 
-release: option.o interactive.o
+release: option.o prompt.o
 	mkdir -p $(LIB_PATH_RELEASE)
 	ar rcs libconsoleapp.a $(OBJ_PATH_RELEASE)/*
 	mv libconsoleapp.a $(LIB_PATH_RELEASE)
 
-debug: option_debug.o interactive_debug.o
+debug: option_debug.o prompt_debug.o
 	mkdir -p $(LIB_PATH_DEBUG)
 	ar rcs libconsoleapp_debug.a $(OBJ_PATH_DEBUG)/*
 	mv libconsoleapp_debug.a $(LIB_PATH_DEBUG)
@@ -54,3 +54,4 @@ clean:
 	rm -rf obj
 	rm -rf lib
 	rm -f tags
+	rm -f $(SAMPLE_SRC_PATH)/sample
