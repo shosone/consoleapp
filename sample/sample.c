@@ -6,7 +6,6 @@
 
 #define DEBUG 1
 #include "for_option.c"
-#include "for_prompt.c"
 
 void printUsage(void);
 void printVersion(void);
@@ -109,21 +108,47 @@ void printVersion(void){
     printf("version 0.0.0\n");
 }
 
-void interactive(int hist_entory_size){
-    sRwhCtx *ctx = genRwhCtx();
-    char *line;
-    while(1){
-#if DEBUG
-    debugInfo2(ctx);
-#endif
-        line = rwh(ctx, ">> ");
-        freeRwhCtx(ctx);
-    }
-}
-
 void print(int str_num, char **strs){
     for(int i=0; i<str_num; i++){
         printf("%s\n", strs[i]);
     }
     printf("\n");
 }
+
+void interactive(int hist_entory_size){
+    sRwhCtx *ctx = genRwhCtx();
+    char *line;
+
+    printf("input \"help\" to display help\n");
+
+    while(1){
+        line = rwh(ctx, ">> ");
+
+        if(strcmp(line, "help") == 0){
+            printf("+----------------------------------------------------------------------+\n");
+            printf("|help:           print this help                                       |\n");
+            printf("|quit:           quit interactive mode                                 |\n");
+            printf("|![some string]: execute \"[some string]\" as a shell command.           |\n");
+            printf("|                                                                      |\n");
+            printf("|NOTE: these key bind is able to change by modifying sRwhCtx\'s fields. |\n");
+            printf("|short cuts:                                                           |\n");
+            printf("|    Ctl-a:  jump to head                                              |\n");
+            printf("|    Ctl-e:  jump to tail                                              |\n");
+            printf("|    Ctl-→ : jump to next separation                                   |\n");
+            printf("|    Ctl-← : jump to previous separation                               |\n");
+            printf("|history operation:                                                    |\n");
+            printf("|    ↑ : go to the past                                                |\n");
+            printf("|    ↓ : go to the future                                              |\n");
+            printf("+----------------------------------------------------------------------+\n");
+        }
+        else if(strcmp(line, "quit") == 0){
+            exit(1);
+        }
+        else if(line[0] == '!'){
+            system(&line[1]);
+        }
+    }
+
+    freeRwhCtx(ctx);
+}
+
