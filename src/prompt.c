@@ -51,19 +51,57 @@ genRwhCtx(int history_size)
     if(!(ctx = (sRwhCtx*)malloc(sizeof(sRwhCtx)))){
         return NULL;
     }
-    ctx -> entry_max = history_size;
-    if(!(ctx -> history       = (char **)calloc(history_size, sizeof(char *)))){
-        free(ctx);
-        return NULL;
+
+    ctx -> history       = NULL;
+    ctx -> sc_head       = NULL;
+    ctx -> sc_tail       = NULL;
+    ctx -> sc_next_block = NULL;
+    ctx -> sc_prev_block = NULL;
+    ctx -> sc_completion = NULL;
+    ctx -> sc_dive_hist  = NULL;
+    ctx -> sc_float_hist = NULL;
+
+    if(!(ctx -> history = (sRingBuf *)malloc(sizeof(sRingBuf)))){
+        goto free_and_exit;
     }
-    memset(ctx -> history, 0x00, history_size);
-    ctx -> sc_head       = malloc(sizeof(char)*strlen(DEFAULT_SC_HEAD));
-    ctx -> sc_tail       = malloc(sizeof(char)*strlen(DEFAULT_SC_TAIL));
-    ctx -> sc_next_block = malloc(sizeof(char)*strlen(DEFAULT_SC_NEXT_BLOCK));
-    ctx -> sc_prev_block = malloc(sizeof(char)*strlen(DEFAULT_SC_PREV_BLOCK));
-    ctx -> sc_completion = malloc(sizeof(char)*strlen(DEFAULT_SC_COMPLETION));
-    ctx -> sc_dive_hist  = malloc(sizeof(char)*strlen(DEFAULT_SC_DIVE_HIST));
-    ctx -> sc_float_hist = malloc(sizeof(char)*strlen(DEFAULT_SC_FLOAT_HIST));
+    ctx -> history -> buf  = NULL;
+    ctx -> history -> size = history_size;
+    ctx -> history -> head = 0;
+    ctx -> history -> tail = 0;
+
+    if(!(ctx -> history -> buf = (char **)calloc(history_size, sizeof(char *)))){
+        goto free_and_exit;
+    }
+    memset(ctx -> history -> buf, 0, history_size);
+
+    if(!(ctx -> sc_head       = malloc(sizeof(char)*strlen(DEFAULT_SC_HEAD)))){
+        goto free_and_exit;
+    }
+
+    if(!(ctx -> sc_tail       = malloc(sizeof(char)*strlen(DEFAULT_SC_TAIL)))){
+        goto free_and_exit;
+    }
+
+    if(!(ctx -> sc_next_block = malloc(sizeof(char)*strlen(DEFAULT_SC_NEXT_BLOCK)))){
+        goto free_and_exit;
+    }
+
+    if(!(ctx -> sc_prev_block = malloc(sizeof(char)*strlen(DEFAULT_SC_PREV_BLOCK)))){
+        goto free_and_exit;
+    }
+
+    if(!(ctx -> sc_completion = malloc(sizeof(char)*strlen(DEFAULT_SC_COMPLETION)))){
+        goto free_and_exit;
+    }
+
+    if(!(ctx -> sc_dive_hist  = malloc(sizeof(char)*strlen(DEFAULT_SC_DIVE_HIST)))){
+        goto free_and_exit;
+    }
+
+    if(!(ctx -> sc_float_hist = malloc(sizeof(char)*strlen(DEFAULT_SC_FLOAT_HIST)))){
+        goto free_and_exit;
+    }
+
     strcpy(ctx -> sc_head,       DEFAULT_SC_HEAD);
     strcpy(ctx -> sc_tail,       DEFAULT_SC_TAIL);
     strcpy(ctx -> sc_next_block, DEFAULT_SC_NEXT_BLOCK);
@@ -72,14 +110,75 @@ genRwhCtx(int history_size)
     strcpy(ctx -> sc_dive_hist,  DEFAULT_SC_DIVE_HIST);
     strcpy(ctx -> sc_float_hist, DEFAULT_SC_FLOAT_HIST);
     return ctx;
-}
 
-void
-freeRwhCtx(sRwhCtx *ctx){
-    for(int i=0; ctx->history[i]!=NULL; i++){
-        free(ctx -> history[i]);
+free_and_exit:
+    free(ctx -> sc_float_hist);
+    free(ctx -> sc_dive_hist);
+    free(ctx -> sc_completion);
+    free(ctx -> sc_next_block);
+    free(ctx -> sc_prev_block);
+    free(ctx -> sc_dive_hist);
+    free(ctx -> sc_tail);
+    free(ctx -> sc_head);
+    if(!(ctx -> history)){
+        free(ctx -> history -> buf);
     }
     free(ctx -> history);
+    free(ctx);
+    return NULL;
+}
+
+static int
+push2Ringbuf(
+        sRingBuf   *rb,
+        const char *str)
+{
+    /* return values */
+    const int SUCCESS       = 0;
+    const int OUT_OF_MEMORY = 1;
+
+    char *new;
+    if(!(new = (char *)malloc(sizeof(char)*strlen(str)))){
+        return OUT_OF_MEMORY;
+    }
+    strcpy(new, str);
+
+    /* buf is empty */
+    if(rb->buf[rb->head] == NULL){
+        rb->buf[rb->head] = new;
+    }
+    /* buf is full */
+    else if(rb->head == rb->tail+1 || rb->tail == rb->size-1){
+        free(rb -> buf[rb -> head]);
+        rb -> buf[rb -> head] = new;
+
+        if(rb->head == rb->size-1){
+            rb -> head = 0;
+            rb -> tail++;
+        }
+        else if(rb->tail == rb->size-1){
+            rb -> head = 1;
+            rb -> tail = 0;
+        }
+        else{
+            rb -> head++;
+            rb -> tail++;
+        }
+    }
+    /* buf is halfway */
+    else{
+        rb -> tail++;
+        rb -> buf[rb -> tail] = new;
+    }
+
+    return SUCCESS;
+}
+
+static char *
+readRingBuf(
+        sRingBuf *rb,
+        int idx_new2old)
+{
 }
 
 char *
@@ -258,3 +357,21 @@ rwh(
  * 
  *     return line; */
 }
+
+void
+freeRwhCtx(sRwhCtx *ctx){
+    for(int i=0; i<ctx->history->size; i++){
+        free(ctx -> history -> buf[i]);
+    }
+    free(ctx -> history -> buf);
+    free(ctx -> history);
+    free(ctx -> sc_head);
+    free(ctx -> sc_tail);
+    free(ctx -> sc_next_block);
+    free(ctx -> sc_prev_block);
+    free(ctx -> sc_completion);
+    free(ctx -> sc_dive_hist);
+    free(ctx -> sc_float_hist);
+    free(ctx);
+}
+

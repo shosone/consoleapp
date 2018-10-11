@@ -20,3 +20,4 @@ ENV [10]: これこれを導入した
 - [4] judgeDestination()のコンテンツの数を数える処理はcheckContentsNum()にて行うので不要
 
 ## CON(SIDERATION)
+- 現在はrwh()内でショートカットが入力された際の動作を実装しているが、割り込み処理で実現できないか調べる

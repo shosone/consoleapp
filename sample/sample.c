@@ -139,6 +139,7 @@ void interactive(int hist_entory_size){
             printf("|history operation:                                                    |\n");
             printf("|    ↑ : go to the past                                                |\n");
             printf("|    ↓ : go to the future                                              |\n");
+            printf("|    tab: completion                                                   |\n");
             printf("+----------------------------------------------------------------------+\n");
         }
         else if(strcmp(line, "quit") == 0){

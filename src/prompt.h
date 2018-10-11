@@ -22,9 +22,15 @@ extern const char DEFAULT_SC_COMPLETION[];
 extern const char DEFAULT_SC_DIVE_HIST[];
 extern const char DEFAULT_SC_FLOAT_HIST[]; 
 
+typedef struct _sRingBuf{
+    char **buf;
+    int    size;
+    int    head;
+    int    tail;
+}sRingBuf;
+
 typedef struct _sRwhCtx{
-    int  entry_max;
-    char **history;
+    sRingBuf *history;
     char *sc_head;
     char *sc_tail;
     char *sc_next_block;
