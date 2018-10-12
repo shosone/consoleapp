@@ -7,9 +7,9 @@ const char DEFAULT_SC_PREV_BLOCK[] = {0x1b, 0x5b, 0x31, 0x3b, 0x35, 0x43};
 const char DEFAULT_SC_COMPLETION[] = {0x09};
 const char DEFAULT_SC_DIVE_HIST[]  = {0x1b, 0x5b, 0x41};
 const char DEFAULT_SC_FLOAT_HIST[] = {0x1b, 0x5b, 0x42};
-const char right[]                 = {0x1b, 0x5b, 0x43};
-const char left[]                  = {0x1b, 0x5b, 0x44};
-const char delete[]                = {0x1b, 0x5b, 0x33, 0x7e, 0x1b};
+static const char right[]          = {0x1b, 0x5b, 0x43};
+static const char left[]           = {0x1b, 0x5b, 0x44};
+static const char delete[]         = {0x1b, 0x5b, 0x33, 0x7e, 0x1b};
 
 
 static char
@@ -322,7 +322,7 @@ rwh(
                 return line;
 
             case 0x7f: /* backspace */
-                sprintf(line, "%s\b%c\b", line, '\0');
+                sprintf(line, "%s\b \b", line);
                 printf("\b \b");
                 break;
 
@@ -340,7 +340,7 @@ rwh(
                         printf("%c", ch);
                         goto free_and_break;
 
-                    case 1: /* UNKNOWN_YET    */
+                    case 1: /* UNKNOWN_YET */
                         /* nothing to do */
                         break;
 
@@ -370,13 +370,15 @@ rwh(
                         goto free_and_break;
 
                     case 9: /* RIGHT  */
-                        sprintf(line, "%s%s", line, right);
-                        printf("%s", right);
+                        sprintf(line, "%s%c%c%c", line, right[0], right[1], right[2]);
+                        printf("%c%c%c", right[0], right[1], right[2]);
                         goto free_and_break;
 
                     case 10: /* LEFT  */
                         sprintf(line, "%s%s", line, left);
-                        printf("%s", left);
+                        for(int i=0; i<strlen(left); i++){
+                            printf("%c", left[i]);
+                        }
                         goto free_and_break;
 
                     case 11: /* DELETE */
