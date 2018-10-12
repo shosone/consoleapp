@@ -14,8 +14,6 @@
 #define BUG_REPORT() (fprintf(stderr, "error: there is a bug! (%s, %s, %d)", __FILE__, __FUNCTION__, __LINE__))
 #endif
 
-#define DEFAULT_HIST_ENTRY_MAX 100
-
 extern const char DEFAULT_SC_HEAD[];
 extern const char DEFAULT_SC_TAIL[];
 extern const char DEFAULT_SC_NEXT_BLOCK[];
@@ -24,9 +22,16 @@ extern const char DEFAULT_SC_COMPLETION[];
 extern const char DEFAULT_SC_DIVE_HIST[];
 extern const char DEFAULT_SC_FLOAT_HIST[]; 
 
+typedef struct _sRingBuf{
+    char **buf;
+    int    size;
+    int    head;
+    int    tail;
+    int    entory_num;
+}sRingBuf;
+
 typedef struct _sRwhCtx{
-    int  entry_max;
-    char **history;
+    sRingBuf *history;
     char *sc_head;
     char *sc_tail;
     char *sc_next_block;
@@ -37,7 +42,7 @@ typedef struct _sRwhCtx{
 }sRwhCtx;
 
 extern sRwhCtx*
-genRwhCtx(void);
+genRwhCtx(int history_size);
 
 extern void
 freeRwhCtx(sRwhCtx *ctx);
