@@ -1,5 +1,5 @@
-# consoleapp
-Consoleapp is c library for console applications.
+# libconsoleapp.a
+libconsoleapp.a is a C library for make it easy to develop a console applications.
 
 ## consoleapp/option
 Functions that check error of option of console application and grouping contents attached to option are summarized.
