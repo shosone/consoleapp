@@ -7,6 +7,10 @@ const char DEFAULT_SC_PREV_BLOCK[] = {0x1b, 0x5b, 0x31, 0x3b, 0x35, 0x43};
 const char DEFAULT_SC_COMPLETION[] = {0x09};
 const char DEFAULT_SC_DIVE_HIST[]  = {0x1b, 0x5b, 0x41};
 const char DEFAULT_SC_FLOAT_HIST[] = {0x1b, 0x5b, 0x42};
+const char right[]                 = {0x1b, 0x5b, 0x43};
+const char left[]                  = {0x1b, 0x5b, 0x44};
+const char delete[]                = {0x1b, 0x5b, 0x33, 0x7e, 0x1b};
+
 
 static char
 getch(void)
@@ -128,29 +132,19 @@ free_and_exit:
     return NULL;
 }
 
-static int
+static void
 push2Ringbuf(
         sRingBuf   *rb,
-        const char *str)
+        char *str)
 {
-    /* return values */
-    const int SUCCESS       = 0;
-    const int OUT_OF_MEMORY = 1;
-
-    char *new;
-    if(!(new = (char *)malloc(sizeof(char)*strlen(str)))){
-        return OUT_OF_MEMORY;
-    }
-    strcpy(new, str);
-
     /* buf is empty */
     if(rb->buf[rb->head] == NULL){
-        rb->buf[rb->head] = new;
+        rb->buf[rb->head] = str;
     }
     /* buf is full */
     else if(rb->head == rb->tail+1 || rb->tail == rb->size-1){
         free(rb -> buf[rb -> head]);
-        rb -> buf[rb -> head] = new;
+        rb -> buf[rb -> head] = str;
 
         if(rb->head == rb->size-1){
             rb -> head = 0;
@@ -168,17 +162,139 @@ push2Ringbuf(
     /* buf is halfway */
     else{
         rb -> tail++;
-        rb -> buf[rb -> tail] = new;
+        rb -> buf[rb -> tail] = str;
     }
-
-    return SUCCESS;
 }
 
 static char *
 readRingBuf(
         sRingBuf *rb,
-        int idx_new2old)
+        int depth)
 {
+    int idx = rb -> tail - depth;
+    if(idx < 0){
+        idx += rb -> size;
+    }
+    return rb -> buf[idx];
+}
+
+static int
+judgeShortCut(
+        sRwhCtx    *ctx,
+        const char *str)
+{
+    /* return values */
+    const int NOT_SHORT_CUT = 0;
+    const int UNKNOWN_YET   = 1;
+    const int SC_HEAD       = 2;
+    const int SC_TAIL       = 3;
+    const int SC_NEXT_BLOCK = 4;
+    const int SC_PREV_BLOCK = 5;
+    const int SC_COMPLETION = 6;
+    const int SC_DIVE_HIST  = 7;
+    const int SC_FLOAT_HIST = 8;
+    const int RIGHT         = 9;  /* ショートカットでは無いがカーソル右が制御信号なので */ 
+    const int LEFT          = 10; /* ショートカットでは無いがカーソル左が制御信号なので */ 
+    const int DELETE        = 11; /* ショートカットでは無いがカーソル左が制御信号なので */ 
+
+    /* flags */
+    int sc_head_possibility       = 1;
+    int sc_tail_possibility       = 1;
+    int sc_next_block_possibility = 1;
+    int sc_prev_block_possibility = 1;
+    int sc_completion_possibility = 1;
+    int sc_dive_hist_possibility  = 1;
+    int sc_float_hist_possibility = 1;
+    int right_possibility         = 1;
+    int left_possibility          = 1;
+    int delete_possibility        = 1;
+
+    int str_len = strlen(str);
+
+    for(int i=0; i<strlen(str); i++){
+        int sc_len;
+        if(sc_head_possibility){
+            sc_len = strlen(ctx->sc_head);
+            sc_head_possibility = sc_len >= str_len && ctx->sc_head[i] == str[i];
+            if(sc_head_possibility && sc_len == str_len){
+                return SC_HEAD;
+            }
+        }
+        if(sc_tail_possibility){
+            sc_len = strlen(ctx->sc_tail);
+            sc_tail_possibility = sc_len >= str_len && ctx->sc_tail[i] == str[i];
+            if(sc_tail_possibility && sc_len == str_len){
+                return SC_TAIL;
+            }
+        }
+        if(sc_next_block_possibility){
+            sc_len = strlen(ctx->sc_next_block);
+            sc_next_block_possibility = sc_len >= str_len && ctx->sc_next_block[i] == str[i];
+            if(sc_next_block_possibility && sc_len == str_len){
+                return SC_NEXT_BLOCK;
+            }
+        }
+        if(sc_prev_block_possibility){
+            sc_len = strlen(ctx->sc_prev_block);
+            sc_prev_block_possibility = sc_len >= str_len && ctx->sc_prev_block[i] == str[i];
+            if(sc_prev_block_possibility && sc_len == str_len){
+                return SC_PREV_BLOCK;
+            }
+        }
+        if(sc_completion_possibility){
+            sc_len = strlen(ctx->sc_completion);
+            sc_completion_possibility = sc_len >= str_len && ctx->sc_completion[i] == str[i];
+            if(sc_completion_possibility && sc_len == str_len){
+                return SC_COMPLETION;
+            }
+        }
+        if(sc_dive_hist_possibility){
+            sc_len = strlen(ctx->sc_dive_hist);
+            sc_dive_hist_possibility = sc_len >= str_len && ctx->sc_dive_hist[i] == str[i];
+            if(sc_dive_hist_possibility && sc_len == str_len){
+                return SC_DIVE_HIST;
+            }
+        }
+        if(sc_float_hist_possibility){
+            sc_len = strlen(ctx->sc_float_hist);
+            sc_float_hist_possibility = sc_len >= str_len && ctx->sc_float_hist[i] == str[i];
+            if(sc_float_hist_possibility && sc_len == str_len){
+                return SC_FLOAT_HIST;
+            }
+        }
+        if(right_possibility){
+            sc_len = strlen(right);
+            right_possibility = sc_len >= str_len && right[i] == str[i];
+            if(right_possibility && sc_len == str_len){
+                return RIGHT;
+            }
+        }
+        if(left_possibility){
+            sc_len = strlen(left);
+            left_possibility = sc_len >= str_len && left[i] == str[i];
+            if(left_possibility && sc_len == str_len){
+                return LEFT;
+            }
+        }
+        if(delete_possibility){
+            sc_len = strlen(delete);
+            delete_possibility = sc_len >= str_len && delete[i] == str[i];
+            if(delete_possibility && sc_len == str_len){
+                return DELETE;
+            }
+        }
+    }
+
+    if(sc_head_possibility || sc_tail_possibility ||
+    sc_next_block_possibility || sc_prev_block_possibility ||
+    sc_completion_possibility || sc_dive_hist_possibility ||
+    sc_float_hist_possibility || right_possibility ||
+    left_possibility || delete_possibility)
+    {
+        return UNKNOWN_YET;
+    }
+
+    return NOT_SHORT_CUT;
 }
 
 char *
@@ -186,176 +302,101 @@ rwh(
         sRwhCtx    *ctx,
         const char *prompt) /* in */
 {
-    char *line;
-    line = readline(prompt);
-    return line;
+    char *line = NULL;
+    char *tmp  = NULL;
 
-/*     const int MAX_HISTORY_ENTRY_NUM = 30; [> tmp <]
- *     char ch;
- *     char buff[30] = {0}; [> 30 is tmp <]
- *     int  entry_idx = g_hist_entry_size;
- *     char current_buff_is_historied = 0;
- *     int  cursor_idx = 0;
- *     char *line = malloc(256);
- * 
- *     printf("%s", prompt);
- * 
- *     while(1){
- *         ch = getch();
- * 
- *         switch(ch){
- *             case 0x1b: [> 方向キー <]
- *                 if(getch() == 0x5b){
- *                     switch(getch()){
- *                         case 0x41: [>↑<]
- *                             [> 途中まで入力してた内容をhistoryに入れる <]
- *                             if(!current_buff_is_historied && g_hist_entry_size > 0){
- *                                 add_history(buff);
- *                                 g_hist_entry_size = g_hist_entry_size == MAX_HISTORY_ENTRY_NUM ? MAX_HISTORY_ENTRY_NUM : g_hist_entry_size + 1;
- *                                 current_buff_is_historied = 1;
- *                                 memset(buff, '\0', sizeof(buff));
- *                             }
- * 
- *                             [> 見える部分の処理 <]
- *                             entry_idx--;
- *                             if(entry_idx < 0){
- *                                 entry_idx = 0;
- *                                 break;
- *                             }
- *                             for(int i=0;i<cursor_idx;i++){
- *                                 printf("%c%c%c", 0x1b, 0x5b, 0x44); [> ← <]
- *                             }
- *                             for(int i=0;i<strlen(buff);i++){
- *                                 printf(" ");
- *                             }
- *                             for(int i=0;i<strlen(buff);i++){
- *                                 printf("%c%c%c", 0x1b, 0x5b, 0x44); [> ← <]
- *                             }
- *                             {
- *                                 [> 見える部分の処理 <]
- *                                 HIST_ENTRY **hist_list = history_list();
- *                                 printf("%s", hist_list[entry_idx] -> line);
- * 
- *                                 [> buffの処理 <]
- *                                 strcpy(buff, hist_list[entry_idx] -> line);
- *                                 cursor_idx = strlen(buff);
- *                             }
- *                             break;
- * 
- *                         case 0x42: [>↓<]
- *                             [> 見える部分の処理 <]
- *                             entry_idx++;
- *                             if(entry_idx > g_hist_entry_size - 1){
- *                                 entry_idx = g_hist_entry_size - 1;
- *                                 break;
- *                             }
- *                             for(int i=0;i<cursor_idx;i++){
- *                                 printf("%c%c%c", 0x1b, 0x5b, 0x44); [> ← <]
- *                             }
- *                             for(int i=0;i<strlen(buff);i++){
- *                                 printf(" ");
- *                             }
- *                             for(int i=0;i<strlen(buff);i++){
- *                                 printf("%c%c%c", 0x1b, 0x5b, 0x44); [> ← <]
- *                             }
- *                             {
- *                                 [> 見える部分の処理 <]
- *                                 HIST_ENTRY **hist_list = history_list();
- *                                 printf("%s", hist_list[entry_idx] -> line);
- * 
- *                                 [> buffの処理 <]
- *                                 strcpy(buff, hist_list[entry_idx] -> line);
- *                                 cursor_idx = strlen(buff);
- *                             }
- *                             break;
- * 
- *                         case 0x43: [> → <]
- *                             if(cursor_idx == strlen(buff)){
- *                                 break;
- *                             }
- *                             printf("%c%c%c", 0x1b, 0x5b, 0x43);
- *                             cursor_idx++;
- *                             break;
- * 
- *                         case 0x44: [>←<]
- *                             if(cursor_idx == 0){
- *                                 break;
- *                             }
- *                             printf("%c%c%c", 0x1b, 0x5b, 0x44);
- *                             cursor_idx--;
- *                             break;
- * 
- *                         default:
- *                             break;
- *                     }
- *                 }
- *                 break;
- * 
- *             case 0x1: [>Ctr-A<]
- *                 for(int i=0;i<cursor_idx;i++){
- *                     printf("%c%c%c", 0x1b, 0x5b, 0x44); [> ← <]
- *                 }
- *                 cursor_idx = 0;
- *                 break;
- * 
- *             case 0x5: [>Ctr-E<]
- *                 for(int i=0;i<strlen(buff)-cursor_idx;i++){
- *                     printf("%c%c%c", 0x1b, 0x5b, 0x43);
- *                 }
- *                 cursor_idx = strlen(buff);
- *                 break;
- * 
- *             case 0x7f: [>backspace<]
- *                 if(cursor_idx == 0){
- *                     break;
- *                 }
- * 
- *                 printf("%c%c%c", 0x1b, 0x5b, 0x44); [> ← <]
- *                 for(int i=0;i<strlen(&buff[cursor_idx])+1;i++){
- *                     printf(" "); 
- *                 }
- *                 for(int i=0;i<strlen(&buff[cursor_idx])+1;i++){
- *                     printf("%c%c%c", 0x1b, 0x5b, 0x44); [> ← <]
- *                 }
- *                 printf("%s", &buff[cursor_idx]);
- *                 for(int i=0;i<strlen(&buff[cursor_idx]);i++){
- *                     printf("%c%c%c", 0x1b, 0x5b, 0x44); [> ← <]
- *                 }
- * 
- *                 sprintf(&buff[cursor_idx-1], "%s", &buff[cursor_idx]);
- *                 cursor_idx--;
- *                 break;
- * 
- *             case '\n': 
- *                 if(current_buff_is_historied){
- *                     remove_history(g_hist_entry_size - 1);
- *                     g_hist_entry_size--;
- *                 }
- *                 putchar('\n');
- *                 add_history(buff);
- *                 g_hist_entry_size = g_hist_entry_size == MAX_HISTORY_ENTRY_NUM ? MAX_HISTORY_ENTRY_NUM : g_hist_entry_size + 1;
- *                 strcpy(line, buff);
- *                 return line;
- * 
- *             default:
- *                 for(int i=0;i<strlen(&buff[cursor_idx]);i++){
- *                     printf("%c%c%c%c", 0x1b, 0x5b, 0x33, 0x7e); [> delete <]
- *                 }
- *                 putchar(ch);
- *                 printf("%s", &buff[cursor_idx]);
- *                 for(int i=0;i<strlen(&buff[cursor_idx]);i++){
- *                     printf("%c%c%c", 0x1b, 0x5b, 0x44); [> ← <]
- *                 }
- *                 {
- *                     char tmp_buff[1000] = {'\0'};
- *                     strcpy(tmp_buff, &buff[cursor_idx]);
- *                     sprintf(&buff[cursor_idx++], "%c%s", ch, tmp_buff);
- *                 }
- *                 break;
- *         }
- *     }
- * 
- *     return line; */
+    printf("%s", prompt);
+    fflush(stdout);
+
+    while(1){
+        char ch = getch();
+        switch(ch){
+            case '\n':
+                if(!(line = (char *)realloc(line, sizeof(char)*(line == NULL ? 1 : strlen(line)+1)))){
+                    return NULL;
+                }
+                push2Ringbuf(ctx->history, line);
+                printf("\n");
+                printf("strcmp(\"quit\", line) = %d\n", strcmp(line, "quit")); /* debug */ 
+                printf("return \"%s\"\n", line); /* debug */ 
+                return line;
+
+            case 0x7f: /* backspace */
+                sprintf(line, "%s\b%c\b", line, '\0');
+                printf("\b \b");
+                break;
+
+            default:
+                if(!(tmp = (char *)realloc(tmp, sizeof(char)*(tmp == NULL ? 1 : strlen(tmp)+1)))){
+                    return NULL;
+                }
+                sprintf(tmp, "%s%c", tmp, ch);
+                switch(judgeShortCut(ctx, tmp)){
+                    case 0: /* NOT_SHORT_CUT  */
+                        if(!(line = (char *)realloc(line, sizeof(char)*(line == NULL ? 1 : strlen(line)+1)))){
+                            return NULL;
+                        }
+                        sprintf(line, "%s%c", line, ch);
+                        printf("%c", ch);
+                        goto free_and_break;
+
+                    case 1: /* UNKNOWN_YET    */
+                        /* nothing to do */
+                        break;
+
+                    case 2: /* SC_HEAD        */
+                        sprintf(line, "%s\r", line);
+                        printf("\r");
+                        goto free_and_break;
+
+                    case 3: /* SC_TAIL        */
+                        sprintf(line, "%s%s", line, right);
+                        printf("%s", right);
+                        goto free_and_break;
+
+                    case 4: /* SC_NEXT_BLOCK  */
+                        goto free_and_break;
+
+                    case 5: /* SC_PREV_BLOCK  */
+                        goto free_and_break;
+
+                    case 6: /* SC_COMPLETION  */
+                        goto free_and_break;
+
+                    case 7: /* SC_DIVE_HIST   */
+                        goto free_and_break;
+
+                    case 8: /* SC_FLOAT_HIST  */
+                        goto free_and_break;
+
+                    case 9: /* RIGHT  */
+                        sprintf(line, "%s%s", line, right);
+                        printf("%s", right);
+                        goto free_and_break;
+
+                    case 10: /* LEFT  */
+                        sprintf(line, "%s%s", line, left);
+                        printf("%s", left);
+                        goto free_and_break;
+
+                    case 11: /* DELETE */
+                        sprintf(line, "%s%s", line, " \b");
+                        printf(" \b");
+                        goto free_and_break;
+
+                    default:
+                        BUG_REPORT();
+                        goto free_and_break;
+
+                    free_and_break:
+                        free(tmp);
+                        tmp = NULL;
+                        break;
+                }
+                break;
+        }
+        fflush(stdout);
+    }
 }
 
 void
