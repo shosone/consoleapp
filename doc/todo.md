@@ -14,6 +14,7 @@ ENV [10]: これこれを導入した
 - [3] prompt.cのrwiとかその他諸々の実装
 
 ## (BUG )FIX
+- [11] prompt.cにてバックスペースをsprintf(line, "%s\b \b", line)で実現するとlineが仮に"hoge"となっていてもstrcmp(line, "hoge")が0にならない. 代替方法でこの問題を解決しているが、原因を調べて正しい方法があれば修正すること.
 
 ## MOD(FICATION)
 - [5] option.cの中身全体的に
