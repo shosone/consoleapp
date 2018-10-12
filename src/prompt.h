@@ -27,6 +27,7 @@ typedef struct _sRingBuf{
     int    size;
     int    head;
     int    tail;
+    int    entory_num;
 }sRingBuf;
 
 typedef struct _sRwhCtx{
