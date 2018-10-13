@@ -12,15 +12,8 @@ int chkOptInteractive(char **contents, int dont_care){
     return SUCCESS;
 }
 
-void regFlagProp(sFLAG_PROPERY_DB *flag_prop_db){
-    addFlagProp2DB(flag_prop_db, "-h", "--help",        0,       0, NULL);
-    addFlagProp2DB(flag_prop_db, "-v", "--version",     0,       0, NULL);
-    addFlagProp2DB(flag_prop_db, "-p", "--print",       1, INT_MAX, NULL);
-    addFlagProp2DB(flag_prop_db, "-i", "--interactive", 1,       1, chkOptInteractive);
-}
-
 #if DEBUG
-void debugInfo1(int groupingOpt_ret, sOPT_GROUP_DB *opt_grp_db){
+void debugInfo1(int groupingOpt_ret, opt_group_db_t *opt_grp_db){
     printf("#################### debug info 1 ########################\n");
     printf("groupingOpt returns %d\n", groupingOpt_ret);
     if(opt_grp_db == NULL){
@@ -28,16 +21,16 @@ void debugInfo1(int groupingOpt_ret, sOPT_GROUP_DB *opt_grp_db){
         printf("#########################################################\n");
         return;
     }
-    int    flagless_num = opt_grp_db -> flagless_num;
+    int    flagless_num = opt_grp_db -> optless_num;
     int    grp_num      = opt_grp_db -> grp_num;
-    char **flagless     = opt_grp_db -> flagless;
+    char **optless      = opt_grp_db -> optless;
     printf("opt_grp_db -> flagless_num = %d\n", flagless_num);
     for(int i=0; i<flagless_num;i++){
-        printf("opt_grp_db -> flagless[%d] = %s\n", i, flagless[i]);
+        printf("opt_grp_db -> flagless[%d] = %s\n", i, optless[i]);
     }
     printf("opt_grp_db -> opt_grp_num = %d\n", grp_num);
     for(int i=0; i<opt_grp_db->grp_num; i++){
-        char  *flag        = opt_grp_db -> grps[i].flag;
+        char  *flag        = opt_grp_db -> grps[i].option;
         int    content_num = opt_grp_db -> grps[i].content_num;
         char **contents    = opt_grp_db -> grps[i].contents;
         int    err_code    = opt_grp_db -> grps[i].err_code;

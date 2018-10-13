@@ -97,12 +97,12 @@ strninsert( /* NOTE: posの値がstrの範囲内にあるかの確認は呼び�
     *str = new;
 }
 
-sRwhCtx*
+rwhctx_t*
 genRwhCtx(int history_size)
 {
-    sRwhCtx *ctx = NULL;
+    rwhctx_t *ctx = NULL;
 
-    if(!(ctx = (sRwhCtx*)malloc(sizeof(sRwhCtx)))){
+    if(!(ctx = (rwhctx_t*)malloc(sizeof(rwhctx_t)))){
         return NULL;
     }
 
@@ -115,7 +115,7 @@ genRwhCtx(int history_size)
     ctx -> sc_dive_hist  = NULL;
     ctx -> sc_float_hist = NULL;
 
-    if(!(ctx -> history = (sRingBuf *)malloc(sizeof(sRingBuf)))){
+    if(!(ctx -> history = (ringbuf_t *)malloc(sizeof(ringbuf_t)))){
         goto free_and_exit;
     }
     ctx -> history -> buf        = NULL;
@@ -185,7 +185,7 @@ free_and_exit:
 
 static void
 push2Ringbuf(
-        sRingBuf   *rb,
+        ringbuf_t   *rb,
         char *str)
 {
     /* buf is empty */
@@ -221,7 +221,7 @@ push2Ringbuf(
 
 static char *
 readRingBuf(
-        sRingBuf *rb,
+        ringbuf_t *rb,
         int depth)
 {
     int idx = rb -> tail - depth;
@@ -231,25 +231,26 @@ readRingBuf(
     return rb -> buf[idx];
 }
 
+typedef enum{
+    JS_NOT_SHORT_CUT = 0,
+    JS_UNKNOWN_YET   = 1,
+    JS_HEAD          = 2,
+    JS_TAIL          = 3,
+    JS_NEXT_BLOCK    = 4,
+    JS_PREV_BLOCK    = 5,
+    JS_COMPLETION    = 6,
+    JS_DIVE_HIST     = 7,
+    JS_FLOAT_HIST    = 8,
+    JS_RIGHT         = 9,  /* ショートカットでは無いがカーソル右が制御信号なので */ 
+    JS_LEFT          = 10, /* ショートカットでは無いがカーソル左が制御信号なので */ 
+    JS_DELETE        = 11, /* ショートカットでは無いがデリートキーが制御信号なので */ 
+}judgeShortCut_errcode_t;
+
 static int
 judgeShortCut(
-        sRwhCtx    *ctx,
+        rwhctx_t    *ctx,
         const char *str)
 {
-    /* return values */
-    const int NOT_SHORT_CUT = 0;
-    const int UNKNOWN_YET   = 1;
-    const int SC_HEAD       = 2;
-    const int SC_TAIL       = 3;
-    const int SC_NEXT_BLOCK = 4;
-    const int SC_PREV_BLOCK = 5;
-    const int SC_COMPLETION = 6;
-    const int SC_DIVE_HIST  = 7;
-    const int SC_FLOAT_HIST = 8;
-    const int RIGHT         = 9;  /* ショートカットでは無いがカーソル右が制御信号なので */ 
-    const int LEFT          = 10; /* ショートカットでは無いがカーソル左が制御信号なので */ 
-    const int DELETE        = 11; /* ショートカットでは無いがカーソル左が制御信号なので */ 
-
     /* flags */
     int sc_head_possibility       = 1;
     int sc_tail_possibility       = 1;
@@ -270,70 +271,70 @@ judgeShortCut(
             sc_len = strlen(ctx->sc_head);
             sc_head_possibility = sc_len >= str_len && ctx->sc_head[i] == str[i];
             if(sc_head_possibility && i == sc_len-1){
-                return SC_HEAD;
+                return JS_HEAD;
             }
         }
         if(sc_tail_possibility){
             sc_len = strlen(ctx->sc_tail);
             sc_tail_possibility = sc_len >= str_len && ctx->sc_tail[i] == str[i];
             if(sc_tail_possibility && i == sc_len-1){
-                return SC_TAIL;
+                return JS_TAIL;
             }
         }
         if(sc_next_block_possibility){
             sc_len = strlen(ctx->sc_next_block);
             sc_next_block_possibility = sc_len >= str_len && ctx->sc_next_block[i] == str[i];
             if(sc_next_block_possibility && i == sc_len-1){
-                return SC_NEXT_BLOCK;
+                return JS_NEXT_BLOCK;
             }
         }
         if(sc_prev_block_possibility){
             sc_len = strlen(ctx->sc_prev_block);
             sc_prev_block_possibility = sc_len >= str_len && ctx->sc_prev_block[i] == str[i];
             if(sc_prev_block_possibility && i == sc_len-1){
-                return SC_PREV_BLOCK;
+                return JS_PREV_BLOCK;
             }
         }
         if(sc_completion_possibility){
             sc_len = strlen(ctx->sc_completion);
             sc_completion_possibility = sc_len >= str_len && ctx->sc_completion[i] == str[i];
             if(sc_completion_possibility && i == sc_len-1){
-                return SC_COMPLETION;
+                return JS_COMPLETION;
             }
         }
         if(sc_dive_hist_possibility){
             sc_len = strlen(ctx->sc_dive_hist);
             sc_dive_hist_possibility = sc_len >= str_len && ctx->sc_dive_hist[i] == str[i];
             if(sc_dive_hist_possibility && i == sc_len-1){
-                return SC_DIVE_HIST;
+                return JS_DIVE_HIST;
             }
         }
         if(sc_float_hist_possibility){
             sc_len = strlen(ctx->sc_float_hist);
             sc_float_hist_possibility = sc_len >= str_len && ctx->sc_float_hist[i] == str[i];
             if(sc_float_hist_possibility && i == sc_len-1){
-                return SC_FLOAT_HIST;
+                return JS_FLOAT_HIST;
             }
         }
         if(right_possibility){
             sc_len = strlen(right);
             right_possibility = sc_len >= str_len && right[i] == str[i];
             if(right_possibility && i == sc_len-1){
-                return RIGHT;
+                return JS_RIGHT;
             }
         }
         if(left_possibility){
             sc_len = strlen(left);
             left_possibility = sc_len >= str_len && left[i] == str[i];
             if(left_possibility && i == sc_len-1){
-                return LEFT;
+                return JS_LEFT;
             }
         }
         if(delete_possibility){
             sc_len = strlen(delete);
             delete_possibility = sc_len >= str_len && delete[i] == str[i];
             if(delete_possibility && i == sc_len-1){
-                return DELETE;
+                return JS_DELETE;
             }
         }
     }
@@ -344,10 +345,10 @@ judgeShortCut(
     sc_float_hist_possibility || right_possibility ||
     left_possibility || delete_possibility)
     {
-        return UNKNOWN_YET;
+        return JS_UNKNOWN_YET;
     }
 
-    return NOT_SHORT_CUT;
+    return JS_NOT_SHORT_CUT;
 }
 
 static int
@@ -427,7 +428,7 @@ static void clearLine(
 
 char *
 rwh(
-        sRwhCtx    *ctx,
+        rwhctx_t    *ctx,
         const char *prompt) /* in */
 {
     char *line           = NULL;
@@ -472,37 +473,37 @@ rwh(
                 sprintf(tmp, "%s%c", tmp_len == 0 ? "" : tmp, ch);
                 tmp_len++;
                 switch(judgeShortCut(ctx, tmp)){
-                    case 0: /* NOT_SHORT_CUT  */
+                    case JS_NOT_SHORT_CUT:
                         strninsert(cursor_pos, &line, ch);
                         cursor_pos++;
                         line_len++;
                         line_modified = 1;
                         goto free_and_break;
 
-                    case 1: /* UNKNOWN_YET */
+                    case JS_UNKNOWN_YET:
                         /* nothing to do */
                         break;
 
-                    case 2: /* SC_HEAD        */
+                    case JS_HEAD:
                         cursor_pos = 0;
                         goto free_and_break;
 
-                    case 3: /* SC_TAIL        */
+                    case JS_TAIL:
                         cursor_pos = line_len;
                         goto free_and_break;
 
-                    case 4: /* SC_NEXT_BLOCK  */
+                    case JS_NEXT_BLOCK:
                         cursor_pos = nextBlock(cursor_pos, line);
                         goto free_and_break;
 
-                    case 5: /* SC_PREV_BLOCK  */
+                    case JS_PREV_BLOCK:
                         cursor_pos = prevBlock(cursor_pos, line);
                         goto free_and_break;
 
-                    case 6: /* SC_COMPLETION  */
+                    case JS_COMPLETION:
                         goto free_and_break;
 
-                    case 7: /* SC_DIVE_HIST   */
+                    case JS_DIVE_HIST:
                         if(history_idx < ctx->history->entory_num){
                             before_is_dive = 1;
                             if(dived){
@@ -520,7 +521,7 @@ rwh(
                         }
                         goto free_and_break;
 
-                    case 8: /* SC_FLOAT_HIST  */
+                    case JS_FLOAT_HIST:
                         if(dived){
                             history_idx   -= before_is_dive;
                             before_is_dive = 0;
@@ -536,15 +537,15 @@ rwh(
                         }
                         goto free_and_break;
 
-                    case 9: /* RIGHT  */
+                    case JS_RIGHT:
                         cursor_pos = cursor_pos == line_len ? cursor_pos : cursor_pos+1;
                         goto free_and_break;
 
-                    case 10: /* LEFT  */
+                    case JS_LEFT:
                         cursor_pos = cursor_pos == 0 ? 0 : cursor_pos-1;
                         goto free_and_break;
 
-                    case 11: /* DELETE */
+                    case JS_DELETE:
                         if(cursor_pos >= line_len){
                             strndelete(cursor_pos, &line);
                             line_len--;
@@ -574,7 +575,7 @@ rwh(
 }
 
 void
-freeRwhCtx(sRwhCtx *ctx){
+freeRwhCtx(rwhctx_t *ctx){
     for(int i=0; i<ctx->history->size; i++){
         free(ctx -> history -> buf[i]);
     }
