@@ -315,8 +315,8 @@ judgeDestination(
         char **str)
 {
     /* flags */
-    static int opt_grp_dbs_contents_is_empty   = 1;
-    static int lock_opt_grp_dbs_contents       = 0;
+    static bool opt_grp_dbs_contents_is_empty   = 1;
+    static bool lock_opt_grp_dbs_contents       = 0;
 
     /* memos */
     static int current_options_contents_num     = 0;

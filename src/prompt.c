@@ -252,16 +252,16 @@ judgeShortCut(
         const char *str)
 {
     /* flags */
-    int sc_head_possibility       = 1;
-    int sc_tail_possibility       = 1;
-    int sc_next_block_possibility = 1;
-    int sc_prev_block_possibility = 1;
-    int sc_completion_possibility = 1;
-    int sc_dive_hist_possibility  = 1;
-    int sc_float_hist_possibility = 1;
-    int right_possibility         = 1;
-    int left_possibility          = 1;
-    int delete_possibility        = 1;
+    bool sc_head_possibility       = 1;
+    bool sc_tail_possibility       = 1;
+    bool sc_next_block_possibility = 1;
+    bool sc_prev_block_possibility = 1;
+    bool sc_completion_possibility = 1;
+    bool sc_dive_hist_possibility  = 1;
+    bool sc_float_hist_possibility = 1;
+    bool right_possibility         = 1;
+    bool left_possibility          = 1;
+    bool delete_possibility        = 1;
 
     int str_len = strlen(str);
 
@@ -440,9 +440,9 @@ rwh(
     char *evacated_line  = NULL;
 
     /* flags */
-    char before_is_dive = 0;
-    char dived          = 0;
-    char line_modified  = 1;
+    bool before_is_dive = 0;
+    bool dived          = 0;
+    bool line_modified  = 1;
 
     printf("%s", prompt);
     fflush(stdout);

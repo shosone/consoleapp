@@ -9,6 +9,7 @@
 #include <stdlib.h>
 #include <ctype.h>
 #include <limits.h>
+#include <stdbool.h>
 
 #ifndef BUG_REPORT
 #include <stdio.h>
