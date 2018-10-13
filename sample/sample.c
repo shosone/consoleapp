@@ -1,8 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "../src/option.h"
-#include "../src/prompt.h"
+#include "../src/consoleapp.h"
 
 #define DEBUG 1
 #include "for_option.c"

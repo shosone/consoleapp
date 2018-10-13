@@ -1,6 +1,3 @@
-#include <stdlib.h>
-#include "../src/option.h"
-
 int chkOptInteractive(char **contents, int dont_care){
     const int SUCCESS        = 0;
     const int ILLIGAL_NUMBER = 1;

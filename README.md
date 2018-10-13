@@ -42,6 +42,7 @@ typedef struct _sOPT_GROUP_DB{
     char      **flagless;     /* 対応するオプションが無いコンテンツ. 例えば, gcc -o hoge hoge.c geho.c のhoge.cとgeho.c */
 }sOPT_GROUP_DB;
 ```
+
 ### function reference
 ```c
 extern sFLAG_PROPERY_DB* /* 生成されたsFLAG_PROPERY_DBのメモリ領域のポインタ */
@@ -76,6 +77,7 @@ extern void
 freeOptGroupDB( /* sOPT_GROUP_DBのメンバのメモリ領域を再帰的に解放 */
         sOPT_GROUP_DB *opt_group_db); /* [in] 開放するsOPT_GROUP_DB */
 ```
+
 ### sample code
 This it a part of "sample/sample.c".
 ```c
