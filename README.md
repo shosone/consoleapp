@@ -3,112 +3,131 @@ libconsoleapp.a is a C library for make it easy to develop a console application
 
 ## consoleapp/option
 Functions that check error of option of console application and grouping contents attached to option are summarized.
+
 ### dependancy
 T.B.D.
+
 ### struct reference
-```c
+```c:option.h
 /* プログラムで使用できるオプションの情報を保持する構造体 */
-typedef struct _sFLAG_PROPERY{
+typedef struct _opt_property_t{
     char *short_form;                                           /* オプションの短縮形式. 例えば"-v" */
     char *long_form;                                            /* オプションの詳細形式. 例えば"--version" */
     int  (*contents_checker)(char **contents, int content_num); /* オプションに付属するcontentsの正しさを調べるコールバック関数 */
     int  content_num_min;                                       /* オプションに付属するcontentsの最小数 */
     int  content_num_max;                                       /* オプションに付属するcontentsの最大数 */
     int  appeared_yet;                                          /* 同じオプションがすでに指定されたかチェックするためのメモとして用いる */
-}sFLAG_PROPERY;
+}opt_property_t;
 ```
-```c
-/* sFLAG_PROPERYのエントリを保持するための構造体 */
-typedef struct _sFLAG_PROPERY_DB{
-    int            prop_num; /* sFLAG_PROPERYの配列のサイズ */
-    sFLAG_PROPERY *props;    /* sFLAG_PROPERYの配列 */
-}sFLAG_PROPERY_DB;
+
+```c:option.h
+/* opt_property_tのエントリを保持するための構造体 */
+typedef struct _opt_property_db_t{
+    int             prop_num; /* propsのサイズ */
+    opt_property_t *props;    /* opt_property_tの配列 */
+}opt_property_db_t;
 ```
-```c
+
+```c:option.h
 /* プログラム実行時に指定した各オプションの情報を保持するための構造体 */
-typedef struct _sOPT_GROUP{
-    char  *flag;          /* 例えば "gcc -Wall -O3 -I ./hoge ./geho -o ./foo bar1.c bar2.c" の -Wall, -O3, -I, -o がそれぞれ別のsOPT_GROUPのフラグに割り当てられる */
-    int    content_num;   /* 例えば flag が -I なら2になる */
-    char **contents;      /* 例えば flag が -I なら ./hoge, ./geho になる */
-    int    err_code;      /* 対応するsFLAG_PROPERYに登録されているcontents_checker関数の引数にcontent_numとcontentsを適用した際の戻り値  */
-}sOPT_GROUP;
+typedef struct _opt_group_t{
+    char  *option;        /* 例えば "gcc -Wall -O3 -I ./hoge ./geho -o ./foo bar1.c bar2.c" の -Wall, -O3, -I, -o がそれぞれ別のopt_group_tのoptionに割り当てられる */
+    int    content_num;   /* 例えば option が -I なら2になる */
+    char **contents;      /* 例えば option が -I なら ./hoge, ./geho になる */
+    int    err_code;      /* 対応するopt_property_tに登録されているcontents_checker関数の引数にcontent_numとcontentsを適用した際の戻り値  */
+}opt_group_t;
 ```
-```c
-/* sOPT_GROUPのエントリを保持するための構造体 */
-typedef struct _sOPT_GROUP_DB{
-    int         grp_num;      /* sOPT_GROUPの配列のサイズ */
-    sOPT_GROUP *grps;         /* sOPT_GROUPの配列 */
-    int         flagless_num; /* 対応するオプションが無いコンテンツの数 */
-    char      **flagless;     /* 対応するオプションが無いコンテンツ. 例えば, gcc -o hoge hoge.c geho.c のhoge.cとgeho.c */
-}sOPT_GROUP_DB;
+
+```c:option.h
+/* opt_group_tのエントリを保持するための構造体 */
+typedef struct _opt_group_db_t{
+    int          grp_num;    /* opt_group_tの配列のサイズ */
+    opt_group_t *grps;       /* opt_group_tの配列 */
+    int         optless_num; /* 対応するオプションが無いコンテンツの数 */
+    char      **optless;     /* 対応するオプションが無いコンテンツ. 例えば, gcc -o hoge hoge.c geho.c のhoge.cとgeho.c */
+}opt_group_db_t;
 ```
+
 ### function reference
-```c
-extern sFLAG_PROPERY_DB* /* 生成されたsFLAG_PROPERY_DBのメモリ領域のポインタ */
-genFlagPropDB(     
-        int prop_num); /* 登録するsFLAG_PROPERYの数 */
+```c:option.h
+extern opt_property_db_t* /* 生成されたopt_property_db_tのメモリ領域のポインタ */
+genOptPropDB(     
+        int prop_num); /* 登録するopt_property_tの数 */
 ```
-```c
-extern int /* 0:success, 1:short_formがNULL, 2:out of memory, 3:content_num_minがcontent_num_maxより大きい */
-addFlagProp2DB( /* sFLAG_PROPERY_DBのエントリを追加する関数 */
-        sFLAG_PROPERY_DB *db,             /* [out] 登録先(genFlagPropDBで作成したsFLAG_PROPERY_DB) */
-        char             *short_form,     /* [in] オプションの短縮形式 */
-        char             *long_form,      /* [in] オプションの詳細形式 */
-        int              content_num_min, /* オプションに付属するコンテンツの最少数 */
-        int              content_num_max, /* オプションに付属するコンテンツの最大数 */
-        int             (*contents_checker)(char **contents, int content_num)); /* オプションのコンテンツをチェックするコールバック関数 */
+
+```c:option.h
+extern int /* option_errcode_tのどれか */
+regOptProp( /* opt_property_db_tのエントリを追加する関数 */
+        opt_property_db_t  *db,             /* [out] 登録先(genOptPropDBで作成したopt_property_db_t) */
+        char               *short_form,     /* [in] オプションの短縮形式 */
+        char               *long_form,      /* [in] オプションの詳細形式 */
+        int                content_num_min, /* オプションに付属するコンテンツの最少数 */
+        int                content_num_max, /* オプションに付属するコンテンツの最大数 */
+        int              (*contents_checker)(char **contents, int content_num)); /* オプションのコンテンツをチェックするコールバック関数 */
 ```
-```c
+
+```c:option.h
 extern void
-freeFlagPropDB( /* sFLAG_PROPERY_DBのメンバのメモリ領域を再帰的に開放する関数 */
-        sFLAG_PROPERY_DB *db); /* [in] 開放するsFLAG_PROPERY_DB */
+freeOptPropDB( /* opt_property_db_tのメンバのメモリ領域を再帰的に開放する関数 */
+        opt_property_db_t *db); /* [in] 開放するopt_property_db_t */
 ```
-```c
-extern int /* 0:success, 1:out of memory, 2:flag_prop_db is null, 3:duplicate same flag, 4:too many contents, 5:too little contents */
-groupingOpt( /* オプション情報が登録されたsFLAG_PROPERY_DBをもとにmainの引数で取得したargcとargvをグループに分類してsOPT_GROUP_DBのエントリに登録する関数 */
-        sFLAG_PROPERY_DB *flag_prop_db, /* [in] オプション情報が登録されたsFLAG_PROPERY_DB */
-        int               argc,         /* mainの引数で受け取ったプログラムの引数の数(プログラム名含む) */
-        char            **argv,         /* [in] mainの引数で受け取ったプログラムの引数(プログラム名含む) */
-        sOPT_GROUP_DB   **opt_grp_db);  /* [out] グルーピングされたオプション情報 */
+
+```c:option.h
+extern int /* option_errcode_tのどれか */
+groupingOpt( /* オプション情報が登録されたopt_property_dbをもとにmainの引数で取得したargcとargvをグループに分類してopt_group_db_tのエントリに登録する関数 */
+        opt_property_db_t *opt_prop_db,  /* [in] オプション情報が登録されたopt_property_db_t */
+        int                argc,         /* mainの引数で受け取ったプログラムの引数の数(プログラム名含む) */
+        char             **argv,         /* [in] mainの引数で受け取ったプログラムの引数(プログラム名含む) */
+        opt_group_db_t   **opt_grp_db);  /* [out] グルーピングされたオプション情報 */
 ```
-```c
+
+```c:option.h
 extern void
-freeOptGroupDB( /* sOPT_GROUP_DBのメンバのメモリ領域を再帰的に解放 */
-        sOPT_GROUP_DB *opt_group_db); /* [in] 開放するsOPT_GROUP_DB */
+freeOptGroupDB( /* opt_group_db_tのメンバのメモリ領域を再帰的に解放 */
+        opt_group_db_t *opt_group_db); /* [in] 開放するopt_group_db_t */
 ```
+
 ### sample code
 This it a part of "sample/sample.c".
 ```c
 int main(int argc, char *argv[]){
 
-    sFLAG_PROPERY_DB *flag_prop_db = genFlagPropDB(4);
-    sOPT_GROUP_DB    *opt_grp_db   = NULL;
-    int               groupingOpt_ret;
+    opt_property_db_t *opt_prop_db = genOptPropDB(4);
+    opt_group_db_t    *opt_grp_db   = NULL;
+    int                ret;
 
-    regFlagProp(flag_prop_db);
-    groupingOpt_ret = groupingOpt(flag_prop_db, argc, argv, &opt_grp_db);
+    regOptProp(opt_prop_db, "-h", "--help",        0,       0, NULL);
+    regOptProp(opt_prop_db, "-v", "--version",     0,       0, NULL);
+    regOptProp(opt_prop_db, "-p", "--print",       1, INT_MAX, NULL);
+    regOptProp(opt_prop_db, "-i", "--interactive", 1,       1, chkOptInteractive);
 
-    switch(groupingOpt_ret){
-        case 0: /* success */
+    ret = groupingOpt(opt_prop_db, argc, argv, &opt_grp_db);
+
+#if DEBUG
+    debugInfo1(ret, opt_grp_db);
+#endif
+
+    switch(ret){
+        case OPTION_SUCCESS: /* success */
             break;
 
-        case 1:
+        case OPTION_OPT_NAME_IS_NULL:
             fprintf(stderr, "error: out of memory\n");
             exit(1);
 
-        case 2:
+        case OPTION_OUT_OF_MEMORY:
             fprintf(stderr, "error: flag_prop_db is null\n");
             exit(1);
 
-        case 3:
+        case OPTION_DUPLICATE_SAME_OPT:
             fprintf(stderr, "error: duplicate same flag\n");
             exit(1);
 
-        case 4:
+        case OPTION_TOO_MANY_CONTENTS:
             fprintf(stderr, "error: too many contents\n");
             exit(1);
 
-        case 5:
+        case OPTION_TOO_LITTLE_CONTENTS:
             fprintf(stderr, "error: too little contents\n");
             exit(1);
 
@@ -123,7 +142,7 @@ int main(int argc, char *argv[]){
                 break;
 
             case 1: 
-                fprintf(stderr, "error: the history size \"%s\" specified with the option \"%s\" is an invalid value\n", opt_grp_db->grps[i].contents[0], opt_grp_db->grps[i].flag);
+                fprintf(stderr, "error: the history size \"%s\" specified with the option \"%s\" is an invalid value\n", opt_grp_db->grps[i].contents[0], opt_grp_db->grps[i].option);
                 exit(2);
                 break;
 
@@ -134,7 +153,7 @@ int main(int argc, char *argv[]){
     }
 
     for(int i=0;i<opt_grp_db->grp_num;i++){
-        char *flag       = opt_grp_db -> grps[i].flag;
+        char *flag       = opt_grp_db -> grps[i].option;
         char **contents  = opt_grp_db -> grps[i].contents;
         int  content_num = opt_grp_db -> grps[i].content_num;
 
@@ -159,7 +178,7 @@ int main(int argc, char *argv[]){
 ```
 
 This is a part of "sample/for_option.c".
-```c
+```c:for_opton.c
 int chkOptInteractive(char **contents, int dont_care){
     const int SUCCESS        = 0;
     const int ILLIGAL_NUMBER = 1;
@@ -169,13 +188,6 @@ int chkOptInteractive(char **contents, int dont_care){
         return ILLIGAL_NUMBER;
     }
     return SUCCESS;
-}
-
-void regFlagProp(sFLAG_PROPERY_DB *flag_prop_db){
-    addFlagProp2DB(flag_prop_db, "-h", "--help",        0,       0, NULL);
-    addFlagProp2DB(flag_prop_db, "-v", "--version",     0,       0, NULL);
-    addFlagProp2DB(flag_prop_db, "-p", "--print",       1, INT_MAX, NULL);
-    addFlagProp2DB(flag_prop_db, "-i", "--interactive", 1,       1, chkOptInteractive);
 }
 ```
 ### demo
@@ -188,46 +200,47 @@ Functions that facilitate the implementation of interactive functions in the con
 T.B.D.
 
 ### struct reference
-```c
-/* structure for ring buffer. this is used for sRwhCtx's member. */
-typedef struct _sRingBuf{
+```c:prompt.h
+/* structure for ring buffer. this is used for rwh_ctx_t's member. */
+typedef struct _ringbuf_t{
     char **buf;         /* buffer for entories */
     int    size;        /* max size of buffer */
     int    head;        /* buffer index at an oldest entory */
     int    tail;        /* buffer index at an newest entory */
     int    entory_num;  /* number of entories */
-}sRingBuf;
+}ringbuf_t;
 ```
 
-```c
-/* structure for preserve context for rwh(). */
-typedef struct _sRwhCtx{
-    sRingBuf *history;   /* history of lines enterd in the console */
-    char *sc_head;       /* shortcut for go to the head of the line */
-    char *sc_tail;       /* shortcut for go to the tail of the line */
-    char *sc_next_block; /* shortcut for go to the next edge of the word of the line */
-    char *sc_prev_block; /* shortcut for go to the previous edge of the word of the line */
-    char *sc_completion; /* shortcut for completion */
-    char *sc_dive_hist;  /* shortcut for fetch older history */
-    char *sc_float_hist; /* shortcut for fetch newer history */
-}sRwhCtx;
+```c:primpt.h
+typedef struct _rwhctx_t{
+    ringbuf_t *history;       /* history of lines enterd in the console */
+    char      *sc_head;       /* shortcut for go to the head of the line */
+    char      *sc_tail;       /* shortcut for go to the tail of the line */
+    char      *sc_next_block; /* shortcut for go to the next edge of the word of the line */
+    char      *sc_prev_block; /* shortcut for go to the previous edge of the word of the line */
+    char      *sc_completion; /* shortcut for completion */
+    char      *sc_dive_hist;  /* shortcut for fetch older history */
+    char      *sc_float_hist; /* shortcut for fetch newer history */
+}rwhctx_t;
 ```
 
 ### function reference
-```c
-extern sRwhCtx* /* the generated sRwhCtx pointer which shortcut setting fields are set to default. if failed, it will be NULL. */
-genRwhCtx( /* generate a sRwhCtx pointer. */
+```c:prompt.h
+extern rwhctx_t* /* a generated rwh_ctx_t pointer which shortcut setting fields are set to default. if failed, it will be NULL. */
+genRwhCtx( /* generate a rwh_ctx_t pointer. */
         int history_size); /* max size of the buffer of the history */
 ```
-```c
+
+```c:prompt.h
 extern void
-freeRwhCtx( /* free sRwhCtx member recursively */
-        sRwhCtx *ctx);  
+freeRwhCtx( /* free rwh_ctx_t pointer */
+        rwhctx_t *ctx);  
 ```
-```c
+
+```c:prompt.h
 extern char * /* enterd line */
 rwh( /* acquire the line entered in the console and keep history. */
-        sRwhCtx    *ctx,      /* [out] an context generated by genRwhCtx(). ctx keeps shortcuts and history operation keys settings and history. after rwh(), the entories of history of ctx is updated. */
+        rwhctx_t   *ctx,      /* [out] an context generated by genRwhCtx(). ctx keeps shortcuts and history operation keys settings and history. after rwh(), the entories of history of ctx is updated. */
         const char *prompt);  /* [in]  string to be output to the console when urging the usr input */
 ```
 
@@ -235,7 +248,7 @@ rwh( /* acquire the line entered in the console and keep history. */
 This it a part of "sample/sample.c".
 ```c
 void interactive(int hist_entory_size){
-    sRwhCtx *ctx = genRwhCtx(30);
+    rwhctx_t *ctx = genRwhCtx(30);
     char *line;
 
     printf("input \"help\" to display help\n");
@@ -249,7 +262,7 @@ void interactive(int hist_entory_size){
             printf("|quit:           quit interactive mode                                 |\n");
             printf("|![some string]: execute \"[some string]\" as a shell command.           |\n");
             printf("|                                                                      |\n");
-            printf("|NOTE: these key bind is able to change by modifying sRwhCtx\'s fields. |\n");
+            printf("|NOTE: these key bind is able to change by modifying rwh_ctx_t\'s fields. |\n");
             printf("|short cuts:                                                           |\n");
             printf("|    Ctl-a:  jump to head                                              |\n");
             printf("|    Ctl-e:  jump to tail                                              |\n");

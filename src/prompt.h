@@ -22,7 +22,7 @@ extern const char DEFAULT_SC_COMPLETION[];
 extern const char DEFAULT_SC_DIVE_HIST[];
 extern const char DEFAULT_SC_FLOAT_HIST[]; 
 
-/* structure for ring buffer. this is used for sRwhCtx's member. */
+/* structure for ring buffer. this is used for rwh_ctx_t's member. */
 typedef struct _ringbuf_t{
     char **buf;         /* buffer for entories */
     int    size;        /* max size of buffer */
@@ -43,12 +43,12 @@ typedef struct _rwhctx_t{
     char      *sc_float_hist; /* shortcut for fetch newer history */
 }rwhctx_t;
 
-extern rwhctx_t* /* a generated sRwhCtx pointer which shortcut setting fields are set to default. if failed, it will be NULL. */
-genRwhCtx( /* generate a sRwhCtx pointer. */
+extern rwhctx_t* /* a generated rwh_ctx_t pointer which shortcut setting fields are set to default. if failed, it will be NULL. */
+genRwhCtx( /* generate a rwh_ctx_t pointer. */
         int history_size); /* max size of the buffer of the history */
 
 extern void
-freeRwhCtx( /* free sRwhCtx pointer */
+freeRwhCtx( /* free rwh_ctx_t pointer */
         rwhctx_t *ctx);  
 
 extern char * /* enterd line */

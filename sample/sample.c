@@ -129,22 +129,22 @@ void interactive(int hist_entory_size){
         line = rwh(ctx, ">> ");
 
         if(strcmp(line, "help") == 0){
-            printf("+----------------------------------------------------------------------+\n");
-            printf("|help:           print this help                                       |\n");
-            printf("|quit:           quit interactive mode                                 |\n");
-            printf("|![some string]: execute \"[some string]\" as a shell command.           |\n");
-            printf("|                                                                      |\n");
-            printf("|NOTE: these key bind is able to change by modifying sRwhCtx\'s fields. |\n");
-            printf("|short cuts:                                                           |\n");
-            printf("|    Ctl-a:  jump to head                                              |\n");
-            printf("|    Ctl-e:  jump to tail                                              |\n");
-            printf("|    Ctl-→ : jump to next separation                                   |\n");
-            printf("|    Ctl-← : jump to previous separation                               |\n");
-            printf("|history operation:                                                    |\n");
-            printf("|    ↑ : go to the past                                                |\n");
-            printf("|    ↓ : go to the future                                              |\n");
-            printf("|    tab: completion                                                   |\n");
-            printf("+----------------------------------------------------------------------+\n");
+            printf("+------------------------------------------------------------------------+\n");
+            printf("|help:           print this help                                         |\n");
+            printf("|quit:           quit interactive mode                                   |\n");
+            printf("|![some string]: execute \"[some string]\" as a shell command.             |\n");
+            printf("|                                                                        |\n");
+            printf("|NOTE: these key bind is able to change by modifying rwh_ctx_t\'s fields. |\n");
+            printf("|short cuts:                                                             |\n");
+            printf("|    Ctl-a:  jump to head                                                |\n");
+            printf("|    Ctl-e:  jump to tail                                                |\n");
+            printf("|    Ctl-→ : jump to next separation                                     |\n");
+            printf("|    Ctl-← : jump to previous separation                                 |\n");
+            printf("|history operation:                                                      |\n");
+            printf("|    ↑ : go to the past                                                  |\n");
+            printf("|    ↓ : go to the future                                                |\n");
+            printf("|    tab: completion                                                     |\n");
+            printf("+------------------------------------------------------------------------+\n");
         }
         else if(strcmp(line, "quit") == 0){
             exit(1);
