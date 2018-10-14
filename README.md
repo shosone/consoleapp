@@ -343,7 +343,7 @@ free_and_exit:
 ## Demo
 ![option_demo](doc/prompt_demo.gif)
 
-## installation
+## Installation
 Please read Makefile. Introduction of autotools is under consideration.
 
 <!-- ![installation](doc/installation.gif) -->
