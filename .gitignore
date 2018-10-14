@@ -55,3 +55,7 @@ dkms.conf
 tags
 *~
 sample/sample
+
+# Other
+build*/
+install*/
