@@ -1,4 +1,4 @@
-#include <stdio.h>
+﻿#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include "../src/consoleapp.h"
@@ -87,8 +87,8 @@ int main(int argc, char *argv[]){
             printVersion();
         }
         else if(strcmp(flag, "-p") == 0 || strcmp(flag, "--print") == 0){
-            for(int i=0; i<content_num; i++){
-                printf("%s\n", contents[i]);
+            for(int j=0; j<content_num; j++){
+                printf("%s\n", contents[j]);
             }
         }
 #ifndef CONSOLEAPP_DISABLE_PROMPT
