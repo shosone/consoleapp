@@ -55,6 +55,8 @@ dkms.conf
 tags
 *~
 sample/sample
+lib*/
+obj*/
 
 # config.h
 src/config.h
