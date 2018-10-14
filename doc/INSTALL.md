@@ -25,8 +25,6 @@ make
 make install
 ```
 
-`make install` is currently not supported.
-
 ## Windows
 
 ### Visual Studio
