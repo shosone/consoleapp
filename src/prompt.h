@@ -34,7 +34,7 @@
 
 #ifndef BUG_REPORT
 #include <stdio.h>
-#define BUG_REPORT() (fprintf(stderr, "error: there is a bug! (%s, %s, %d)", __FILE__, __FUNCTION__, __LINE__))
+#define BUG_REPORT() (fprintf(stderr, "error: there is a bug! (%s, %s, %d)", __FILE__, __func__, __LINE__))
 #endif
 
 extern const char DEFAULT_SC_HEAD[];
