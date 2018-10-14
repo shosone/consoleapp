@@ -28,3 +28,5 @@
 - getchは自作しなくてもcurses.hにwgetchが定義されていたのでこっちが使えるかも
 - string\_plus.h追加
 - datastructure.h追加
+- winでwarningを消すためにstrtokをstrtok_sに変えるかstrcharで自力でparseする
+- option_errcode_tのエラーが発生した場合はその時点でメッセージを出力して終了する.
