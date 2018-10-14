@@ -7,7 +7,6 @@
 - -hvi というようなオプションの指定ができるようにする
 
 ## (BUG )FIX
-- rwh()でdeleteキー押下時の動作がおかしい
 
 ## MOD(FICATION)
 - option.cの中身全体的にリファクタリング

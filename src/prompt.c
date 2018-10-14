@@ -31,7 +31,7 @@ const char DEFAULT_SC_DIVE_HIST[]  = {0x1b, 0x5b, 0x41, 0x00};
 const char DEFAULT_SC_FLOAT_HIST[] = {0x1b, 0x5b, 0x42, 0x00};
 static const char right[]          = {0x1b, 0x5b, 0x43, 0x00};
 static const char left[]           = {0x1b, 0x5b, 0x44, 0x00};
-static const char delete[]         = {0x1b, 0x5b, 0x33, 0x7e, 0x1b, 0x00};
+static const char delete[]         = {0x1b, 0x5b, 0x33, 0x7e, 0x00};
 
 /* ====================================== */
 
@@ -87,7 +87,7 @@ strndelete( /* NOTE: posの値がstrの範囲内にあるかの確認は呼び�
         return;
     }
     (*str)[pos] = '\0';
-    *str = (char *)realloc(*str, sizeof(char)*(str_len-1));
+    *str = (char *)realloc(*str, sizeof(char)*(str_len));
     if(str_len == pos+1){
         return;
     }
@@ -665,7 +665,7 @@ rwh(
                         goto free_and_break;
 
                     case JS_DELETE:
-                        if(cursor_pos >= line_len){
+                        if(cursor_pos < line_len){
                             strndelete(cursor_pos, &line);
                             line_len--;
                             line_modified = 1;
