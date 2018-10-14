@@ -1,11 +1,13 @@
-#include <stdio.h>
+﻿#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include "../src/consoleapp.h"
 
 #define DEBUG 1
 #include "for_option.c"
+#ifndef CONSOLEAPP_DISABLE_PROMPT
 #include "for_prompt.c"
+#endif
 
 void printUsage(void);
 void printVersion(void);
@@ -85,13 +87,15 @@ int main(int argc, char *argv[]){
             printVersion();
         }
         else if(strcmp(flag, "-p") == 0 || strcmp(flag, "--print") == 0){
-            for(int i=0; i<content_num; i++){
-                printf("%s\n", contents[i]);
+            for(int j=0; j<content_num; j++){
+                printf("%s\n", contents[j]);
             }
         }
-        else if(strcmp(flag, "-i") == 0 || strcmp(flag, "--interactive") == 0){
+#ifndef CONSOLEAPP_DISABLE_PROMPT
+		else if(strcmp(flag, "-i") == 0 || strcmp(flag, "--interactive") == 0){
             interactive(atoi(contents[0]));
         }
+#endif
     }
 
     return 0;
@@ -119,6 +123,7 @@ void print(int str_num, char **strs){
     printf("\n");
 }
 
+#ifndef CONSOLEAPP_DISABLE_PROMPT
 void interactive(int hist_entory_size){
     char     *line;
     int       mode = 1;
@@ -239,4 +244,4 @@ free_and_exit:
     freeRwhCtx(ctx1);
     freeRwhCtx(ctx2);
 }
-
+#endif

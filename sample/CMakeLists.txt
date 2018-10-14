@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.1)
+﻿cmake_minimum_required(VERSION 3.1)
 enable_language(C)
 set(CMAKE_C_STANDARD 11) # C11...
 set(CMAKE_C_STANDARD_REQUIRED ON) #...is required...
@@ -8,7 +8,6 @@ set(sample_src
     sample.c
 )
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_SOURCE_DIR}/cmake/modules)
-message(STATUS "mod: ${CMAKE_SOURCE_DIR}/cmake/modules")
 include(FindReadline)
 find_package(Readline)
 if(MSVC)

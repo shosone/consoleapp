@@ -41,10 +41,13 @@ debug: option_debug.o prompt_debug.o
 	$(CC) $(CFLAGS_DEBUG) -I$(INC_PATH) -o$@ -c $(SRC_PATH)/$*.c
 	mv $@ $(OBJ_PATH_DEBUG)
 
-%.o: %.h %.c
+%.o: %.h %.c confing.h
 	mkdir -p $(OBJ_PATH_RELEASE)
 	$(CC) $(CFLAGS_RELEASE) -I$(INC_PATH) -c $(SRC_PATH)/$*.c
 	mv $@ $(OBJ_PATH_RELEASE)
+
+confing.h:
+	touch src/config.h
 
 tag:
 	ctags -R --language-force=C

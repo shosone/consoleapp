@@ -1,4 +1,4 @@
-void interactiveHelp1(void){
+﻿void interactiveHelp1(void){
     printf("+------------------------------------------------------------------------+\n");
     printf("|help:           print this help                                         |\n");
     printf("|quit:           quit interactive mode                                   |\n");
