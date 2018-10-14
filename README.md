@@ -12,7 +12,7 @@ Hereafter, the function of 1 is called **consoleapp/option**, and the function o
 # consoleapp/option
 **consoleapp/option** makes it easy to classification and error check of options received at startup.
 
-## struct reference
+## Struct reference
 
 ```c:option.h
 /* プログラムで使用できるオプションの情報を保持する構造体 */
@@ -54,7 +54,7 @@ typedef struct _opt_group_db_t{
 }opt_group_db_t;
 ```
 
-## function reference
+## Function reference
 ```c:option.h
 extern opt_property_db_t* /* 生成されたopt_property_db_tのメモリ領域のポインタ */
 genOptPropDB(     
@@ -93,7 +93,7 @@ freeOptGroupDB( /* opt_group_db_tのメンバのメモリ領域を再帰的に�
         opt_group_db_t *opt_group_db); /* [in] 開放するopt_group_db_t */
 ```
 
-## sample code
+## Sample code
 This it a part of "sample/sample.c".
 ```c
 int main(int argc, char *argv[]){
@@ -196,13 +196,13 @@ int chkOptInteractive(char **contents, int dont_care){
     return SUCCESS;
 }
 ```
-## demo
+## Demo
 ![option_demo](doc/option_demo.gif)
 
 # consoleapp/prompt
 **consoleapp/prompt** makes it easy to implementation of interactive function.
 
-## struct reference
+## Struct reference
 The most important structure is rwhctx_t, and structures other than rwhctx_t are defined for rwhctx_t.
 
 ```c:prompt.h
@@ -240,7 +240,7 @@ typedef struct _rwhctx_t{
 }rwhctx_t;
 ```
 
-## function reference
+## Function reference
 The most important function is rwh(), and functions other than rwh() are defined for rwh().  
 Incidentary, rwh is short form of Readline With History. However, complementary function was added in the development process.
 
@@ -273,7 +273,7 @@ freeRwhCtx( /* free rwhctx_t pointer recursively. */
 ```
 
 
-## sample code
+## Sample code
 This is a part of "sample/sample.c". The flow of the Program is,
 
 1. make context of rwhctx\_t for mode1.
@@ -340,7 +340,7 @@ free_and_exit:
 }
 ```
 
-## demo
+## Demo
 ![option_demo](doc/prompt_demo.gif)
 
 ## installation
@@ -349,25 +349,12 @@ Please read Makefile. Introduction of autotools is under consideration.
 <!-- ![installation](doc/installation.gif) -->
 
 
-## license
-MIT License
+## Documentation
+### Todo
+I've written or not written in [doc/TODO.md](doc/TODO.md), bugs, idea, and anything else that I can not remember.
 
-Copyright (c) 2018 Sho Sone
+### Contoributer
+Contributor is managed with [doc/CONTRIBUTER.md](doc/CONTRIBUTER.md). Please describe it freely in this file, if you commit.
 
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
+### Copyright
+We are proceeding with development under the MIT license. When you want to use the deliverables of this project, you can use it without permission. For details, please see the [doc/COPYRIGHT](doc/COPYRIGHT).
