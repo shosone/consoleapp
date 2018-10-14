@@ -21,9 +21,8 @@ Introduction of autotools is under consideration.
 ### GnuMake
 
 ```bash
-mkdir -p build
-cd build
-make -C ..
+make
+make install
 ```
 
 `make install` is currently not supported.
