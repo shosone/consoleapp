@@ -43,3 +43,5 @@ install(EXPORT consoleapp-export                     # 6.a
     FILE consoleapp-config.cmake                     # 6.b ファイル名を指定する
     DESTINATION share/cmake/consoleapp/              # 6.c インストール先
     EXPORT_LINK_INTERFACE_LIBRARIES)          # 6.d 同時にリンクすべきライブラリをエクスポートする
+
+add_subdirectory(sample)
