@@ -5,6 +5,7 @@
 
 #define DEBUG 1
 #include "for_option.c"
+#include "for_prompt.c"
 
 void printUsage(void);
 void printVersion(void);
@@ -119,40 +120,121 @@ void print(int str_num, char **strs){
 }
 
 void interactive(int hist_entory_size){
-    rwhctx_t *ctx = genRwhCtx(30);
-    char *line;
+    char     *line;
+    int       mode = 1;
+
+    const char *commands1[] = {
+        "help",
+        "quit",
+        "ctx",
+        "modctx",
+        "!echo",
+        "!ls",
+        "!pwd",
+        "!date",
+        "!ls -a",
+        "!ls -l",
+        "!ls -lt",
+    };
+
+    const char *commands2[] = {
+        "help",
+        "ctx",
+        "head",
+        "tail",
+        "next block",
+        "prev block",
+        "completion",
+        "dive hist",
+        "float hist",
+        "done",
+    };
+
+    rwhctx_t *ctx1 = genRwhCtx("sample$ "       , hist_entory_size, commands1, sizeof(commands1)/sizeof(char *));
+    rwhctx_t *ctx2 = genRwhCtx("modctx@sample$ ", hist_entory_size, commands2, sizeof(commands1)/sizeof(char *));
 
     printf("input \"help\" to display help\n");
 
     while(1){
-        line = rwh(ctx, ">> ");
 
-        if(strcmp(line, "help") == 0){
-            printf("+------------------------------------------------------------------------+\n");
-            printf("|help:           print this help                                         |\n");
-            printf("|quit:           quit interactive mode                                   |\n");
-            printf("|![some string]: execute \"[some string]\" as a shell command.             |\n");
-            printf("|                                                                        |\n");
-            printf("|NOTE: these key bind is able to change by modifying rwh_ctx_t\'s fields. |\n");
-            printf("|short cuts:                                                             |\n");
-            printf("|    Ctl-a:  jump to head                                                |\n");
-            printf("|    Ctl-e:  jump to tail                                                |\n");
-            printf("|    Ctl-→ : jump to next separation                                     |\n");
-            printf("|    Ctl-← : jump to previous separation                                 |\n");
-            printf("|history operation:                                                      |\n");
-            printf("|    ↑ : go to the past                                                  |\n");
-            printf("|    ↓ : go to the future                                                |\n");
-            printf("|    tab: completion                                                     |\n");
-            printf("+------------------------------------------------------------------------+\n");
-        }
-        else if(strcmp(line, "quit") == 0){
-            exit(1);
-        }
-        else if(line[0] == '!'){
-            system(&line[1]);
+        switch(mode){
+            case 1:
+                line = rwh(ctx1);
+                if(strcmp(line, "help") == 0){
+                    interactiveHelp1();
+                }
+                else if(strcmp(line, "ctx") == 0){
+                    interactivePrintCtx(ctx1);
+                }
+                else if(line[0] == '!'){
+                    system(&line[1]);
+                }
+                else if(strcmp(line, "modctx") == 0){
+                    mode = 2;
+                }
+                else if(strcmp(line, "quit") == 0){
+                    goto free_and_exit;
+                }
+                else{
+                    printf("err\n");
+                }
+                break;
+
+            case 2:
+                line = rwh(ctx2);
+                if(strcmp(line, "help") == 0){
+                    interactiveHelp2();
+                }
+                else if(strcmp(line, "ctx") == 0){
+                    interactivePrintCtx(ctx2);
+                }
+                else if(strcmp(line, "head") == 0){
+                    printf("input new key bind\n");
+                    char *kb = readline("head << ");
+                    ctx2 -> sc_head = kb;
+                }
+                else if(strcmp(line, "tail") == 0){
+                    printf("input new key bind\n");
+                    char *kb = readline("tail << ");
+                    ctx2 -> sc_tail = kb;
+                }
+                else if(strcmp(line, "next block") == 0){
+                    printf("input new key bind\n");
+                    char *kb = readline("next block << ");
+                    ctx2 -> sc_next_block = kb;
+                }
+                else if(strcmp(line, "prev block") == 0){
+                    printf("input new key bind\n");
+                    char *kb = readline("prev block << ");
+                    ctx2 -> sc_prev_block = kb;
+                }
+                else if(strcmp(line, "completion") == 0){
+                    printf("input new key bind\n");
+                    char *kb = readline("completion << ");
+                    ctx2 -> sc_completion = kb;
+                }
+                else if(strcmp(line, "dive hist") == 0){
+                    printf("input new key bind\n");
+                    char *kb = readline("dive hist << ");
+                    ctx2 -> sc_dive_hist = kb;
+                }
+                else if(strcmp(line, "float hist") == 0){
+                    printf("input new key bind\n");
+                    char *kb = readline("float hist << ");
+                    ctx2 -> sc_float_hist = kb;
+                }
+                else if(strcmp(line, "done") == 0){
+                    mode = 1;
+                }
+                else{
+                    printf("err\n");
+                }
+                break;
         }
     }
 
-    freeRwhCtx(ctx);
+free_and_exit:
+    freeRwhCtx(ctx1);
+    freeRwhCtx(ctx2);
 }
 
