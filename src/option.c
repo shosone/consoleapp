@@ -27,6 +27,8 @@ alwaysReturnTrue(
         char **contents,
         int  content_num)
 {
+    (void)contents;
+    (void)content_num;
     return 0;
 }
 
