@@ -33,6 +33,8 @@ static const char right[]          = {0x1b, 0x5b, 0x43, 0x00};
 static const char left[]           = {0x1b, 0x5b, 0x44, 0x00};
 static const char delete[]         = {0x1b, 0x5b, 0x33, 0x7e, 0x1b, 0x00};
 
+/* ====================================== */
+
 static char
 getch(void)
 {
@@ -99,13 +101,13 @@ strninsert( /* NOTE: posの値がstrの範囲内にあるかの確認は呼び�
         char   ch)
 {
     if(*str == NULL){
-        *str = (char *)malloc(sizeof(char) * 1);
+        *str = (char *)malloc(sizeof(char) * 2);
         (*str)[0] = ch;
+        (*str)[1] = '\0';
         return;
     }
 
-    int   str_len = strlen(*str);
-    char *new     = (char *)malloc(sizeof(char)*(str_len+1));
+    char *new = (char *)malloc(sizeof(char)*(strlen(*str)+2));
 
     if(!new){
         free(*str);
@@ -119,15 +121,156 @@ strninsert( /* NOTE: posの値がstrの範囲内にあるかの確認は呼び�
     *str = new;
 }
 
-rwhctx_t*
-genRwhCtx(int history_size)
+/* ====================================== */
+
+completion_t*
+genCompletion(
+        const char **strings,
+              int    entory_num)
 {
-    rwhctx_t *ctx = NULL;
+    completion_t *ret = NULL;
+    if(!(ret = (completion_t*)malloc(sizeof(completion_t)))){
+        return NULL;
+    }
+
+    char **strings_copy = NULL;
+    if(!(strings_copy = (char **)calloc(entory_num, sizeof(char *)))){
+        free(ret);
+        return NULL;
+    }
+    memcpy(strings_copy, strings, sizeof(char *)*entory_num);
+
+    int compare(const void* _a, const void* _b){
+        char *a = *(char**)_a;
+        char *b = *(char**)_b;
+        for(int i=0; a[i] != '\0' && b[i] != '\0'; i++){
+            if     (a[i] > b[i]) return 1;
+            else if(a[i] < b[i]) return 0;
+        }
+        return 0;
+    }
+
+    qsort(strings_copy, entory_num, sizeof(char*), compare);
+
+    ret -> entory_num = entory_num;
+    ret -> entories   = strings_copy;
+
+    return ret;
+}
+
+/* lenear search */
+static int /* candidate[戻り値]の文字列は先頭にstrを含む文字列になる */
+search(
+        int            init_ei,
+        char          *str,
+        completion_t *candidate)
+{
+    char **entories   = candidate -> entories;
+    int    entory_num = candidate -> entory_num;
+
+    if(str == NULL)
+        str = "";
+
+    int si;
+    int ei = init_ei;
+    for(si=0; str[si] != '\0'; si++){
+        for(; ei<entory_num; ei++, si=0){
+            if(entories[ei][si] == str[si]) break;
+        }
+    }
+
+    return ei;
+}
+
+static void
+completion(
+        char          *str,
+        completion_t *candidate)
+{
+    int init_i = search(0, str, candidate);
+
+    if(init_i < candidate->entory_num){
+        printf("\n");
+        for(int i=init_i; i<candidate->entory_num; i=search(i+1, str, candidate)){
+            printf("%s  ", candidate->entories[i]);
+        }
+        printf("\n");
+    }
+}
+
+/* ===================================== */
+
+static void
+push2Ringbuf(
+        ringbuf_t   *rb,
+        char *str)
+{
+    /* buf is empty */
+    if(rb->buf[rb->head] == NULL){
+        rb -> buf[rb->head] = str;
+        rb -> entory_num++;
+    }
+    /* buf is full */
+    else if(rb->head == rb->tail+1 || rb->tail == rb->size-1){
+        free(rb -> buf[rb -> head]);
+        rb -> buf[rb -> head] = str;
+
+        if(rb->head == rb->size-1){
+            rb -> head = 0;
+            rb -> tail++;
+        }
+        else if(rb->tail == rb->size-1){
+            rb -> head = 1;
+            rb -> tail = 0;
+        }
+        else{
+            rb -> head++;
+            rb -> tail++;
+        }
+    }
+    /* buf is halfway */
+    else{
+        rb -> tail++;
+        rb -> buf[rb -> tail] = str;
+        rb -> entory_num++;
+    }
+}
+
+static char *
+readRingBuf(
+        ringbuf_t *rb,
+        int depth)
+{
+    int idx = rb -> tail - depth;
+    if(idx < 0){
+        idx += rb -> size;
+    }
+    return rb -> buf[idx];
+}
+
+/* ================================================== */
+
+rwhctx_t*
+genRwhCtx(
+        const char  *prompt,         /* [in] prompt */
+              int    history_size,   /* max size of the buffer of the history */
+        const char **candidates,     /* [in] search target at completion */ 
+              int    candidate_num)  /* number of candidates */
+{
+    rwhctx_t     *ctx       = NULL;
+    completion_t *cpl = NULL;
 
     if(!(ctx = (rwhctx_t*)malloc(sizeof(rwhctx_t)))){
         return NULL;
     }
 
+    if(!(cpl = genCompletion(candidates, candidate_num))){
+        free(ctx);
+        return NULL;
+    }
+    ctx -> candidate = cpl;
+
+    ctx -> prompt        = prompt;
     ctx -> history       = NULL;
     ctx -> sc_head       = NULL;
     ctx -> sc_tail       = NULL;
@@ -205,53 +348,6 @@ free_and_exit:
     return NULL;
 }
 
-static void
-push2Ringbuf(
-        ringbuf_t   *rb,
-        char *str)
-{
-    /* buf is empty */
-    if(rb->buf[rb->head] == NULL){
-        rb -> buf[rb->head] = str;
-        rb -> entory_num++;
-    }
-    /* buf is full */
-    else if(rb->head == rb->tail+1 || rb->tail == rb->size-1){
-        free(rb -> buf[rb -> head]);
-        rb -> buf[rb -> head] = str;
-
-        if(rb->head == rb->size-1){
-            rb -> head = 0;
-            rb -> tail++;
-        }
-        else if(rb->tail == rb->size-1){
-            rb -> head = 1;
-            rb -> tail = 0;
-        }
-        else{
-            rb -> head++;
-            rb -> tail++;
-        }
-    }
-    /* buf is halfway */
-    else{
-        rb -> tail++;
-        rb -> buf[rb -> tail] = str;
-        rb -> entory_num++;
-    }
-}
-
-static char *
-readRingBuf(
-        ringbuf_t *rb,
-        int depth)
-{
-    int idx = rb -> tail - depth;
-    if(idx < 0){
-        idx += rb -> size;
-    }
-    return rb -> buf[idx];
-}
 
 typedef enum{
     JS_NOT_SHORT_CUT = 0,
@@ -450,8 +546,7 @@ static void clearLine(
 
 char *
 rwh(
-        rwhctx_t    *ctx,
-        const char *prompt) /* in */
+        rwhctx_t    *ctx) 
 {
     char *line           = NULL;
     int   line_len       = 0;
@@ -460,6 +555,7 @@ rwh(
     int   cursor_pos     = 0;
     int   history_idx    = 0;
     char *evacated_line  = NULL;
+    const char *prompt   = ctx -> prompt;
 
     /* flags */
     bool before_is_dive = 0;
@@ -523,6 +619,7 @@ rwh(
                         goto free_and_break;
 
                     case JS_COMPLETION:
+                        completion(line, ctx->candidate);
                         goto free_and_break;
 
                     case JS_DIVE_HIST:

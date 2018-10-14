@@ -135,8 +135,8 @@ initOptGroupDB(
 {
     opt_grp_db -> grp_num      = 0;
     opt_grp_db -> grps         = NULL;
-    opt_grp_db -> optless_num = 0;
-    opt_grp_db -> optless     = NULL;
+    opt_grp_db -> optless_num  = 0;
+    opt_grp_db -> optless      = NULL;
 }
 
 static void
