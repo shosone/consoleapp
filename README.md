@@ -344,10 +344,8 @@ free_and_exit:
 ![option_demo](doc/prompt_demo.gif)
 
 ## Installation
-Please read Makefile. Introduction of autotools is under consideration.
 
-<!-- ![installation](doc/installation.gif) -->
-
+Watch [doc/INSTALL.md](doc/INSTALL.md)
 
 ## Documentation
 ### Todo
