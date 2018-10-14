@@ -123,6 +123,16 @@ strninsert( /* NOTE: posの値がstrの範囲内にあるかの確認は呼び�
 
 /* ====================================== */
 
+static int genCompletionCompare(const void* a_, const void* b_){
+        char *a = *(char**)a_;
+        char *b = *(char**)b_;
+        for(int i=0; a[i] != '\0' && b[i] != '\0'; i++){
+            if     (a[i] > b[i]) return 1;
+            else if(a[i] < b[i]) return 0;
+        }
+        return 0;
+    }
+
 completion_t*
 genCompletion(
         const char **strings,
@@ -140,17 +150,7 @@ genCompletion(
     }
     memcpy(strings_copy, strings, sizeof(char *)*entory_num);
 
-    int compare(const void* _a, const void* _b){
-        char *a = *(char**)_a;
-        char *b = *(char**)_b;
-        for(int i=0; a[i] != '\0' && b[i] != '\0'; i++){
-            if     (a[i] > b[i]) return 1;
-            else if(a[i] < b[i]) return 0;
-        }
-        return 0;
-    }
-
-    qsort(strings_copy, entory_num, sizeof(char*), compare);
+    qsort(strings_copy, entory_num, sizeof(char*), genCompletionCompare);
 
     ret -> entory_num = entory_num;
     ret -> entories   = strings_copy;
