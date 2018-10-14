@@ -285,10 +285,10 @@ judgeShortCut(
     bool left_possibility          = 1;
     bool delete_possibility        = 1;
 
-    int str_len = strlen(str);
+    size_t str_len = strlen(str);
 
-    for(int i=0; i<strlen(str); i++){
-        int sc_len;
+    for(size_t i=0; i<strlen(str); i++){
+        size_t sc_len;
         if(sc_head_possibility){
             sc_len = strlen(ctx->sc_head);
             sc_head_possibility = sc_len >= str_len && ctx->sc_head[i] == str[i];
@@ -373,10 +373,10 @@ judgeShortCut(
     return JS_NOT_SHORT_CUT;
 }
 
-static int
+static size_t
 auxNextPrevBlock(
-        int         incOrDec(int),
-        int         curent_cursor_pos,
+        size_t         incOrDec(size_t),
+        size_t         curent_cursor_pos,
         const char *str)
 {
     if(incOrDec(curent_cursor_pos) == 0){
@@ -394,54 +394,50 @@ auxNextPrevBlock(
     return auxNextPrevBlock(incOrDec, incOrDec(curent_cursor_pos), str);
 }
 
-static int
+static size_t nextBlockInc(size_t n){ return n + 1; }
+
+static size_t
 nextBlock(
-        int         curent_cursor_pos, 
+        size_t         curent_cursor_pos,
         const char *str)
 {
     if(str == NULL || curent_cursor_pos == strlen(str)){
         return curent_cursor_pos;
     }
 
-    int inc(int n){
-        return n + 1;
-    }
-
     if(str[curent_cursor_pos-1] == ' ' || str[curent_cursor_pos+1] == ' '){
         curent_cursor_pos++;
     }
 
-    return auxNextPrevBlock(inc, curent_cursor_pos, str);
+    return auxNextPrevBlock(nextBlockInc, curent_cursor_pos, str);
 }
 
-static int
+static size_t nextBlockDec(size_t n){ return n - 1; }
+
+static size_t
 prevBlock(
-        int curent_cursor_pos,
+        size_t curent_cursor_pos,
         const char *str)
 {
     if(curent_cursor_pos == 0){
         return 0;
     }
 
-    int dec(int n){
-        return n - 1;
-    }
-
     if(str[curent_cursor_pos-1] == ' ' || str[curent_cursor_pos+1] == ' '){
         curent_cursor_pos--;
     }
 
-    return auxNextPrevBlock(dec, curent_cursor_pos, str);
+    return auxNextPrevBlock(nextBlockDec, curent_cursor_pos, str);
 }
 
 static void clearLine(
         const char *prompt,
         const char *line)
 {
-    int line_len = line == NULL ? 0 : strlen(line);
+    size_t line_len = line == NULL ? 0 : strlen(line);
     printf("\r");
     /* +1は直前の操作がbackspaceだった場合に, 1文字分lineからは消えているがコンソール上では消えていないため */
-    for(int i=0; i<strlen(prompt)+line_len+1; i++){
+    for(size_t i=0; i<strlen(prompt)+line_len+1; i++){
         printf(" ");
     }
     printf("\r%s", prompt);
@@ -454,10 +450,10 @@ rwh(
         const char *prompt) /* in */
 {
     char *line           = NULL;
-    int   line_len       = 0;
+    size_t   line_len       = 0;
     char *tmp            = NULL;
     int   tmp_len        = 0;
-    int   cursor_pos     = 0;
+    size_t   cursor_pos     = 0;
     int   history_idx    = 0;
     char *evacated_line  = NULL;
 
@@ -589,7 +585,7 @@ rwh(
         }
         clearLine(prompt, line);
         printf("%s", line == NULL ? "" : line);
-        for(int i=0; i<line_len-cursor_pos; i++){
+        for(size_t i=0; i<line_len-cursor_pos; i++){
             printf("\b");
         }
         fflush(stdout);
