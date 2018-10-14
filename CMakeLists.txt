@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.1)
+﻿cmake_minimum_required(VERSION 3.1)
 enable_language(C)
 set(CMAKE_C_STANDARD 11) # C11...
 set(CMAKE_C_STANDARD_REQUIRED ON) #...is required...
@@ -9,7 +9,6 @@ project(consoleapp)
 
 set(consoleapp_src
     src/option.c
-    src/prompt.c
 )
 if(MSVC)
   # Force to always compile with W4
@@ -18,10 +17,21 @@ if(MSVC)
   else()
     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /W4")
   endif()
+  set(CONSOLEAPP_DISABLE_PROMPT 1)
 elseif(CMAKE_COMPILER_IS_GNUCC OR CMAKE_COMPILER_IS_GNUC)
   # Update if necessary
   set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Wextra -Wno-long-long -pedantic")
+  include(CheckIncludeFile)
+  CHECK_INCLUDE_FILE(termios.h HAVE_TERMIOS_H)
+  if(HAVE_TERMIOS_H)
+    list(APPEND consoleapp_src src/prompt.c)
+    set(CONSOLEAPP_DISABLE_PROMPT 0)
+  else()
+  set(CONSOLEAPP_DISABLE_PROMPT 1)
+  endif()
 endif()
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/src/config.h.in ${CMAKE_CURRENT_SOURCE_DIR}/src/config.h)
+
 # 2. ライブラリのビルド指定
 add_library(consoleapp STATIC ${consoleapp_src})
 # 3. インストールするヘッダファイルを指定しておく。

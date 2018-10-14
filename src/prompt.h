@@ -1,4 +1,4 @@
-/* MIT License
+﻿/* MIT License
  * 
  * Copyright (c) 2018 Sho Sone
  * 
@@ -22,7 +22,8 @@
 
 #ifndef PROMPT_H
 #define PROMPT_H
-
+#include "config.h"
+#ifndef CONSOLEAPP_DISABLE_PROMPT
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -93,5 +94,5 @@ rwh( /* acquire the line entered in the console and keep history. */
 extern void
 freeRwhCtx( /* free rwhctx_t pointer recursively. */
         rwhctx_t *ctx); /* [mod] to be freed */
-
 #endif 
+#endif
