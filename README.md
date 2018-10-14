@@ -1,13 +1,19 @@
 # libconsoleapp.a
-libconsoleapp.a is a C library for make it easy to develop a console applications.
+The libconsoleapp.a is a C library.
+This library aim to provide general-purpose and flexible functions of the console application and to prepare for its development.  
+Currently, this library can be useful for implementing the following two functions in the console app.  
 
-## consoleapp/option
-Functions that check error of option of console application and grouping contents attached to option are summarized.
+1. Classification and error check of options received at startup.
+2. Implementation of interactive function.
 
-### dependancy
-T.B.D.
+Hereafter, the function of 1 is called **consoleapp/option**, and the function of 2 is called **consoleapp/prompt**.  
+**consoleapp/option** is implemented in option.c and option.h. **consoleapp/prompt** is implemented in prompt.c and prompt.h.
 
-### struct reference
+# consoleapp/option
+**consoleapp/option** makes it easy to classification and error check of options received at startup.
+
+## struct reference
+
 ```c:option.h
 /* プログラムで使用できるオプションの情報を保持する構造体 */
 typedef struct _opt_property_t{
@@ -48,7 +54,7 @@ typedef struct _opt_group_db_t{
 }opt_group_db_t;
 ```
 
-### function reference
+## function reference
 ```c:option.h
 extern opt_property_db_t* /* 生成されたopt_property_db_tのメモリ領域のポインタ */
 genOptPropDB(     
@@ -87,7 +93,7 @@ freeOptGroupDB( /* opt_group_db_tのメンバのメモリ領域を再帰的に�
         opt_group_db_t *opt_group_db); /* [in] 開放するopt_group_db_t */
 ```
 
-### sample code
+## sample code
 This it a part of "sample/sample.c".
 ```c
 int main(int argc, char *argv[]){
@@ -190,18 +196,17 @@ int chkOptInteractive(char **contents, int dont_care){
     return SUCCESS;
 }
 ```
-### demo
+## demo
 ![option_demo](doc/option_demo.gif)
 
-## consoleapp/prompt
-Functions that facilitate the implementation of interactive functions in the console application are summarized.
+# consoleapp/prompt
+**consoleapp/prompt** makes it easy to implementation of interactive function.
 
-### dependancy
-T.B.D.
+## struct reference
+The most important structure is rwhctx_t, and structures other than rwhctx_t are defined for rwhctx_t.
 
-### struct reference
 ```c:prompt.h
-/* structure for ring buffer. this is used for rwh_ctx_t's member. */
+/* structure for ring buffer. this is used for rwh_ctx_t's member. there is no need for user to know. */
 typedef struct _ringbuf_t{
     char **buf;         /* buffer for entories */
     int    size;        /* max size of buffer */
@@ -211,92 +216,140 @@ typedef struct _ringbuf_t{
 }ringbuf_t;
 ```
 
+```c:prompt.h
+/* structure for holding candidates at completion. */
+typedef struct _completion_t{
+    char** entories;   /* entories are sorted in ascending order */
+    int    entory_num; /* number of entories */
+}completion_t;
+```
+
 ```c:primpt.h
+/* structure for preserve context for rwh(). */
 typedef struct _rwhctx_t{
-    ringbuf_t *history;       /* history of lines enterd in the console */
-    char      *sc_head;       /* shortcut for go to the head of the line */
-    char      *sc_tail;       /* shortcut for go to the tail of the line */
-    char      *sc_next_block; /* shortcut for go to the next edge of the word of the line */
-    char      *sc_prev_block; /* shortcut for go to the previous edge of the word of the line */
-    char      *sc_completion; /* shortcut for completion */
-    char      *sc_dive_hist;  /* shortcut for fetch older history */
-    char      *sc_float_hist; /* shortcut for fetch newer history */
+    const char   *prompt;        /* prompt */
+    ringbuf_t    *history;       /* history of lines enterd in the console */
+    completion_t *candidate;     /* search target at completion */
+    char         *sc_head;       /* shortcut for go to the head of the line */
+    char         *sc_tail;       /* shortcut for go to the tail of the line */
+    char         *sc_next_block; /* shortcut for go to the next edge of the word of the line */
+    char         *sc_prev_block; /* shortcut for go to the previous edge of the word of the line */
+    char         *sc_completion; /* shortcut for completion */
+    char         *sc_dive_hist;  /* shortcut for fetch older history */
+    char         *sc_float_hist; /* shortcut for fetch newer history */
 }rwhctx_t;
 ```
 
-### function reference
+## function reference
+The most important function is rwh(), and functions other than rwh() are defined for rwh().  
+Incidentary, rwh is short form of Readline With History. However, complementary function was added in the development process.
+
 ```c:prompt.h
-extern rwhctx_t* /* a generated rwh_ctx_t pointer which shortcut setting fields are set to default. if failed, it will be NULL. */
-genRwhCtx( /* generate a rwh_ctx_t pointer. */
-        int history_size); /* max size of the buffer of the history */
+extern completion_t* /* NULL if fails */
+genCompletion( /* generate a completion_t */
+        const char **strings,      /* [in] search target at completion */
+        int          string_num);  /* number of candidate */
 ```
 
 ```c:prompt.h
-extern void
-freeRwhCtx( /* free rwh_ctx_t pointer */
-        rwhctx_t *ctx);  
+extern rwhctx_t* /* a generated rwh_ctx_t pointer which shortcut setting fields are set to default. if failed, it will be NULL. */
+genRwhCtx( /* generate a rwh_ctx_t pointer. */
+        const char  *prompt,         /* [in] prompt */
+              int    history_size,   /* max size of the buffer of the history */
+        const char **candidates,     /* [in] search target at completion */ 
+              int    candidate_num); /* number of candidates */
 ```
 
 ```c:prompt.h
 extern char * /* enterd line */
 rwh( /* acquire the line entered in the console and keep history. */
-        rwhctx_t   *ctx,      /* [out] an context generated by genRwhCtx(). ctx keeps shortcuts and history operation keys settings and history. after rwh(), the entories of history of ctx is updated. */
-        const char *prompt);  /* [in]  string to be output to the console when urging the usr input */
+        rwhctx_t   *ctx);      /* [mod] an context generated by genRwhCtx(). ctx keeps shortcuts and history operation keys settings and history. after rwh(), the entories of history of ctx is updated. */
 ```
 
-### sample code
-This it a part of "sample/sample.c".
+```c:prompt.h
+extern void
+freeRwhCtx( /* free rwhctx_t pointer recursively. */
+        rwhctx_t *ctx); /* [mod] to be freed */
+```
+
+
+## sample code
+This is a part of "sample/sample.c". The flow of the Program is,
+
+1. make context of rwhctx\_t for mode1.
+2. make context of rwhctx\_t for mode2.
+3. get line from prompt by rwh() with current mode context.
+4. Perform processing corresponding to the content of acquired line.
+
 ```c
 void interactive(int hist_entory_size){
-    rwhctx_t *ctx = genRwhCtx(30);
-    char *line;
+    char     *line;
+    int       mode = 1;
+
+    const char *commands1[] = {"help", "quit", "ctx", "modctx", "!echo", "!ls", "!pwd", "!date", "!ls -a", "!ls -l", "!ls -lt"};
+    const char *commands2[] = {"help", "ctx", "head", "tail", "next block", "prev block", "completion", "dive hist", "float hist", "done"};
+
+    /* here!!! 1 */
+    rwhctx_t *ctx1 = genRwhCtx("sample$ "       , hist_entory_size, commands1, sizeof(commands1)/sizeof(char *));
+    /* here!!! 2 */
+    rwhctx_t *ctx2 = genRwhCtx("modctx@sample$ ", hist_entory_size, commands2, sizeof(commands2)/sizeof(char *));
 
     printf("input \"help\" to display help\n");
 
     while(1){
-        line = rwh(ctx, ">> ");
+        switch(mode){
+            case 1:
+                /* here!!! 3 */
+                line = rwh(ctx1);
 
-        if(strcmp(line, "help") == 0){
-            printf("+----------------------------------------------------------------------+\n");
-            printf("|help:           print this help                                       |\n");
-            printf("|quit:           quit interactive mode                                 |\n");
-            printf("|![some string]: execute \"[some string]\" as a shell command.           |\n");
-            printf("|                                                                      |\n");
-            printf("|NOTE: these key bind is able to change by modifying rwh_ctx_t\'s fields. |\n");
-            printf("|short cuts:                                                           |\n");
-            printf("|    Ctl-a:  jump to head                                              |\n");
-            printf("|    Ctl-e:  jump to tail                                              |\n");
-            printf("|    Ctl-→ : jump to next separation                                   |\n");
-            printf("|    Ctl-← : jump to previous separation                               |\n");
-            printf("|history operation:                                                    |\n");
-            printf("|    ↑ : go to the past                                                |\n");
-            printf("|    ↓ : go to the future                                              |\n");
-            printf("|    tab: completion                                                   |\n");
-            printf("+----------------------------------------------------------------------+\n");
-        }
-        else if(strcmp(line, "quit") == 0){
-            exit(1);
-        }
-        else if(line[0] == '!'){
-            system(&line[1]);
+                /* here!!! 4 */
+                if(strcmp(line, "help") == 0){
+                    interactiveHelp1();
+                }
+                else if(strcmp(line, "ctx") == 0){
+                    interactivePrintCtx(ctx1);
+                }
+                ** Abb **
+                else{
+                    printf("err\n");
+                }
+                break;
+
+            case 2:
+                /* here!!! 3 */
+                line = rwh(ctx2);
+
+                /* here!!! 4 */
+                if(strcmp(line, "help") == 0){
+                    interactiveHelp2();
+                }
+                else if(strcmp(line, "ctx") == 0){
+                    interactivePrintCtx(ctx2);
+                }
+                ** Abb **
+                else{
+                    printf("err\n");
+                }
+                break;
         }
     }
 
-    freeRwhCtx(ctx);
+free_and_exit:
+    freeRwhCtx(ctx1);
+    freeRwhCtx(ctx2);
 }
 ```
 
-### demo
+## demo
 ![option_demo](doc/prompt_demo.gif)
 
 ## installation
 Please read Makefile. Introduction of autotools is under consideration.
 
-![installation](doc/installation.gif)
+<!-- ![installation](doc/installation.gif) -->
 
 
 ## license
-```
 MIT License
 
 Copyright (c) 2018 Sho Sone
@@ -318,4 +371,3 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
-```

@@ -150,16 +150,17 @@ void interactive(int hist_entory_size){
         "done",
     };
 
+    /* here!! */
     rwhctx_t *ctx1 = genRwhCtx("sample$ "       , hist_entory_size, commands1, sizeof(commands1)/sizeof(char *));
-    rwhctx_t *ctx2 = genRwhCtx("modctx@sample$ ", hist_entory_size, commands2, sizeof(commands1)/sizeof(char *));
+    rwhctx_t *ctx2 = genRwhCtx("modctx@sample$ ", hist_entory_size, commands2, sizeof(commands2)/sizeof(char *));
 
     printf("input \"help\" to display help\n");
 
     while(1){
-
         switch(mode){
             case 1:
                 line = rwh(ctx1);
+
                 if(strcmp(line, "help") == 0){
                     interactiveHelp1();
                 }
@@ -182,6 +183,7 @@ void interactive(int hist_entory_size){
 
             case 2:
                 line = rwh(ctx2);
+
                 if(strcmp(line, "help") == 0){
                     interactiveHelp2();
                 }
