@@ -85,13 +85,13 @@ regOptProp(
         return OPTION_MIN_BIGGER_THAN_MAX;
     }
 
-	const size_t short_form_len = strlen(short_form) + 1;
+	const size_t short_form_len = strlen(short_form);
     if(NULL == (opt_prop->short_form = (char *)malloc(short_form_len))){
         return OPTION_OUT_OF_MEMORY;
     }
     memcpy(opt_prop->short_form, short_form, short_form_len);
 
-	const size_t long_form_len = strlen(long_form)+ 1;
+	const size_t long_form_len = strlen(long_form);
     if(long_form && NULL == (opt_prop->long_form = (char *)malloc(long_form_len))){
         free(opt_prop->short_form);
         opt_prop->short_form = NULL;
@@ -257,9 +257,12 @@ add2optGrpDB_contents(
     const int OUT_OF_MEMORY = 1;
 
     opt_grp_db -> optless_num += 1;
-    if(
-        (0 < opt_grp_db->optless_num && (size_t)opt_grp_db->optless_num < (SIZE_MAX / sizeof(char *)))
-        || NULL == (opt_grp_db -> optless = (char **)realloc(opt_grp_db->optless, opt_grp_db->optless_num * sizeof(char *)))){
+    /* if(
+     *     (0 < opt_grp_db->optless_num && (size_t)opt_grp_db->optless_num < (SIZE_MAX / sizeof(char *)))
+     *     || NULL == (opt_grp_db -> optless = (char **)realloc(opt_grp_db->optless, opt_grp_db->optless_num * sizeof(char *)))){
+     *     return OUT_OF_MEMORY;
+     * } */
+    if(!(opt_grp_db -> optless = (char **)reallocarray(opt_grp_db->optless, opt_grp_db->optless_num, sizeof(char *)))){
         return OUT_OF_MEMORY;
     }
     opt_grp_db -> optless[opt_grp_db->optless_num-1] = str;
