@@ -20,7 +20,6 @@
 ## Memo
 - autotoolsの導入
 - -hvi というようなオプションの指定ができるようにする
-- option.cの中身全体的にリファクタリング
 - judgeDestination()のコンテンツの数を数える処理はcheckContentsNum()にて行うので不要
 - prompt作成したらREADME.mdの更新
 - ソースのコメントを英語にする
@@ -30,3 +29,4 @@
 - datastructure.h追加
 - winでwarningを消すためにstrtokをstrtok_sに変えるかstrcharで自力でparseする
 - option_errcode_tのエラーが発生した場合はその時点でメッセージを出力して終了する.
+- ./sample --help=aでエラー
