@@ -11,11 +11,12 @@
 ## Coding rule
 - Variable names are snake style.
 - Function names are camel style.
-- Aappend \_t to new name of typedef struct or enum.
+- Add suffix \_t to new type name of struct and enum.
+- Add suffix \_p to variable of out pointer and the case you want to make that attention.
 - Use type bool of stdbool.h for those that take only binary values such as flag.
 
 ## Other rule
-- Set file encoding to UTF-8.
+- Set source file encoding to UTF-8.
 
 ## Memo
 - autotoolsの導入
@@ -27,6 +28,9 @@
 - getchは自作しなくてもcurses.hにwgetchが定義されていたのでこっちが使えるかも
 - string\_plus.h追加
 - datastructure.h追加
-- winでwarningを消すためにstrtokをstrtok_sに変えるかstrcharで自力でparseする
-- option_errcode_tのエラーが発生した場合はその時点でメッセージを出力して終了する.
+- winでwarningを消すためにstrtokをstrtok\_sに変えるかstrcharで自力でparseする
+- option\_errcode\_tのエラーが発生した場合はその時点でメッセージを出力して終了する.
 - ./sample --help=aでエラー
+- ヘッダファイルのincludeするファイルはexportしている関数や構造体に必要なファイルのみにしてそれ以外は.cに移動
+- consoleapp.hを消す. ビルドで生成されるライブラリもlibconsoleapp.aではなくをlibprompt.aとliboption.aの２つに分ける
+- GnuMakeのmake install, make uninstall対応
