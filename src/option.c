@@ -191,30 +191,45 @@ decodeOptions(
 
         do{
             (*new_argc_p)++;
-			const int new_argc = *new_argc_p;
-            if(
-                (0 < new_argc && (size_t)new_argc < (SIZE_MAX / sizeof(char *)))
-                || NULL == ((*new_argv_p) = (char **)realloc(*new_argv_p, new_argc * sizeof(char *)))
-            ){
+			/* const int new_argc = *new_argc_p;
+             * if(
+             *     (0 < new_argc && (size_t)new_argc < (SIZE_MAX / sizeof(char *)))
+             *     || NULL == ((*new_argv_p) = (char **)realloc(*new_argv_p, new_argc * sizeof(char *)))
+             * ){  */
+            if(!((*new_argv_p) = (char **)reallocarray(*new_argv_p, (*new_argc_p), sizeof(char *)))){
                 ret = OUT_OF_MEMORY;
                 goto free_and_exit;
             }
-			char** const new_argv = *new_argv_p;
-			const size_t copy_src_len = strlen(copy_src);
-			const size_t copy_src_len_with_null_char = copy_src_len + 1;
-            if(NULL == (new_argv[new_argc -1] = (char *)malloc(copy_src_len_with_null_char))){
+			/* char** const new_argv = *new_argv_p;
+			 * const size_t copy_src_len = strlen(copy_src);
+			 * const size_t copy_src_len_with_null_char = copy_src_len + 1;
+             * if(NULL == (new_argv[new_argc -1] = (char *)malloc(copy_src_len_with_null_char))){
+             *     ret = OUT_OF_MEMORY;
+             *     goto free_and_exit;
+             * } */
+            if(!((*new_argv_p)[*new_argc_p-1] = (char *)malloc(sizeof(char)*(strlen(copy_src)+1)))){
                 ret = OUT_OF_MEMORY;
                 goto free_and_exit;
             }
+            /* if(delim != '\0'){
+			 *     new_argv[new_argc -1][0] = '\n'; // あまり良いやり方ではないかもしれないが、この情報はjudgeDestinationで必要になる
+             *     memcpy(&(new_argv[new_argc -1][1]), copy_src, copy_src_len_with_null_char);
+             * } */
             if(delim != '\0'){
-				new_argv[new_argc -1][0] = '\n'; // あまり良いやり方ではないかもしれないが、この情報はjudgeDestinationで必要になる
-                memcpy(&(new_argv[new_argc -1][1]), copy_src, copy_src_len_with_null_char);
+                (*new_argv_p)[*new_argc_p-1][0] = '\n'; // あまり良いやり方ではないかもしれないが、この情報はjudgeDestinationで必要になる
+                strcpy(&((*new_argv_p)[*new_argc_p-1][1]), copy_src);
             }
+            /* else{
+             *     memcpy(new_argv[new_argc -1], copy_src, copy_src_len_with_null_char);
+             * } */
             else{
-                memcpy(new_argv[new_argc -1], copy_src, copy_src_len_with_null_char);
+                strcpy((*new_argv_p)[*new_argc_p-1], copy_src);
             }
-            if(&copy_src[copy_src_len] != last_null_ptr){
-                copy_src[copy_src_len] = delim; /* 分割した文字列をもとに戻す */
+            /* if(&copy_src[copy_src_len] != last_null_ptr){
+             *     copy_src[copy_src_len] = delim; [> 分割した文字列をもとに戻す <]
+             * } */
+            if(&copy_src[strlen(copy_src)] != last_null_ptr){
+                copy_src[strlen(copy_src)] = delim; /* 分割した文字列をもとに戻す */
             }
         }while(a_part_of_condition && 
                 ((NULL != (copy_src = strtok(NULL, ",")) && (delim = ',')) ||
@@ -260,9 +275,12 @@ add2optGrpDB_OptGrps_Option(
     const int OUT_OF_MEMORY = 1;
 
     opt_grp_db -> grp_num += 1;
-    if(
-        (0 < opt_grp_db->grp_num && (size_t)opt_grp_db->grp_num < (SIZE_MAX / sizeof(opt_group_t)))
-        || NULL == (opt_grp_db -> grps = (opt_group_t*)realloc(opt_grp_db->grps, opt_grp_db->grp_num * sizeof(opt_group_t)))){
+    /* if(
+     *     (0 < opt_grp_db->grp_num && (size_t)opt_grp_db->grp_num < (SIZE_MAX / sizeof(opt_group_t)))
+     *     || NULL == (opt_grp_db -> grps = (opt_group_t*)realloc(opt_grp_db->grps, opt_grp_db->grp_num * sizeof(opt_group_t)))){
+     *     return OUT_OF_MEMORY;
+     * } */
+    if(!(opt_grp_db -> grps = (opt_group_t*)reallocarray(opt_grp_db->grps, opt_grp_db->grp_num, sizeof(opt_group_t)))){
         return OUT_OF_MEMORY;
     }
     initOptGroup(&(opt_grp_db -> grps[opt_grp_db->grp_num-1]));
@@ -280,10 +298,13 @@ add2optGrpDB_OptGrps_Contents(
 
     opt_group_t *current_grp  = &(opt_grp_db -> grps[opt_grp_db->grp_num - 1]);
     current_grp -> content_num++;
-    if(
-        (0 < current_grp->content_num && (size_t)current_grp->content_num < (SIZE_MAX / sizeof(char *)))
-        || NULL == (current_grp->contents = (char **)realloc(current_grp->contents, current_grp->content_num * sizeof(char *)))
-    ){
+    /* if(
+     *     (0 < current_grp->content_num && (size_t)current_grp->content_num < (SIZE_MAX / sizeof(char *)))
+     *     || NULL == (current_grp->contents = (char **)realloc(current_grp->contents, current_grp->content_num * sizeof(char *)))
+     * ){  
+     *     return OUT_OF_MEMORY;
+     * } */
+    if(!(current_grp->contents = (char **)reallocarray(current_grp->contents, current_grp->content_num, sizeof(char *)))){
         return OUT_OF_MEMORY;
     }
     current_grp->contents[current_grp->content_num-1] = str;
@@ -416,7 +437,7 @@ groupingOpt(
         char            **argv,
         opt_group_db_t   **opt_grp_db) 
 {
-    if(!opt_prop_db){
+    if(NULL == opt_prop_db){
         return OPTION_OPT_PROP_DB_IS_NULL;
     }
 
