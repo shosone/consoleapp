@@ -27,6 +27,8 @@
 #define _GNU_SOURCE
 #endif
 
+#include <stdbool.h>
+
 /* プログラムで使用できるオプションの情報を保持する構造体 */
 typedef struct _opt_property_t{
     char *short_form;                                           /* オプションの短縮形式. 例えば"-v" */
@@ -34,7 +36,7 @@ typedef struct _opt_property_t{
     int  (*contents_checker)(char **contents, int content_num); /* オプションに付属するcontentsの正しさを調べるコールバック関数 */
     int  content_num_min;                                       /* オプションに付属するcontentsの最小数 */
     int  content_num_max;                                       /* オプションに付属するcontentsの最大数 */
-    int  appeared_yet;                                          /* 同じオプションがすでに指定されたかチェックするためのメモとして用いる */
+    bool  appeared_yet;                                          /* 同じオプションがすでに指定されたかチェックするためのメモとして用いる */
 }opt_property_t;
 
 /* opt_property_tのエントリを保持するための構造体 */
