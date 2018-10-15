@@ -22,11 +22,78 @@
 
 #include "option.h"
 #include <stdint.h>
+#include <string.h>
+#include <stdlib.h>
+#include <ctype.h>
+#include <limits.h>
+#include <stdbool.h>
+#include <stdio.h>
+
+#define LIBCONSOLE_APP_VERSION "0.0"
 
 #ifndef isNull
 #define isNull(p)    ((p) == NULL)
+#endif
+
+#ifndef isNotNull
 #define isNotNull(p) ((p) != NULL)
 #endif
+
+#define OPTION_SUCCESS  0
+#define OPTION_FAILURE -1
+
+/* use printUsrErrMsg(errcode, option_or_content_name) */
+typedef enum{
+    OPTION_DUPLICATE_SAME_OPT = 1, 
+    OPTION_TOO_MANY_CONTENTS, 
+    OPTION_TOO_LITTLE_CONTENTS, 
+}option_usr_errcode_t;
+
+/* use printProgramerErrMsg(errcode) */
+typedef enum{
+    OPTION_OPT_NAME_IS_NULL = 1, 
+    OPTION_MIN_BIGGER_THAN_MAX, 
+    OPTION_OPT_PROP_DB_IS_NULL, 
+}option_programer_errcode_t;
+
+/* use printSubroutineErrMsg(errcode) */
+typedef enum{
+    OPTION_OUT_OF_MEMORY = 1, 
+    OPTION_UNEXPECTED_CONSTANT_VALUE_IN_SWITCH,
+}option_subroutine_errcode_t;
+
+static const char *option_usr_errmsg[] = {
+    "%sduplicate same option %s(%s).",
+    "%sthe number of contents of option %s(%s) is too many.",
+    "%sthe number of contents of option %s(%s) is too little.",
+};
+
+static const char *option_programer_errmsg[] = {
+    "%sopt_property_t\'s field short_form cannot be NULL. please check 2nd argument of regOptProp().",
+    "%sopt_property_t\'s filed content_num_min bigger than content_num_max. please check 4th and 5th argument of regOptProp().",
+    "%sopt_property_t pointer is NULL.",
+};
+
+static const char *option_developer_errmsg[] = {
+    "%sout of memory occurred.",
+    "%sunexpected constant value in switch statement.",
+};
+
+#define printUsrErrMsg(errcode, short_form, long_form)\
+    fprintf(stderr, option_usr_errmsg[errcode], "option error: ", short_form, isNull(long_form) ? " \b\b" : long_form);\
+    fprintf(stderr, "\n")
+
+#define printProgramerErrMsg(errcode)\
+    fprintf(stderr, option_programer_errmsg[errcode], "usage error (%s@libconsoleapp.a): ", __func__);\
+    fprintf(stderr, "\n")
+
+#define printDeveloperErrMsg(errcode)\
+    fprintf(stderr, option_developer_errmsg[errcode], "there may be a bug in libconsoleapp.a (;_;): ");\
+    fprintf(stderr, " version: %s\n", LIBCONSOLE_APP_VERSION);\
+    fprintf(stderr, " file: %s\n", __FILE__);\
+    fprintf(stderr, " function: %s\n", __func__);\
+    fprintf(stderr, " line no: %d\n", __LINE__);\
+    fprintf(stderr, " please give us a bug info. (https://github.com/shosone/consoleapp)")
 
 static int 
 alwaysReturnTrue(
@@ -159,7 +226,7 @@ initOptGroup(
     grp -> err_code    = 0;
 }
 
-static int /* 0:success, 1: out of memory */
+static int 
 decodeOptions(
         opt_property_db_t *db,
         int               org_argc,
@@ -167,10 +234,6 @@ decodeOptions(
         int              *new_argc_p,
         char           ***new_argv_p)
 {
-    const int SUCCESS            = 0;
-    const int OUT_OF_MEMORY      = 1;
-
-    int ret       = SUCCESS;
     *new_argc_p   = 0;
     (*new_argv_p) = NULL;
 
@@ -198,12 +261,12 @@ decodeOptions(
             (*new_argc_p)++;
             if(isNull((*new_argv_p) = (char **)reallocarray(*new_argv_p, (*new_argc_p), sizeof(char *))))
             {
-                ret = OUT_OF_MEMORY;
+                printDeveloperErrMsg(OPTION_OUT_OF_MEMORY);
                 goto free_and_exit;
             }
             const size_t copy_src_len_plus1 = strlen(copy_src) + 1;
             if(isNull((*new_argv_p)[*new_argc_p-1] = (char *)malloc(sizeof(char)*(copy_src_len_plus1)))){
-                ret = OUT_OF_MEMORY;
+                printDeveloperErrMsg(OPTION_OUT_OF_MEMORY);
                 goto free_and_exit;
             }
             if(delim != '\0'){
@@ -221,7 +284,7 @@ decodeOptions(
                  ((delim = '\0') && (a_part_of_condition = 0))));
     }
 
-    return SUCCESS;
+    return OPTION_SUCCESS;
 
 free_and_exit:
     for(int i=0; i<*new_argc_p; i++){
@@ -230,57 +293,124 @@ free_and_exit:
     }
     free(*new_argv_p);
     *new_argv_p = NULL;
-    return ret;
+    return OPTION_FAILURE;
+}
+
+typedef enum{
+    JD_OPT_GRP_DBs_OPTLESS,
+    JD_OPT_GRPs_CONTENTS,
+    JD_OPT_GRPs_OPTION,
+}judgeDestination_errcode_t;
+
+static int
+judgeDestination(
+        opt_property_db_t *opt_prop_db,
+        char             **str)
+{
+    /* flags */
+    static bool opt_grp_dbs_contents_is_empty   = true;
+    static bool opt_grp_dbs_contents_locked     = false;
+
+    /* memos */
+    static opt_property_t *current_options_property;
+    static int   current_options_contents_num     = 0;
+    static int   current_options_contents_num_max = 0;
+    static int   current_options_contents_num_min = 0;
+
+    for(int i=0; i<opt_prop_db->prop_num; i++){
+        if(strcmp(opt_prop_db->props[i].short_form, *str) == 0 || strcmp(opt_prop_db->props[i].long_form, *str) == 0){
+            current_options_property = &(opt_prop_db -> props[i]);
+            if(opt_grp_dbs_contents_is_empty == false){
+                opt_grp_dbs_contents_locked = true;
+            }
+            if(current_options_property -> appeared_yet){
+                printUsrErrMsg(OPTION_DUPLICATE_SAME_OPT, current_options_property -> short_form, current_options_property -> long_form);
+                return OPTION_FAILURE;
+            }
+            if(current_options_contents_num < current_options_contents_num_min){
+                printUsrErrMsg(OPTION_TOO_LITTLE_CONTENTS, current_options_property -> short_form, current_options_property -> long_form);
+                return OPTION_FAILURE;
+            }
+            opt_prop_db->props[i].appeared_yet = 1;
+            current_options_contents_num       = 0;
+            current_options_contents_num_max   = current_options_property -> content_num_max;
+            current_options_contents_num_min   = current_options_property -> content_num_min;
+            return JD_OPT_GRPs_OPTION;
+        }
+    }
+
+    /* 文字列の先頭の改行コードはdecodeOptionsにてこの関数のために付属された情報で本来の文字列には先頭の改行コードは存在しない */
+    if(*str[0] == '\n'){
+        if(current_options_contents_num >= current_options_contents_num_max){
+            printUsrErrMsg(OPTION_TOO_MANY_CONTENTS, current_options_property -> short_form, current_options_property -> long_form);
+            return OPTION_FAILURE;
+        }
+        else{
+            /* 先頭の改行コードを削除 */
+            *str = &(*str[1]);
+            current_options_contents_num++;
+            return JD_OPT_GRPs_CONTENTS;
+        }
+    }
+
+    if(current_options_contents_num < current_options_contents_num_max){
+        current_options_contents_num++;
+        return JD_OPT_GRPs_CONTENTS;
+    }
+
+    if(opt_grp_dbs_contents_locked == false){
+        opt_grp_dbs_contents_is_empty = 0;
+        return JD_OPT_GRP_DBs_OPTLESS;
+    }
+
+    printUsrErrMsg(OPTION_TOO_MANY_CONTENTS, current_options_property -> short_form, current_options_property -> long_form);
+    return OPTION_TOO_MANY_CONTENTS;
 }
 
 static int
-add2optGrpDB_contents(
+updateOptGrpDB(
+        judgeDestination_errcode_t direction,
         opt_group_db_t *opt_grp_db,
-        char *str)
+        char           *str)
 {
-    const int SUCCESS       = 0;
-    const int OUT_OF_MEMORY = 1;
+    switch(direction){
+        case JD_OPT_GRP_DBs_OPTLESS:
+            opt_grp_db -> optless_num += 1;
+            if(isNull(opt_grp_db -> optless = (char **)reallocarray(opt_grp_db->optless, opt_grp_db->optless_num, sizeof(char *)))){
+                printDeveloperErrMsg(OPTION_OUT_OF_MEMORY);
+                return OPTION_OUT_OF_MEMORY;
+            }
+            opt_grp_db -> optless[opt_grp_db->optless_num-1] = str;
+            break;
 
-    opt_grp_db -> optless_num += 1;
-    if(isNull(opt_grp_db -> optless = (char **)reallocarray(opt_grp_db->optless, opt_grp_db->optless_num, sizeof(char *)))){
-        return OUT_OF_MEMORY;
+        case JD_OPT_GRPs_OPTION:
+            opt_grp_db -> grp_num += 1;
+            if(isNull(opt_grp_db -> grps = (opt_group_t*)reallocarray(opt_grp_db->grps, opt_grp_db->grp_num, sizeof(opt_group_t)))){
+                printDeveloperErrMsg(OPTION_OUT_OF_MEMORY);
+                return OPTION_OUT_OF_MEMORY;
+            }
+            initOptGroup(&(opt_grp_db -> grps[opt_grp_db->grp_num-1]));
+            opt_grp_db -> grps[opt_grp_db->grp_num-1].option = str;
+            break;
+
+        case JD_OPT_GRPs_CONTENTS:
+            {
+                opt_group_t *current_grp  = &(opt_grp_db -> grps[opt_grp_db->grp_num - 1]);
+                current_grp -> content_num++;
+                if(isNull(current_grp->contents = (char **)reallocarray(current_grp->contents, current_grp->content_num, sizeof(char *)))){
+                    printDeveloperErrMsg(OPTION_OUT_OF_MEMORY);
+                    return OPTION_OUT_OF_MEMORY;
+                }
+                current_grp->contents[current_grp->content_num-1] = str;
+                break;
+            }
+
+        default:
+            printDeveloperErrMsg(OPTION_UNEXPECTED_CONSTANT_VALUE_IN_SWITCH);
+            return OPTION_UNEXPECTED_CONSTANT_VALUE_IN_SWITCH;
     }
-    opt_grp_db -> optless[opt_grp_db->optless_num-1] = str;
-    return SUCCESS;
-}
 
-static int
-add2optGrpDB_OptGrps_Option(
-        opt_group_db_t *opt_grp_db,
-        char       *str)     
-{
-    const int SUCCESS       = 0;
-    const int OUT_OF_MEMORY = 1;
-
-    opt_grp_db -> grp_num += 1;
-    if(isNull(opt_grp_db -> grps = (opt_group_t*)reallocarray(opt_grp_db->grps, opt_grp_db->grp_num, sizeof(opt_group_t)))){
-        return OUT_OF_MEMORY;
-    }
-    initOptGroup(&(opt_grp_db -> grps[opt_grp_db->grp_num-1]));
-    opt_grp_db -> grps[opt_grp_db->grp_num-1].option = str;
-    return SUCCESS;
-}
-
-static int
-add2optGrpDB_OptGrps_Contents(
-        opt_group_db_t *opt_grp_db,
-        char       *str)     
-{
-    const int SUCCESS       = 0;
-    const int OUT_OF_MEMORY = 1;
-
-    opt_group_t *current_grp  = &(opt_grp_db -> grps[opt_grp_db->grp_num - 1]);
-    current_grp -> content_num++;
-    if(isNull(current_grp->contents = (char **)reallocarray(current_grp->contents, current_grp->content_num, sizeof(char *)))){
-        return OUT_OF_MEMORY;
-    }
-    current_grp->contents[current_grp->content_num-1] = str;
-    return SUCCESS;
+    return OPTION_SUCCESS;
 }
 
 static void
@@ -300,195 +430,67 @@ adaptContentsChecker(
     }
 }
 
-static int
-checkContentsNum(
-        opt_property_db_t *opt_prop_db,
-        opt_group_db_t    *opt_grp_db)
-{
-    /* return values */
-    const int SUCCESS = 0;
-    const int TOO_MANY_CONTENTS    = 1;
-    const int TOO_LITTLE_CONTENTS  = 2;
-
-    for(int i=0; i<opt_grp_db->grp_num; i++){
-        char *option = opt_grp_db -> grps[i].option;
-
-        opt_property_t *props = opt_prop_db -> props;
-        while(strcmp(props->short_form, option) != 0 && strcmp(props->long_form, option) != 0){
-            props++;
-        }
-
-        int num = opt_grp_db -> grps[i].content_num;
-        int min = props -> content_num_min;
-        int max = props -> content_num_max;
-
-        if(num < min){
-            return TOO_LITTLE_CONTENTS;
-        }
-
-        if(num > max){
-            return TOO_MANY_CONTENTS;
-        }
-    }
-
-    return SUCCESS;
-}
-
-typedef enum{
-    JD_OPT_GRP_DBs_CONTENTS  =  0,
-    JD_OPT_GRPs_CONTENTS     =  1,
-    JD_OPT_GRPs_OPTION       =  2,
-    JD_DUPLICATE_SAME_OPTION = -1,
-    JD_TOO_MANY_CONTENTS     = -2,
-    JD_TOO_LITTLE_CONTENTS   = -3,
-}judgeDestination_errcode_t;
-
-static int
-judgeDestination(
-        opt_property_db_t *opt_prop_db,
-        char **str)
-{
-    /* flags */
-    static bool opt_grp_dbs_contents_is_empty   = 1;
-    static bool lock_opt_grp_dbs_contents       = 0;
-
-    /* memos */
-    static int current_options_contents_num     = 0;
-    static int current_options_contents_num_max = 0;
-    static int current_options_contents_num_min = 0;
-
-    for(int i=0; i<opt_prop_db->prop_num; i++){
-        if(strcmp(opt_prop_db->props[i].short_form, *str) == 0 || strcmp(opt_prop_db->props[i].long_form, *str) == 0){
-            if(!opt_grp_dbs_contents_is_empty){
-                lock_opt_grp_dbs_contents = 1;
-            }
-            if(opt_prop_db->props[i].appeared_yet){
-                return JD_DUPLICATE_SAME_OPTION;
-            }
-            if(current_options_contents_num < current_options_contents_num_min){
-                return OPTION_TOO_LITTLE_CONTENTS;
-            }
-            opt_prop_db->props[i].appeared_yet = 1;
-            current_options_contents_num       = 0;
-            current_options_contents_num_max   = opt_prop_db->props[i].content_num_max;
-            current_options_contents_num_min   = opt_prop_db->props[i].content_num_min;
-            return JD_OPT_GRPs_OPTION;
-        }
-    }
-
-    /* 文字列の先頭の改行コードはdecodeOptionsにてこの関数のために付属された情報で本来の文字列には先頭の改行コードは存在しない */
-    if(*str[0] == '\n'){
-        if(current_options_contents_num >= current_options_contents_num_max){
-            return OPTION_TOO_MANY_CONTENTS;
-        }
-        else{
-            /* 先頭の改行コードを削除 */
-            *str = &(*str[1]);
-            current_options_contents_num++;
-            return JD_OPT_GRPs_CONTENTS;
-        }
-    }
-
-    if(current_options_contents_num < current_options_contents_num_max){
-        current_options_contents_num++;
-        return JD_OPT_GRPs_CONTENTS;
-    }
-
-    if(!lock_opt_grp_dbs_contents){
-        opt_grp_dbs_contents_is_empty = 0;
-        return JD_OPT_GRP_DBs_CONTENTS;
-    }
-
-    return OPTION_TOO_MANY_CONTENTS;
-}
-
-int
-groupingOpt(
+opt_group_db_t*
+genOptGrpDB(
         opt_property_db_t *opt_prop_db,
         int               argc,
-        char            **argv,
-        opt_group_db_t   **opt_grp_db) 
+        char            **argv)
 {
+    opt_group_db_t *grp_db_p = NULL;
+
     if(isNull(opt_prop_db)){
-        return OPTION_OPT_PROP_DB_IS_NULL;
+        printProgramerErrMsg(OPTION_OPT_PROP_DB_IS_NULL);
+        return NULL;
     }
 
-    if(isNull(*opt_grp_db = (opt_group_db_t *)malloc(sizeof(opt_group_db_t)))){
-        return OPTION_OUT_OF_MEMORY;
+    if(isNull(grp_db_p = (opt_group_db_t *)malloc(sizeof(opt_group_db_t)))){
+        printDeveloperErrMsg(OPTION_OUT_OF_MEMORY);
+        return NULL;
     }
-    initOptGroupDB(*opt_grp_db);
+    initOptGroupDB(grp_db_p);
 
     int    new_argc;
     char **new_argv = NULL;
-    int    ret;
 
-    ret = decodeOptions(opt_prop_db, argc, argv, &new_argc, &new_argv);
-    if(ret != 0){
+    if(decodeOptions(opt_prop_db, argc, argv, &new_argc, &new_argv) != OPTION_SUCCESS){
         goto free_and_exit;
     }
 
     for(int i=0; i<new_argc; i++){
         switch(judgeDestination(opt_prop_db, &new_argv[i])){
-            case JD_OPT_GRP_DBs_CONTENTS:
-                if(add2optGrpDB_contents(*opt_grp_db, new_argv[i]) == 1){
-                    ret = OPTION_OUT_OF_MEMORY;
+            case JD_OPT_GRP_DBs_OPTLESS:
+                if(updateOptGrpDB(JD_OPT_GRP_DBs_OPTLESS, grp_db_p, new_argv[i]) != OPTION_SUCCESS){
                     goto free_and_exit;
                 }
                 break;
 
             case JD_OPT_GRPs_CONTENTS:
-                if(add2optGrpDB_OptGrps_Contents(*opt_grp_db, new_argv[i]) == 1){
-                    ret = OPTION_OUT_OF_MEMORY;
+                if(updateOptGrpDB(JD_OPT_GRPs_CONTENTS, grp_db_p, new_argv[i]) != OPTION_SUCCESS){
                     goto free_and_exit;
                 }
                 break;
 
             case JD_OPT_GRPs_OPTION:
-                if(add2optGrpDB_OptGrps_Option(*opt_grp_db, new_argv[i]) == 1){
-                    ret = OPTION_OUT_OF_MEMORY;
+                if(updateOptGrpDB(JD_OPT_GRPs_OPTION, grp_db_p, new_argv[i]) != OPTION_SUCCESS){
                     goto free_and_exit;
                 }
                 break;
 
-            case JD_DUPLICATE_SAME_OPTION: 
-                ret = OPTION_DUPLICATE_SAME_OPT;
-                goto free_and_exit;
-
-            case JD_TOO_MANY_CONTENTS:
-                ret = OPTION_TOO_MANY_CONTENTS;
-                goto free_and_exit;
-
-            case JD_TOO_LITTLE_CONTENTS:
-                ret = OPTION_TOO_LITTLE_CONTENTS;
+            case OPTION_FAILURE: 
                 goto free_and_exit;
 
             default:
-                BUG_REPORT();
+                printDeveloperErrMsg(OPTION_UNEXPECTED_CONSTANT_VALUE_IN_SWITCH);
+                goto free_and_exit;
         }
     }
 
-    ret = checkContentsNum(opt_prop_db, *opt_grp_db);
-    switch(ret){
-        case 1:
-            ret = OPTION_TOO_MANY_CONTENTS;
-            goto free_and_exit;
-
-        case 2:
-            ret = OPTION_TOO_LITTLE_CONTENTS;
-            goto free_and_exit;
-
-        case 0:
-        default:
-            break;
-    }
-
-    adaptContentsChecker(opt_prop_db, *opt_grp_db);
-    return OPTION_SUCCESS;
+    adaptContentsChecker(opt_prop_db, grp_db_p);
+    return grp_db_p;
 
 free_and_exit:
-    freeOptGroupDB(*opt_grp_db);
-    *opt_grp_db = NULL;
-    return ret;
+    freeOptGroupDB(grp_db_p);
+    return NULL;
 }
 
 static void

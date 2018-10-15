@@ -34,3 +34,4 @@
 - ヘッダファイルのincludeするファイルはexportしている関数や構造体に必要なファイルのみにしてそれ以外は.cに移動
 - consoleapp.hを消す. ビルドで生成されるライブラリもlibconsoleapp.aではなくをlibprompt.aとliboption.aの２つに分ける
 - GnuMakeのmake install, make uninstall対応
+- errno.hの導入

@@ -1,6 +1,7 @@
 ﻿#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <limits.h>
 #include "../src/consoleapp.h"
 
 #define DEBUG 1
@@ -15,57 +16,21 @@ void interactive(int hist_entory_size);
 
 int main(int argc, char *argv[]){
 
-    opt_property_db_t *opt_prop_db = genOptPropDB(4);
-    opt_group_db_t    *opt_grp_db   = NULL;
-    int                ret;
+    opt_property_db_t *prop_db = genOptPropDB(4);
+    regOptProp(prop_db, "-h", "--help",        0,       0, NULL);
+    regOptProp(prop_db, "-v", "--version",     0,       0, NULL);
+    regOptProp(prop_db, "-p", "--print",       1, INT_MAX, NULL);
+    regOptProp(prop_db, "-i", "--interactive", 1,       1, chkOptInteractive);
 
-    regOptProp(opt_prop_db, "-h", "--help",        0,       0, NULL);
-    regOptProp(opt_prop_db, "-v", "--version",     0,       0, NULL);
-    regOptProp(opt_prop_db, "-p", "--print",       1, INT_MAX, NULL);
-    regOptProp(opt_prop_db, "-i", "--interactive", 1,       1, chkOptInteractive);
+    opt_group_db_t *grp_db_p = genOptGrpDB(prop_db, argc, argv);
 
-    ret = groupingOpt(opt_prop_db, argc, argv, &opt_grp_db);
-
-#if DEBUG
-    debugInfo1(ret, opt_grp_db);
-#endif
-
-    switch(ret){
-        case OPTION_SUCCESS: /* success */
-            break;
-
-        case OPTION_OPT_NAME_IS_NULL:
-            fprintf(stderr, "error: out of memory\n");
-            exit(1);
-
-        case OPTION_OUT_OF_MEMORY:
-            fprintf(stderr, "error: flag_prop_db is null\n");
-            exit(1);
-
-        case OPTION_DUPLICATE_SAME_OPT:
-            fprintf(stderr, "error: duplicate same flag\n");
-            exit(1);
-
-        case OPTION_TOO_MANY_CONTENTS:
-            fprintf(stderr, "error: too many contents\n");
-            exit(1);
-
-        case OPTION_TOO_LITTLE_CONTENTS:
-            fprintf(stderr, "error: too little contents\n");
-            exit(1);
-
-        default:
-            fprintf(stderr, "there is a bug! (line: %d)\n", __LINE__);
-            exit(100);
-    }
-
-    for(int i=0; i<opt_grp_db->grp_num; i++){
-        switch(opt_grp_db->grps[i].err_code){
+    for(int i=0; i<grp_db_p->grp_num; i++){
+        switch(grp_db_p->grps[i].err_code){
             case 0: /* success */
                 break;
 
             case 1: 
-                fprintf(stderr, "error: the history size \"%s\" specified with the option \"%s\" is an invalid value\n", opt_grp_db->grps[i].contents[0], opt_grp_db->grps[i].option);
+                fprintf(stderr, "error: the history size \"%s\" specified with the option \"%s\" is an invalid value\n", grp_db_p->grps[i].contents[0], grp_db_p->grps[i].option);
                 exit(2);
                 break;
 
@@ -75,10 +40,10 @@ int main(int argc, char *argv[]){
         }
     }
 
-    for(int i=0;i<opt_grp_db->grp_num;i++){
-        char *flag       = opt_grp_db -> grps[i].option;
-        char **contents  = opt_grp_db -> grps[i].contents;
-        int  content_num = opt_grp_db -> grps[i].content_num;
+    for(int i=0;i<grp_db_p->grp_num;i++){
+        char *flag       = grp_db_p -> grps[i].option;
+        char **contents  = grp_db_p -> grps[i].contents;
+        int  content_num = grp_db_p -> grps[i].content_num;
 
         if(strcmp(flag, "-h") == 0 || strcmp(flag, "--help") == 0){
             printUsage();
