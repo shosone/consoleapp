@@ -314,8 +314,8 @@ judgeDestination(
         char             **str)
 {
     /* flags */
-    static bool opt_grp_dbs_contents_is_empty = true;
-    static bool opt_grp_dbs_contents_locked   = false;
+    static bool opt_grp_dbs_flagless_is_empty = true;
+    static bool opt_grp_dbs_flagless_locked   = false;
 
     /* memos */
     static opt_property_t *current_options_property;
@@ -323,11 +323,20 @@ judgeDestination(
     static int   current_options_contents_num_max = 0;
     static int   current_options_contents_num_min = 0;
 
+    /* if str == NULL, this function was called as finalizing.  */
+    if(str == NULL){
+            if(current_options_contents_num < current_options_contents_num_min){
+                printUsrErrMsg(OPTION_TOO_LITTLE_CONTENTS, current_options_property -> short_form, current_options_property -> long_form);
+                return OPTION_FAILURE;
+            }
+            return OPTION_SUCCESS;
+    }
+
     for(int i=0; i<opt_prop_db->prop_num; i++){
         if(strcmp(opt_prop_db->props[i].short_form, *str) == 0 || strcmp(opt_prop_db->props[i].long_form, *str) == 0){
             current_options_property = &(opt_prop_db -> props[i]);
-            if(opt_grp_dbs_contents_is_empty == false){
-                opt_grp_dbs_contents_locked = true;
+            if(opt_grp_dbs_flagless_is_empty == false){
+                opt_grp_dbs_flagless_locked = true;
             }
             if(current_options_property -> appeared_yet){
                 printUsrErrMsg(OPTION_DUPLICATE_SAME_OPT, current_options_property -> short_form, current_options_property -> long_form);
@@ -364,8 +373,8 @@ judgeDestination(
         return JD_OPT_GRPs_CONTENTS;
     }
 
-    if(opt_grp_dbs_contents_locked == false){
-        opt_grp_dbs_contents_is_empty = 0;
+    if(opt_grp_dbs_flagless_locked == false){
+        opt_grp_dbs_flagless_is_empty = 0;
         return JD_OPT_GRP_DBs_OPTLESS;
     }
 
@@ -465,19 +474,19 @@ genOptGrpDB(
     for(int i=0; i<new_argc; i++){
         switch(judgeDestination(opt_prop_db, &new_argv[i])){
             case JD_OPT_GRP_DBs_OPTLESS:
-                if(updateOptGrpDB(JD_OPT_GRP_DBs_OPTLESS, grp_db_p, new_argv[i]) != OPTION_SUCCESS){
+                if(updateOptGrpDB(JD_OPT_GRP_DBs_OPTLESS, grp_db_p, new_argv[i]) == OPTION_FAILURE){
                     goto free_and_exit;
                 }
                 break;
 
             case JD_OPT_GRPs_CONTENTS:
-                if(updateOptGrpDB(JD_OPT_GRPs_CONTENTS, grp_db_p, new_argv[i]) != OPTION_SUCCESS){
+                if(updateOptGrpDB(JD_OPT_GRPs_CONTENTS, grp_db_p, new_argv[i]) == OPTION_FAILURE){
                     goto free_and_exit;
                 }
                 break;
 
             case JD_OPT_GRPs_OPTION:
-                if(updateOptGrpDB(JD_OPT_GRPs_OPTION, grp_db_p, new_argv[i]) != OPTION_SUCCESS){
+                if(updateOptGrpDB(JD_OPT_GRPs_OPTION, grp_db_p, new_argv[i]) == OPTION_FAILURE){
                     goto free_and_exit;
                 }
                 break;
@@ -489,6 +498,11 @@ genOptGrpDB(
                 printDeveloperErrMsg(OPTION_UNEXPECTED_CONSTANT_VALUE_IN_SWITCH);
                 goto free_and_exit;
         }
+    }
+
+    /* TODO: 動くには動くがあんまりいいやり方ではない. 可読性のためにリファクタが必要 */
+    if (judgeDestination(NULL, NULL) == OPTION_FAILURE){
+        goto free_and_exit;
     }
 
     adaptContentsChecker(opt_prop_db, grp_db_p);
