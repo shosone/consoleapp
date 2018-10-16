@@ -65,7 +65,7 @@ extern opt_property_db_t* /* 生成されたopt_property_db_tのメモリ領域�
 genOptPropDB(     
         int prop_num); /* 登録するopt_property_tの数 */
 
-extern int /* option_errcode_tのどれか */
+extern int /* 0: success, 1: failure */
 regOptProp( /* opt_property_db_tのエントリを追加する関数 */
         opt_property_db_t  *db,             /* [out] 登録先(genOptPropDBで作成したopt_property_db_t) */
         char               *short_form,     /* [in] オプションの短縮形式 */
@@ -78,7 +78,7 @@ extern void
 freeOptPropDB( /* opt_property_db_tのメンバのメモリ領域を再帰的に開放する関数 */
         opt_property_db_t *db); /* [in] 開放するopt_property_db_t */
 
-extern opt_group_db_t* /* option_errcode_tのどれか */
+extern opt_group_db_t* 
 genOptGrpDB( /* オプション情報が登録されたopt_property_dbをもとにmainの引数で取得したargcとargvをグループに分類してopt_group_db_tのエントリに登録する関数 */
         opt_property_db_t *opt_prop_db,  /* [in] オプション情報が登録されたopt_property_db_t */
         int                argc,         /* mainの引数で受け取ったプログラムの引数の数(プログラム名含む) */

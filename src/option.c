@@ -56,7 +56,7 @@ typedef enum{
     OPTION_OPT_PROP_DB_IS_NULL, 
 }option_programer_errcode_t;
 
-/* use printSubroutineErrMsg(errcode) */
+/* use printDeveloperErrMsg(errcode) */
 typedef enum{
     OPTION_OUT_OF_MEMORY = 1, 
     OPTION_UNEXPECTED_CONSTANT_VALUE_IN_SWITCH,
@@ -116,6 +116,7 @@ opt_property_db_t
     }
 
     if(isNull(opt_prop_db = (opt_property_db_t *)malloc(sizeof(opt_property_db_t)))){
+        printDeveloperErrMsg(OPTION_OUT_OF_MEMORY);
         return NULL;
     }
 
@@ -124,6 +125,7 @@ opt_property_db_t
     if(isNull(opt_prop_db->props = (opt_property_t *)calloc(prop_num, sizeof(opt_property_t)))){
         free(opt_prop_db);
         opt_prop_db = NULL;
+        printDeveloperErrMsg(OPTION_OUT_OF_MEMORY);
         return NULL;
     }
 
@@ -150,16 +152,19 @@ regOptProp(
     opt_property_t *opt_prop = &(db -> props[idx]);
 
     if(short_form == NULL){
-        return OPTION_OPT_NAME_IS_NULL;
+        printProgramerErrMsg(OPTION_OUT_OF_MEMORY);
+        return OPTION_FAILURE;
     }
 
     if(content_num_max < content_num_min){
-        return OPTION_MIN_BIGGER_THAN_MAX;
+        printProgramerErrMsg(OPTION_MIN_BIGGER_THAN_MAX);
+        return OPTION_FAILURE;
     }
 
 	const size_t short_form_len = strlen(short_form);
     if(isNull(opt_prop->short_form = (char *)malloc(short_form_len))){
-        return OPTION_OUT_OF_MEMORY;
+        printDeveloperErrMsg(OPTION_OUT_OF_MEMORY);
+        return OPTION_FAILURE;
     }
     memcpy(opt_prop->short_form, short_form, short_form_len);
 
@@ -167,7 +172,8 @@ regOptProp(
     if(long_form && isNull(opt_prop->long_form = (char *)malloc(long_form_len))){
         free(opt_prop->short_form);
         opt_prop->short_form = NULL;
-        return OPTION_OUT_OF_MEMORY;
+        printDeveloperErrMsg(OPTION_OUT_OF_MEMORY);
+        return OPTION_FAILURE;
     }
 	memcpy(opt_prop->long_form, long_form, long_form_len);
     
@@ -308,8 +314,8 @@ judgeDestination(
         char             **str)
 {
     /* flags */
-    static bool opt_grp_dbs_contents_is_empty   = true;
-    static bool opt_grp_dbs_contents_locked     = false;
+    static bool opt_grp_dbs_contents_is_empty = true;
+    static bool opt_grp_dbs_contents_locked   = false;
 
     /* memos */
     static opt_property_t *current_options_property;

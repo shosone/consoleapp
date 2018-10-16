@@ -24,6 +24,11 @@ int main(int argc, char *argv[]){
 
     opt_group_db_t *grp_db_p = genOptGrpDB(prop_db, argc, argv);
 
+    if(grp_db_p == NULL){
+        fprintf(stderr, "sample: faild to analyzing option.\n");
+        return 0; 
+    }
+
     for(int i=0; i<grp_db_p->grp_num; i++){
         switch(grp_db_p->grps[i].err_code){
             case 0: /* success */
