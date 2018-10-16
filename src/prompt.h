@@ -24,19 +24,6 @@
 #define PROMPT_H
 #include "config.h"
 #ifndef CONSOLEAPP_DISABLE_PROMPT
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <termios.h>
-#include <unistd.h>
-#include <readline/readline.h>
-#include <readline/history.h>
-#include <stdbool.h>
-
-#ifndef BUG_REPORT
-#include <stdio.h>
-#define BUG_REPORT() (fprintf(stderr, "error: there is a bug! (%s, %s, %d)", __FILE__, __func__, __LINE__))
-#endif
 
 extern const char DEFAULT_SC_HEAD[];
 extern const char DEFAULT_SC_TAIL[];

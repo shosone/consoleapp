@@ -21,6 +21,12 @@
  * SOFTWARE. */
 
 #include "prompt.h"
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <termios.h>
+#include <unistd.h>
+#include <stdbool.h>
 
 const char DEFAULT_SC_HEAD[]       = {0x01, 0x00};
 const char DEFAULT_SC_TAIL[]       = {0x05, 0x00};
@@ -669,7 +675,7 @@ rwh(
                         goto free_and_break;
 
                     default:
-                        BUG_REPORT();
+                        /* BUG_REPORT(); */
                         goto free_and_break;
 
                     free_and_break:

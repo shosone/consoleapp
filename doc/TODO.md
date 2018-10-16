@@ -29,8 +29,6 @@
 - string\_plus.h追加
 - datastructure.h追加
 - winでwarningを消すためにstrtokをstrtok\_sに変えるかstrcharで自力でparseする
-- option\_errcode\_tのエラーが発生した場合はその時点でメッセージを出力して終了する.
-- ヘッダファイルのincludeするファイルはexportしている関数や構造体に必要なファイルのみにしてそれ以外は.cに移動
 - consoleapp.hを消す. ビルドで生成されるライブラリもlibconsoleapp.aではなくをlibprompt.aとliboption.aの２つに分ける
 - GnuMakeのmake install, make uninstall対応
 - errno.hの導入

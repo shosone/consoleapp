@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <limits.h>
+#include <readline/readline.h>
 #include "../src/consoleapp.h"
 
 #define DEBUG 1
