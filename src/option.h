@@ -68,7 +68,7 @@ extern opt_property_db_t* /* 生成されたopt_property_db_tのメモリ領域�
 genOptPropDB(     
         int prop_num); /* 登録するopt_property_tの数 */
 
-extern int /* 0: success, 1: failure */
+extern int /* 0: success, -1: failure */
 regOptProp( /* opt_property_db_tのエントリを追加する関数 */
         opt_property_db_t  *db,             /* [out] 登録先(genOptPropDBで作成したopt_property_db_t) */
         char               *short_form,     /* [in] オプションの短縮形式 */
