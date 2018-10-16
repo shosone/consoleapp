@@ -29,6 +29,9 @@
 
 #include <stdbool.h>
 
+#define OPTION_SUCCESS  0
+#define OPTION_FAILURE -1
+
 /* プログラムで使用できるオプションの情報を保持する構造体 */
 typedef struct _opt_property_t{
     char *short_form;                                           /* オプションの短縮形式. 例えば"-v" */

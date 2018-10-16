@@ -39,9 +39,6 @@
 #define isNotNull(p) ((p) != NULL)
 #endif
 
-#define OPTION_SUCCESS  0
-#define OPTION_FAILURE -1
-
 /* use printUsrErrMsg(errcode, option_or_content_name) */
 typedef enum{
     OPTION_DUPLICATE_SAME_OPT, 
