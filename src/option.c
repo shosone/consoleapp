@@ -44,21 +44,21 @@
 
 /* use printUsrErrMsg(errcode, option_or_content_name) */
 typedef enum{
-    OPTION_DUPLICATE_SAME_OPT = 1, 
+    OPTION_DUPLICATE_SAME_OPT, 
     OPTION_TOO_MANY_CONTENTS, 
     OPTION_TOO_LITTLE_CONTENTS, 
 }option_usr_errcode_t;
 
 /* use printProgramerErrMsg(errcode) */
 typedef enum{
-    OPTION_OPT_NAME_IS_NULL = 1, 
+    OPTION_OPT_NAME_IS_NULL,
     OPTION_MIN_BIGGER_THAN_MAX, 
     OPTION_OPT_PROP_DB_IS_NULL, 
 }option_programer_errcode_t;
 
 /* use printDeveloperErrMsg(errcode) */
 typedef enum{
-    OPTION_OUT_OF_MEMORY = 1, 
+    OPTION_OUT_OF_MEMORY, 
     OPTION_UNEXPECTED_CONSTANT_VALUE_IN_SWITCH,
 }option_subroutine_errcode_t;
 
