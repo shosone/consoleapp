@@ -37,4 +37,3 @@
 - contentsCheckerの結果をpopOptionErr()で取り出せうようにする
 - optlessはoptGrpDBではなく、グローバル変数char\*\* optless\_argv, int optless\_argcで管理できるようにする
 ### Bug
-- ./sample --help=aでエラー

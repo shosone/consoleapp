@@ -244,16 +244,17 @@ decodeOptions(
     (*new_argv_p) = NULL;
 
     for(int org_argv_i=1; org_argv_i<org_argc; org_argv_i++){
-        char *copy_src            = org_argv[org_argv_i];
-        char *last_null_ptr       = &copy_src[strlen(copy_src)];
-        int   a_part_of_condition = 0;
-        char  delim               = '\0';
+        char *copy_src             = org_argv[org_argv_i];
+        char *last_null_ptr        = &copy_src[strlen(copy_src)];
+        bool   a_part_of_condition = false;
+        char  delim                = '\0';
 
+        /* このブロック終了後にa_part_of_conditionがtrueになっていたらorg_argv[org_argv_i]は--hoge=geho形式で--hogeがオプションになっている */
         for(int db_i = 0; db_i<db->prop_num; db_i++){
             char *memo = strchr(copy_src, '=');
             if(memo){
                 if(strcmp(db->props[db_i].long_form, strtok(copy_src, "=")) == 0){
-                    a_part_of_condition = 1;
+                    a_part_of_condition = true;
                     delim = '=';
                     break;
                 }
@@ -275,7 +276,7 @@ decodeOptions(
                 printDeveloperErrMsg(OPTION_OUT_OF_MEMORY);
                 goto free_and_exit;
             }
-            if(delim != '\0'){
+            if(delim == ','){
                 (*new_argv_p)[*new_argc_p-1][0] = '\n'; // あまり良いやり方ではないかもしれないが、この情報はjudgeDestinationで必要になる
                 memcpy(&((*new_argv_p)[*new_argc_p-1][1]), copy_src, copy_src_len_plus1);
             }
@@ -287,7 +288,7 @@ decodeOptions(
             }
         }while(a_part_of_condition && 
                 ((isNotNull(copy_src = strtok(NULL, ",")) && (delim = ',')) ||
-                 ((delim = '\0') && (a_part_of_condition = 0))));
+                 ((delim = '\0') && (a_part_of_condition = false))));
     }
 
     return OPTION_SUCCESS;
