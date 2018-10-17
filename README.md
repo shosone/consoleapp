@@ -62,7 +62,7 @@ genOptPropDB(
 ```
 
 ```c:option.h
-extern int /* option_errcode_tのどれか */
+extern int /* 0: success, -1: failure */
 regOptProp( /* opt_property_db_tのエントリを追加する関数 */
         opt_property_db_t  *db,             /* [out] 登録先(genOptPropDBで作成したopt_property_db_t) */
         char               *short_form,     /* [in] オプションの短縮形式 */
@@ -79,12 +79,11 @@ freeOptPropDB( /* opt_property_db_tのメンバのメモリ領域を再帰的に
 ```
 
 ```c:option.h
-extern int /* option_errcode_tのどれか */
-groupingOpt( /* オプション情報が登録されたopt_property_dbをもとにmainの引数で取得したargcとargvをグループに分類してopt_group_db_tのエントリに登録する関数 */
+extern opt_group_db_t* 
+genOptGrpDB( /* オプション情報が登録されたopt_property_dbをもとにmainの引数で取得したargcとargvをグループに分類してopt_group_db_tのエントリに登録する関数 */
         opt_property_db_t *opt_prop_db,  /* [in] オプション情報が登録されたopt_property_db_t */
         int                argc,         /* mainの引数で受け取ったプログラムの引数の数(プログラム名含む) */
-        char             **argv,         /* [in] mainの引数で受け取ったプログラムの引数(プログラム名含む) */
-        opt_group_db_t   **opt_grp_db);  /* [out] グルーピングされたオプション情報 */
+        char             **argv);         /* [in] mainの引数で受け取ったプログラムの引数(プログラム名含む) */
 ```
 
 ```c:option.h
@@ -99,56 +98,25 @@ This it a part of "sample/sample.c".
 int main(int argc, char *argv[]){
 
     opt_property_db_t *opt_prop_db = genOptPropDB(4);
-    opt_group_db_t    *opt_grp_db   = NULL;
-    int                ret;
-
     regOptProp(opt_prop_db, "-h", "--help",        0,       0, NULL);
     regOptProp(opt_prop_db, "-v", "--version",     0,       0, NULL);
     regOptProp(opt_prop_db, "-p", "--print",       1, INT_MAX, NULL);
     regOptProp(opt_prop_db, "-i", "--interactive", 1,       1, chkOptInteractive);
 
-    ret = groupingOpt(opt_prop_db, argc, argv, &opt_grp_db);
+    opt_group_db_t *grp_db_p = genOptGrpDB(prop_db, argc, argv);
 
-#if DEBUG
-    debugInfo1(ret, opt_grp_db);
-#endif
-
-    switch(ret){
-        case OPTION_SUCCESS: /* success */
-            break;
-
-        case OPTION_OPT_NAME_IS_NULL:
-            fprintf(stderr, "error: out of memory\n");
-            exit(1);
-
-        case OPTION_OUT_OF_MEMORY:
-            fprintf(stderr, "error: flag_prop_db is null\n");
-            exit(1);
-
-        case OPTION_DUPLICATE_SAME_OPT:
-            fprintf(stderr, "error: duplicate same flag\n");
-            exit(1);
-
-        case OPTION_TOO_MANY_CONTENTS:
-            fprintf(stderr, "error: too many contents\n");
-            exit(1);
-
-        case OPTION_TOO_LITTLE_CONTENTS:
-            fprintf(stderr, "error: too little contents\n");
-            exit(1);
-
-        default:
-            fprintf(stderr, "there is a bug! (line: %d)\n", __LINE__);
-            exit(100);
+    if(grp_db_p == NULL){
+        fprintf(stderr, "sample: faild to analyzing option.\n");
+        return 0; 
     }
 
-    for(int i=0; i<opt_grp_db->grp_num; i++){
-        switch(opt_grp_db->grps[i].err_code){
+    for(int i=0; i<grp_db_p->grp_num; i++){
+        switch(grp_db_p->grps[i].err_code){
             case 0: /* success */
                 break;
 
             case 1: 
-                fprintf(stderr, "error: the history size \"%s\" specified with the option \"%s\" is an invalid value\n", opt_grp_db->grps[i].contents[0], opt_grp_db->grps[i].option);
+                fprintf(stderr, "error: the history size \"%s\" specified with the option \"%s\" is an invalid value\n", grp_db_p->grps[i].contents[0], grp_db_p->grps[i].option);
                 exit(2);
                 break;
 
@@ -158,10 +126,10 @@ int main(int argc, char *argv[]){
         }
     }
 
-    for(int i=0;i<opt_grp_db->grp_num;i++){
-        char *flag       = opt_grp_db -> grps[i].option;
-        char **contents  = opt_grp_db -> grps[i].contents;
-        int  content_num = opt_grp_db -> grps[i].content_num;
+    for(int i=0;i<grp_db_p->grp_num;i++){
+        char *flag       = grp_db_p -> grps[i].option;
+        char **contents  = grp_db_p -> grps[i].contents;
+        int  content_num = grp_db_p -> grps[i].content_num;
 
         if(strcmp(flag, "-h") == 0 || strcmp(flag, "--help") == 0){
             printUsage();
@@ -170,12 +138,9 @@ int main(int argc, char *argv[]){
             printVersion();
         }
         else if(strcmp(flag, "-p") == 0 || strcmp(flag, "--print") == 0){
-            for(int i=0; i<content_num; i++){
-                printf("%s\n", contents[i]);
+            for(int j=0; j<content_num; j++){
+                printf("%s\n", contents[j]);
             }
-        }
-        else if(strcmp(flag, "-i") == 0 || strcmp(flag, "--interactive") == 0){
-            interactive(atoi(contents[0]));
         }
     }
 
