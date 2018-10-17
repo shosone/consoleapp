@@ -360,7 +360,7 @@ judgeDestination(
         }
         else{
             /* 先頭の改行コードを削除 */
-            *str = &(*str[1]);
+            *str = &(*str)[1];
             current_options_contents_num++;
             return JD_OPT_GRPs_CONTENTS;
         }

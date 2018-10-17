@@ -11,17 +11,12 @@
 }
 
 #if DEBUG
-void debugInfo1(int groupingOpt_ret, opt_group_db_t *opt_grp_db){
-    printf("#################### debug info 1 ########################\n");
-    printf("groupingOpt returns %d\n", groupingOpt_ret);
-    if(opt_grp_db == NULL){
-        printf("opt_grp_db is NULL\n");
-        printf("#########################################################\n");
-        return;
-    }
+void debugInfo1(opt_group_db_t *opt_grp_db){
     int    flagless_num = opt_grp_db -> optless_num;
     int    grp_num      = opt_grp_db -> grp_num;
     char **optless      = opt_grp_db -> optless;
+
+    printf("#################### debug info 1 ########################\n");
     printf("opt_grp_db -> flagless_num = %d\n", flagless_num);
     for(int i=0; i<flagless_num;i++){
         printf("opt_grp_db -> flagless[%d] = %s\n", i, optless[i]);

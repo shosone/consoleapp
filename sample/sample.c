@@ -30,6 +30,10 @@ int main(int argc, char *argv[]){
         return 0; 
     }
 
+#if DEBUG
+    debugInfo1(grp_db_p);
+#endif
+
     for(int i=0; i<grp_db_p->grp_num; i++){
         switch(grp_db_p->grps[i].err_code){
             case 0: /* success */
