@@ -518,7 +518,7 @@ freeOptGroup(
     free(opt_grp->option);
     opt_grp->option = NULL;
     for(int i=0; i<opt_grp->content_num; i++){
-        free(opt_grp->contents[i]);
+        free(&(opt_grp->contents[i]));
         opt_grp->contents[i] = NULL;
     }
     free(opt_grp->contents);
