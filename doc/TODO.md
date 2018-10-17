@@ -32,6 +32,9 @@
 - consoleapp.hを消す. ビルドで生成されるライブラリもlibconsoleapp.aではなくをlibprompt.aとliboption.aの２つに分ける
 - GnuMakeのmake install, make uninstall対応
 - errno.hの導入
-- contentsCheckerの結果をpopOptionErr()で取り出せうようにする
 - optlessはoptGrpDBではなく、グローバル変数char\*\* optless\_argv, int optless\_argcで管理できるようにする
+- option\_property\_tのフィールドに優先度を保持するフィールドを追加する
+    - popOptionErr()により優先度の高いオプションから順にcontensCheckerを適用した結果を取り出す
+    - popOption()によりユーザがコンソールに入力したオプションを優先度の高いオプションから取り出す
 ### Bug
+- 今の所見つかっていない
