@@ -6,71 +6,92 @@
 #include "../src/consoleapp.h"
 
 #define DEBUG 1
-#include "for_option.c"
-#ifndef CONSOLEAPP_DISABLE_PROMPT
-#include "for_prompt.c"
-#endif
+
+/* priority */
+enum {
+    /* high */
+    HELP = 1,
+    VERSION,
+    PRINT,
+    INTERACTIVE,
+    /* low */
+};
+
+/* error code */
+enum {
+    SAMPLE_SUCCESS = 0,
+    INTERACTIVE_ILLIGAL_NUMBER,
+};
 
 void printUsage(void);
 void printVersion(void);
 void interactive(int hist_entory_size);
 
+int chkOptInteractive(char **contents, int dont_care){
+    (void)dont_care;
+
+    int num = atoi(contents[0]);
+    if(num < 1){
+        return INTERACTIVE_ILLIGAL_NUMBER;
+    }
+    return SAMPLE_SUCCESS;
+}
+
 int main(int argc, char *argv[]){
 
-    opt_property_db_t *prop_db = genOptPropDB(4);
-    regOptProp(prop_db, "-h", "--help",        0,       0, NULL);
-    regOptProp(prop_db, "-v", "--version",     0,       0, NULL);
-    regOptProp(prop_db, "-p", "--print",       1, INT_MAX, NULL);
-    regOptProp(prop_db, "-i", "--interactive", 1,       1, chkOptInteractive);
+    regOptProperty(HELP,        "-h", "--help",        0,       0,              NULL);
+    regOptProperty(VERSION,     "-v", "--version",     0,       0,              NULL);
+    regOptProperty(PRINT,       "-p", "--print",       1, INT_MAX,              NULL);
+    regOptProperty(INTERACTIVE, "-i", "--interactive", 1,       1, chkOptInteractive);
 
-    opt_group_db_t *grp_db_p = genOptGrpDB(prop_db, argc, argv);
-
-    if(grp_db_p == NULL){
-        fprintf(stderr, "sample: faild to analyzing option.\n");
-        return 0; 
+    int    optless_num = 0;
+    char **optless     = NULL;
+    if(groupingOpt(argc, argv, &optless_num, &optless) == OPTION_FAILURE){
+        fprintf(stderr, "sample: an error occurred while parsing the option.\n");
+        return 0;
     }
 
-#if DEBUG
-    debugInfo1(grp_db_p);
-#endif
+    int errcode = OPTION_SUCCESS;
+    while((errcode = popOptErrcode()) != OPTION_SUCCESS){
+        switch(errcode){
+            case INTERACTIVE_ILLIGAL_NUMBER:
+                fprintf(stderr, "error: the history size specified with the option -i(--interactive) is an invalid value\n");
+                exit(1);
+        }
+    }
 
-    for(int i=0; i<grp_db_p->grp_num; i++){
-        switch(grp_db_p->grps[i].err_code){
-            case 0: /* success */
+    opt_group_t *opt_grp_p = NULL;
+    while((opt_grp_p = popOptGroup()) != NULL){
+        switch(opt_grp_p -> priority){
+            case HELP:
+                printUsage();
                 break;
 
-            case 1: 
-                fprintf(stderr, "error: the history size \"%s\" specified with the option \"%s\" is an invalid value\n", grp_db_p->grps[i].contents[0], grp_db_p->grps[i].option);
-                exit(2);
+            case VERSION:
+                printVersion();
+                break;
+
+            case PRINT:
+                for(int i=0; i<opt_grp_p->content_num; i++){
+                    printf("%s\n", opt_grp_p->contents[i]);
+                }
+                break;
+
+            case INTERACTIVE:
+                interactive(atoi(opt_grp_p->contents[0]));
                 break;
 
             default:
-                fprintf(stderr, "error: there is a bug! (line: %d)\n", __LINE__);
-                exit(100);
+                fprintf(stderr, "error: there is a bug at %d in %s\n", __LINE__, __FILE__);
+                break;
         }
     }
 
-    for(int i=0;i<grp_db_p->grp_num;i++){
-        char *flag       = grp_db_p -> grps[i].option;
-        char **contents  = grp_db_p -> grps[i].contents;
-        int  content_num = grp_db_p -> grps[i].content_num;
-
-        if(strcmp(flag, "-h") == 0 || strcmp(flag, "--help") == 0){
-            printUsage();
+    if(optless != NULL){
+        printf("these optionless contents are ignored in this sample.\n");
+        for(int i=0; i<optless_num; i++){
+            printf("%s\n", optless[i]);
         }
-        else if(strcmp(flag, "-v") == 0 || strcmp(flag, "--version") == 0){
-            printVersion();
-        }
-        else if(strcmp(flag, "-p") == 0 || strcmp(flag, "--print") == 0){
-            for(int j=0; j<content_num; j++){
-                printf("%s\n", contents[j]);
-            }
-        }
-#ifndef CONSOLEAPP_DISABLE_PROMPT
-		else if(strcmp(flag, "-i") == 0 || strcmp(flag, "--interactive") == 0){
-            interactive(atoi(contents[0]));
-        }
-#endif
     }
 
     return 0;
@@ -98,7 +119,65 @@ void print(int str_num, char **strs){
     printf("\n");
 }
 
+/* for consoleapp/prompt ============================================ */
+
 #ifndef CONSOLEAPP_DISABLE_PROMPT
+void interactiveHelp1(void){
+    printf("+------------------------------------------------------------------------+\n");
+    printf("|help:           print this help                                         |\n");
+    printf("|quit:           quit interactive mode                                   |\n");
+    printf("|ctx:            print context info                                      |\n");
+    printf("|modctx:         modify shortcut settings                                |\n");
+    printf("|![some string]: execute \"[some string]\" as a shell command.             |\n");
+    printf("|                                                                        |\n");
+    printf("|NOTE: these key bind is able to change by modifying rwh_ctx_t\'s fields. |\n");
+    printf("|short cuts:                                                             |\n");
+    printf("|    Ctl-a:  jump to head                                                |\n");
+    printf("|    Ctl-e:  jump to tail                                                |\n");
+    printf("|    Ctl-→ : jump to next separation                                     |\n");
+    printf("|    Ctl-← : jump to previous separation                                 |\n");
+    printf("|history operation:                                                      |\n");
+    printf("|    ↑ : go to the past                                                  |\n");
+    printf("|    ↓ : go to the future                                                |\n");
+    printf("|    tab: completion                                                     |\n");
+    printf("+------------------------------------------------------------------------+\n");
+}
+
+void interactiveHelp2(void){
+    printf("+------------------------------------------+\n");
+    printf("|help:        print this help              |\n");
+    printf("|ctx:         print context info           |\n");
+    printf("|done:        finish modctx mode           |\n");
+    printf("|head:        change sc_head key bind      |\n");
+    printf("|tail:        change sc_tail key bind      |\n");
+    printf("|next block:  change sc_next_block key bind|\n");
+    printf("|prev block:  change sc_prev_block key bind|\n");
+    printf("|completion:  change sc_completion key bind|\n");
+    printf("|dive hist:   change dive hist key bind    |\n");
+    printf("|float hist:  change float hist key bind   |\n");
+    printf("+------------------------------------------+\n");
+}
+
+void interactivePrintCtx(rwhctx_t *ctx){
+    printf("history: \n");
+    printf(" ↑ old\n");
+    for(int i=0; i<ctx->history->entory_num; i++){
+        printf("    %s\n", ctx->history->buf[i]);
+    }
+    printf(" ↓ new\n");
+    printf("candidate: \n");
+    for(int i=0; i<ctx->candidate->entory_num; i++){
+        printf("    %s\n", ctx->candidate->entories[i]);
+    }
+    printf("sc_head: %s\n", ctx->sc_head);
+    printf("sc_tail: %s\n", ctx->sc_tail);
+    printf("sc_next_block: %s\n", ctx->sc_next_block);
+    printf("sc_prev_block: %s\n", ctx->sc_prev_block);
+    printf("sc_completion: %s\n", ctx->sc_completion);
+    printf("sc_dive_hist: %s\n", ctx->sc_dive_hist);
+    printf("sc_float_hist: %s\n", ctx->sc_float_hist);
+}
+
 void interactive(int hist_entory_size){
     char     *line;
     int       mode = 1;
