@@ -250,7 +250,9 @@ decodeOptions(
 
         do{
             (*new_argc_p)++;
-            if(isNull((*new_argv_p) = (char **)realloc(*new_argv_p, sizeof(char *)*(*new_argc_p))))
+            if(
+                    *new_argc_p > SIZE_MAX/sizeof(char*) || /* overflow check */
+                    isNull((*new_argv_p) = (char **)realloc(*new_argv_p, sizeof(char *)*(*new_argc_p))))
             {
                 printDeveloperErrMsg(OPTION_OUT_OF_MEMORY);
                 goto free_and_exit;
@@ -378,13 +380,17 @@ updateOptless(
         char ***optless,     /* [out] */
         char   *str)
 {
-    if(isNull(*optless = (char**)realloc(*optless, sizeof(char*)*(*optless_num+1)))){
+    if(
+            (*optless_num+1) > SIZE_MAX/sizeof(char*) || /* overflow check */
+            isNull(*optless = (char**)realloc(*optless, sizeof(char*)*(*optless_num+1))))
+    {
         printDeveloperErrMsg(OPTION_OUT_OF_MEMORY);
         return OPTION_FAILURE;
     }
 
     size_t str_len_plus1 = strlen(str) + 1;
-    if(isNull((*optless)[*optless_num] = (char*)malloc(str_len_plus1))){
+    if(isNull((*optless)[*optless_num] = (char*)malloc(str_len_plus1)))
+    {
         *optless = realloc(*optless, sizeof(char*)*(*optless_num)); /* reducing */
         printDeveloperErrMsg(OPTION_OUT_OF_MEMORY);
         return OPTION_FAILURE;
@@ -403,7 +409,10 @@ updateOptGrpGP(
 {
     switch(direction){
         case JD_OPT_GRPs_OPTION:
-            if(isNull(grp_gp = (opt_group_t**)realloc(grp_gp, sizeof(opt_group_t)*(grp_num_g+1)))){
+            if(
+                    (grp_num_g+1) > SIZE_MAX/sizeof(opt_group_t) ||  /* overflow check */
+                    isNull(grp_gp = (opt_group_t**)realloc(grp_gp, sizeof(opt_group_t)*(grp_num_g+1))))
+            {
                 printDeveloperErrMsg(OPTION_OUT_OF_MEMORY);
                 return OPTION_OUT_OF_MEMORY;
             }
@@ -420,7 +429,10 @@ updateOptGrpGP(
         case JD_OPT_GRPs_CONTENTS:
             {
                 opt_group_t *grp  = grp_gp[grp_num_g - 1];
-                if(isNull(grp->contents = (char **)realloc(grp->contents, sizeof(char *)*(grp->content_num+1)))){
+                if(
+                        (grp->content_num+1) > SIZE_MAX/sizeof(char*) || /* overflow check */
+                        isNull(grp->contents = (char **)realloc(grp->contents, sizeof(char *)*(grp->content_num+1))))
+                {
                     printDeveloperErrMsg(OPTION_OUT_OF_MEMORY);
                     return OPTION_OUT_OF_MEMORY;
                 }
@@ -451,7 +463,10 @@ adaptContentsChecker(void)
         for(int j=0; j<prop_num_g; j++){
             opt_property_t *prop = prop_gp[j];
             if(prop->priority == grp->priority){
-                if(isNull(errcode_memo_g = realloc(errcode_memo_g, sizeof(int)*(errcode_memo_num_g+1)))){
+                if(
+                        (errcode_memo_num_g+1) > SIZE_MAX/sizeof(int) || /* overflow check */
+                        isNull(errcode_memo_g = realloc(errcode_memo_g, sizeof(int)*(errcode_memo_num_g+1))))
+                {
                     goto free_and_exit;
                 }
                 errcode_memo_g[errcode_memo_num_g++] = prop->contentsChecker(grp->contents, grp->content_num);
@@ -513,7 +528,10 @@ regOptProperty( /* opt_property_db_tのエントリを追加する関数 */
 
     /* [done] error check */
 
-    if(isNull(prop_gp = realloc(prop_gp, prop_num_g+1))){
+    if(
+            prop_num_g > SIZE_MAX-1 || /* overflow check */
+            isNull(prop_gp = realloc(prop_gp, prop_num_g+1)))
+    {
         printDeveloperErrMsg(OPTION_OUT_OF_MEMORY);
         return OPTION_FAILURE;
     }
