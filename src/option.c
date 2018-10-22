@@ -475,8 +475,8 @@ free_and_exit:
 int /* OPTION_SUCCESS or OPTION_FAILURE */
 regOptProperty( /* opt_property_db_tのエントリを追加する関数 */
     unsigned int priority,        /* popOptGroupにて取り出すオプションの順番(優先度) */
-    char *short_form,      /* [in] オプションの短縮形式 */
-    char *long_form,       /* [in] オプションの詳細形式 */
+    const char *short_form,      /* [in] オプションの短縮形式 */
+    const char *long_form,       /* [in] オプションの詳細形式 */
     int   content_num_min, /* オプションに付属するコンテンツの最少数 */
     int   content_num_max, /* オプションに付属するコンテンツの最大数 */
     int (*contents_checker)(char **contents, int content_num)) /* オプションのコンテンツをチェックするコールバック関数 */
