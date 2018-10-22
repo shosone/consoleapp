@@ -6,8 +6,8 @@ LIB_PATH_RELEASE = ./lib/release
 LIB_PATH_DEBUG   = ./lib/debug
 OBJ_PATH_RELEASE = ./obj/release
 OBJ_PATH_DEBUG   = ./obj/debug
-CFLAGS_RELEASE   = -Wall -O3 -D_GNU_SOURCE
-CFLAGS_DEBUG     = -Wall -g3 -O0 -D_GNU_SOURCE
+CFLAGS_RELEASE   = -Wall -O3 
+CFLAGS_DEBUG     = -Wall -g3 -O0 
 CFLAGS_LINK_LIB  = -lreadline
 
 vpath %.h $(INC_PATH)
