@@ -479,7 +479,7 @@ regOptProperty( /* opt_property_db_tのエントリを追加する関数 */
     const char *long_form,       /* [in] オプションの詳細形式 */
     int   content_num_min, /* オプションに付属するコンテンツの最少数 */
     int   content_num_max, /* オプションに付属するコンテンツの最大数 */
-    int (*contents_checker)(char **contents, int content_num)) /* オプションのコンテンツをチェックするコールバック関数 */
+    int (*contentsChecker)(char **contents, int content_num)) /* オプションのコンテンツをチェックするコールバック関数 */
 {
     /* [begin] error check */
 
@@ -525,9 +525,6 @@ regOptProperty( /* opt_property_db_tのエントリを追加する関数 */
     }
 
     initOptPropertyT(prop_gp[prop_num_g]);
-    prop_gp[prop_num_g]->content_num_min = content_num_min;
-    prop_gp[prop_num_g]->content_num_max = content_num_max;
-    prop_gp[prop_num_g]->priority        = priority;
 
 	const size_t short_form_len = strlen(short_form);
     if(isNull(prop_gp[prop_num_g]->short_form = (char *)malloc(short_form_len))){
@@ -540,6 +537,13 @@ regOptProperty( /* opt_property_db_tのエントリを追加する関数 */
         goto free_and_exit;
     }
 	memcpy(prop_gp[prop_num_g]->long_form, long_form, long_form_len);
+
+    prop_gp[prop_num_g]->content_num_min = content_num_min;
+    prop_gp[prop_num_g]->content_num_max = content_num_max;
+    prop_gp[prop_num_g]->priority        = priority;
+    if(contentsChecker != NULL){
+        prop_gp[prop_num_g]->contentsChecker = contentsChecker;
+    }
 
     prop_num_g++;
 
