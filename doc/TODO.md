@@ -22,7 +22,6 @@
 - autotoolsの導入
 - -hvi というようなオプションの指定ができるようにする
 - judgeDestination()のコンテンツの数を数える処理はcheckContentsNum()にて行うので不要
-- prompt作成したらREADME.mdの更新
 - ソースのコメントを英語にする
 - 現在はrwh()内でショートカットが入力された際の動作を実装しているが、割り込み処理で実現できないか調べる
 - getchは自作しなくてもcurses.hにwgetchが定義されていたのでこっちが使えるかも
