@@ -22,8 +22,14 @@
 
 #ifndef CONSOLEAPP_PROMPT_H
 #define CONSOLEAPP_PROMPT_H
-#include "config.h"
+#include "./config.h"
 #ifndef CONSOLEAPP_DISABLE_PROMPT
+
+#ifdef _WIN32
+#include "./common_win32.h"
+#endif
+
+#include "./common_defines.h"
 
 extern const char DEFAULT_SC_HEAD[];
 extern const char DEFAULT_SC_TAIL[];

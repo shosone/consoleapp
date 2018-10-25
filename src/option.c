@@ -20,9 +20,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE. */
 
-#include "option.h"
-#include "defines.h"
-#include "errmsg.h"
+#include "./option.h"
 #include <stdint.h>
 #include <string.h>
 #include <stdlib.h>

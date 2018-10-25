@@ -71,16 +71,16 @@ This is a part of "sample/sample.c". The flow of the Program is,
 int main(int argc, char *argv[]){
 
     /* here!!! 1 */
-    regOptProperty(HELP,        "-h", "--help",        0,       0,              NULL);
-    regOptProperty(VERSION,     "-v", "--version",     0,       0,              NULL);
-    regOptProperty(PRINT,       "-p", "--print",       1, INT_MAX,              NULL);
-    regOptProperty(INTERACTIVE, "-i", "--interactive", 1,       1, chkOptInteractive);
+    regOptProperty(HELP,        "-h", "--help",        0, 0,       NULL);
+    regOptProperty(VERSION,     "-v", "--version",     0, 0,       NULL);
+    regOptProperty(PRINT,       "-p", "--print",       1, INT_MAX, NULL);
+    regOptProperty(INTERACTIVE, "-i", "--interactive", 1, 1,       chkOptInteractive);
 
     /* here!!! 2 */
     int    optless_num = 0;
     char **optless     = NULL;
     if(groupingOpt(argc, argv, &optless_num, &optless) == OPTION_FAILURE){
-        fprintf(stderr, "sample: an error occurred while parsing the option.\n");
+        fprintf(stderr, "sample: an error occurred while parsing options.\n");
         return 0;
     }
 

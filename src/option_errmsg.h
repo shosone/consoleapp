@@ -24,26 +24,18 @@
 #ifndef CONSOLEAPP_ERRMSG_H
 #define CONSOLEAPP_ERRMSG_H
 
-#include <stdio.h>
-#include "defines.h"
-
 #ifdef OPTION_AUTOMSG
+
+#include <stdio.h>
+
 #define printUsrErrMsg(errcode, short_form, long_form)\
     fprintf(stderr, option_usr_errmsg[errcode], short_form, isNull(long_form) ? " \b\b" : long_form);\
     fprintf(stderr, "\n")
-#else
-#define printUsrErrMsg(errcode, short_form, long_form)
-#endif
 
-#ifdef OPTION_AUTOMSG
 #define printProgramerErrMsg(errcode)\
     fprintf(stderr, option_programer_errmsg[errcode],  __func__);\
     fprintf(stderr, "\n")
-#else
-#define printProgramerErrMsg(errcode)
-#endif
 
-#ifdef OPTION_AUTOMSG
 #define printDeveloperErrMsg(errcode)\
     fprintf(stderr, option_developer_errmsg[errcode], "");\
     fprintf(stderr, "\n");\
@@ -52,11 +44,7 @@
     fprintf(stderr, " function: %s\n", __func__);\
     fprintf(stderr, " line no: %d\n", __LINE__);\
     fprintf(stderr, " please give us a bug info. (https://github.com/shosone/consoleapp)")
-#else
-#define printDeveloperErrMsg(errcode)
-#endif
 
-#ifdef OPTION_AUTOMSG
 /* use printUsrErrMsg(errcode, option_or_content_name) */
 typedef enum{
     OPTION_DUPLICATE_SAME_OPT, 
@@ -99,5 +87,12 @@ static const char *option_developer_errmsg[] = {
     "there may be a bug in libconsoleapp.a (;_;): out of memory occurred.",
     "there may be a bug in libconsoleapp.a (;_;): unexpected constant value in switch statement.",
 };
+
+#else
+
+#define printUsrErrMsg(errcode, short_form, long_form)
+#define printProgramerErrMsg(errcode)
+#define printDeveloperErrMsg(errcode)
+
 #endif /* OPTION_AUTOMSG */
 #endif /* CONSOLEAPP_ERR_MSG_H */

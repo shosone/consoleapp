@@ -1,20 +1,23 @@
-#for build
-CC               = gcc
-INC_PATH         = ./src
-SRC_PATH         = ./src
-SAMPLE_SRC_PATH  = ./sample
-LIB_PATH_RELEASE = ./lib/release
-LIB_PATH_DEBUG   = ./lib/debug
-OBJ_PATH_RELEASE = ./obj/release
-OBJ_PATH_DEBUG   = ./obj/debug
-CFLAGS_RELEASE   = -Wall -O3 
-CFLAGS_DEBUG     = -Wall -g3 -O0 
-CFLAGS_LINK_LIB  = -lreadline
+#for build libraries
+CC               := gcc
+INC_PATH         := ./src
+SRC_PATH         := ./src
+SAMPLE_SRC_PATH  := ./sample
+LIB_PATH_RELEASE := ./lib/release
+LIB_PATH_DEBUG   := ./lib/debug
+OBJ_PATH_RELEASE := ./obj/release
+OBJ_PATH_DEBUG   := ./obj/debug
+CFLAGS_RELEASE   := -Wall -O3 
+CFLAGS_DEBUG     := -Wall -g3 -O0 
+TARGET_RELEASE   := libprompt.a liboption.a
+TARGET_DEBUG     := libprompt_debug.a liboption_debug.a
+
+#for build sample app
+CFLAGS_SAMPLE :=  -Wall -lprompt_debug -loption_debug -lreadline
 
 #for install
-TARGET  = libconsoleapp.a
-LIB_DIR = /usr/lib
-INC_DIR = /usr/include/consoleapp
+LIB_DIR  := /usr/lib
+INC_DIR  := /usr/include/consoleapp
 
 vpath %.h $(INC_PATH)
 vpath %.c $(SRC_PATH) $(SAMPLE_SRC_PATH)
@@ -24,23 +27,27 @@ vpath %.a $(LIB_PATH_RELEASE) $(LIB_PATH_DEBUG)
 .PHONY: clean tag install uninstall 
 
 all: 
-	make release
-	make debug
+	@for r in $(TARGET_RELEASE); \
+	do make $$r;                 \
+	done
+	@for d in $(TARGET_DEBUG);   \
+	do make $$d;                 \
+	done
 	make sample
 	ctags -R
 
-sample: sample.c libconsoleapp_debug.a
-	$(CC) $(CFLAGS_DEBUG) -I$(INC_PATH) -L$(LIB_PATH_DEBUG) -o$(SAMPLE_SRC_PATH)/$@ $(SAMPLE_SRC_PATH)/sample.c -lconsoleapp_debug -lreadline
+sample: sample.c $(TARGET_DEBUG)
+	$(CC) $(CFLAGS_DEBUG) -I$(INC_PATH) -L$(LIB_PATH_DEBUG) -o$(SAMPLE_SRC_PATH)/$@ $< $(CFLAGS_SAMPLE)
 
-release: option.o prompt.o
-	mkdir -p $(LIB_PATH_RELEASE)
-	ar rcs libconsoleapp.a $(OBJ_PATH_RELEASE)/*
-	mv libconsoleapp.a $(LIB_PATH_RELEASE)
-
-debug: option_debug.o prompt_debug.o
+lib%_debug.a: %_debug.o
 	mkdir -p $(LIB_PATH_DEBUG)
-	ar rcs libconsoleapp_debug.a $(OBJ_PATH_DEBUG)/*
-	mv libconsoleapp_debug.a $(LIB_PATH_DEBUG)
+	ar rcs $@ $(OBJ_PATH_DEBUG)/$^
+	mv $@ $(LIB_PATH_DEBUG)
+
+lib%.a: %.o
+	mkdir -p $(LIB_PATH_RELEASE)
+	ar rcs $@ $(OBJ_PATH_RELEASE)/$^
+	mv $@ $(LIB_PATH_RELEASE)
 
 %_debug.o: %.c %.h 
 	mkdir -p $(OBJ_PATH_DEBUG)
@@ -56,17 +63,23 @@ confing.h:
 	touch src/config.h
 
 install:
-	@make release
-	@sudo cp $(LIB_PATH_RELEASE)/$(TARGET) $(LIB_DIR)
-	@sudo mkdir $(INC_DIR)
-	@sudo cp $(INC_PATH)/*.h $(INC_DIR)
+	sudo mkdir $(INC_DIR)
+	@for r in $(TARGET_RELEASE);                     \
+	do                                              \
+		make $$r;                                   \
+		sudo cp $(LIB_PATH_RELEASE)/$$r $(LIB_DIR); \
+		sudo cp $(INC_PATH)/*.h $(INC_DIR);         \
+	done
 
 uninstall:
-	@sudo rm -f $(LIB_DIR)/$(TARGET)
-	@sudo rm -rf $(INC_DIR)
+	sudo rm -rf $(INC_DIR)
+	@for r in $(TARGET_RELEASE);    \
+	do                             \
+		sudo rm -f $(LIB_DIR)/$$r; \
+	done
 
 tag:
-	ctags -R --language-force=C
+	@ctags -R --language-force=C
 
 clean:
 	find . -name "*.[ao]" | xargs rm -f

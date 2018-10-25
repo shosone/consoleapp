@@ -3,7 +3,8 @@
 #include <string.h>
 #include <limits.h>
 #include <readline/readline.h>
-#include "../src/consoleapp.h"
+#include "../src/option.h"
+#include "../src/prompt.h"
 
 #define DEBUG 1
 
@@ -39,15 +40,15 @@ int chkOptInteractive(char **contents, int dont_care){
 
 int main(int argc, char *argv[]){
 
-    regOptProperty(HELP,        "-h", "--help",        0,       0,              NULL);
-    regOptProperty(VERSION,     "-v", "--version",     0,       0,              NULL);
-    regOptProperty(PRINT,       "-p", "--print",       1, INT_MAX,              NULL);
-    regOptProperty(INTERACTIVE, "-i", "--interactive", 1,       1, chkOptInteractive);
+    regOptProperty(HELP,        "-h", "--help",        0, 0,       NULL);
+    regOptProperty(VERSION,     "-v", "--version",     0, 0,       NULL);
+    regOptProperty(PRINT,       "-p", "--print",       1, INT_MAX, NULL);
+    regOptProperty(INTERACTIVE, "-i", "--interactive", 1, 1,       chkOptInteractive);
 
     int    optless_num = 0;
     char **optless     = NULL;
     if(groupingOpt(argc, argv, &optless_num, &optless) == OPTION_FAILURE){
-        fprintf(stderr, "sample: an error occurred while parsing the option.\n");
+        fprintf(stderr, "sample: an error occurred while parsing options.\n");
         return 0;
     }
 

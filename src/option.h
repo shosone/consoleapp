@@ -23,6 +23,13 @@
 #ifndef CONSOLEAPP_OPTION_H
 #define CONSOLEAPP_OPTION_H
 
+#ifdef _WIN32
+#include "./common_win32.h"
+#endif
+
+#include "./common_defines.h"
+#include "./option_errmsg.h"
+
 #define OPTION_SUCCESS  0
 #define OPTION_FAILURE -1
 
