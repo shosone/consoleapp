@@ -28,6 +28,10 @@
 #endif
 
 #include "./common_defines.h"
+
+#define OPTION_AUTOMSG
+#define CONSOLEAPP_OPTION_VERSION "0.0"
+
 #include "./option_errmsg.h"
 
 #define OPTION_SUCCESS  0

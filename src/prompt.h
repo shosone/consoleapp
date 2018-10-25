@@ -31,6 +31,8 @@
 
 #include "./common_defines.h"
 
+#define CONSOLEAPP_PROMPT_VERSION "0.0"
+
 extern const char DEFAULT_SC_HEAD[];
 extern const char DEFAULT_SC_TAIL[];
 extern const char DEFAULT_SC_NEXT_BLOCK[];

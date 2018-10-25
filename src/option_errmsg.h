@@ -39,7 +39,7 @@
 #define printDeveloperErrMsg(errcode)\
     fprintf(stderr, option_developer_errmsg[errcode], "");\
     fprintf(stderr, "\n");\
-    fprintf(stderr, " version: %s\n", CONSOLEAPP_VERSION);\
+    fprintf(stderr, " version: %s\n", CONSOLEAPP_OPTION_VERSION);\
     fprintf(stderr, " file: %s\n", __FILE__);\
     fprintf(stderr, " function: %s\n", __func__);\
     fprintf(stderr, " line no: %d\n", __LINE__);\

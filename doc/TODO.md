@@ -29,4 +29,4 @@
 - errno.hの導入
 - liboption.aとlibprompt.aの２つのライブラリを生成するよう変更したことに伴うREADME.mdの更新
 ### Bug
-- regOptPropertyでpriorityの値がOPTION_SUCCESSになっていたらエラーにする
+- 見つかっておらず
