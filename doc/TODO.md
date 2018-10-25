@@ -25,10 +25,8 @@
 - ソースのコメントを英語にする
 - 現在はrwh()内でショートカットが入力された際の動作を実装しているが、割り込み処理で実現できないか調べる
 - getchは自作しなくてもcurses.hにwgetchが定義されていたのでこっちが使えるかも
-- string\_plus.h追加
-- datastructure.h追加
 - winでwarningを消すためにstrtokをstrtok\_sに変えるかstrcharで自力でparseする
-- GnuMakeのmake install, make uninstall対応
 - errno.hの導入
+- liboption.aとlibprompt.aの２つのライブラリを生成するよう変更したことに伴うREADME.mdの更新
 ### Bug
-- 今の所見つかっていない
+- regOptPropertyでpriorityの値がOPTION_SUCCESSになっていたらエラーにする
