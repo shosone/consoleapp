@@ -1,3 +1,4 @@
+#for build
 CC               = gcc
 INC_PATH         = ./src
 SRC_PATH         = ./src
@@ -10,12 +11,17 @@ CFLAGS_RELEASE   = -Wall -O3
 CFLAGS_DEBUG     = -Wall -g3 -O0 
 CFLAGS_LINK_LIB  = -lreadline
 
+#for install
+TARGET  = libconsoleapp.a
+LIB_DIR = /usr/lib
+INC_DIR = /usr/include/consoleapp
+
 vpath %.h $(INC_PATH)
 vpath %.c $(SRC_PATH) $(SAMPLE_SRC_PATH)
 vpath %.o $(OBJ_PATH_RELEASE) $(OBJ_PATH_DEBUG)
 vpath %.a $(LIB_PATH_RELEASE) $(LIB_PATH_DEBUG) 
 
-.PHONY: clean tag
+.PHONY: clean tag install uninstall 
 
 all: 
 	make release
@@ -48,6 +54,16 @@ debug: option_debug.o prompt_debug.o
 
 confing.h:
 	touch src/config.h
+
+install:
+	@make release
+	@sudo cp $(LIB_PATH_RELEASE)/$(TARGET) $(LIB_DIR)
+	@sudo mkdir $(INC_DIR)
+	@sudo cp $(INC_PATH)/*.h $(INC_DIR)
+
+uninstall:
+	@sudo rm -f $(LIB_DIR)/$(TARGET)
+	@sudo rm -rf $(INC_DIR)
 
 tag:
 	ctags -R --language-force=C
