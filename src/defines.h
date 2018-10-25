@@ -1,4 +1,4 @@
-﻿/* MIT License
+/* MIT License
  * 
  * Copyright (c) 2018 Sho Sone
  * 
@@ -18,19 +18,20 @@
  * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
- * SOFTWARE.
- *  */
+ * SOFTWARE. 
+ */
 
-#ifndef CONSOLE_APP_H
-#define CONSOLE_APP_H
+#ifndef CONSOLEAPP_DEFINES_H
+#define CONSOLEAPP_DEFINES_H
 
-#ifdef _WIN32
-#include "win32.h"
+#define CONSOLEAPP_VERSION "0.0.0"
+
+#ifndef isNull
+#define isNull(p)    ((p) == NULL)
 #endif
 
-#define OPTION_AUTOMSG
-
-#include "option.h"
-#include "prompt.h"
+#ifndef isNotNull
+#define isNotNull(p) ((p) != NULL)
+#endif
 
 #endif

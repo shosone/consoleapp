@@ -20,14 +20,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE. */
 
-#ifndef OPTION_H
-#define OPTION_H
-
-#ifndef _GNU_SOURCE
-#define _GNU_SOURCE
-#endif
-
-#include <stdbool.h>
+#ifndef CONSOLEAPP_OPTION_H
+#define CONSOLEAPP_OPTION_H
 
 #define OPTION_SUCCESS  0
 #define OPTION_FAILURE -1

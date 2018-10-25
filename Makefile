@@ -36,7 +36,7 @@ debug: option_debug.o prompt_debug.o
 	ar rcs libconsoleapp_debug.a $(OBJ_PATH_DEBUG)/*
 	mv libconsoleapp_debug.a $(LIB_PATH_DEBUG)
 
-%_debug.o: %.c %.h
+%_debug.o: %.c %.h 
 	mkdir -p $(OBJ_PATH_DEBUG)
 	$(CC) $(CFLAGS_DEBUG) -I$(INC_PATH) -o$@ -c $(SRC_PATH)/$*.c
 	mv $@ $(OBJ_PATH_DEBUG)

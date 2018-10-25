@@ -1,4 +1,4 @@
-﻿/* MIT License
+/* MIT License
  * 
  * Copyright (c) 2018 Sho Sone
  * 
@@ -18,19 +18,14 @@
  * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
- * SOFTWARE.
- *  */
+ * SOFTWARE. 
+ */
 
-#ifndef CONSOLE_APP_H
-#define CONSOLE_APP_H
+#ifndef CONSOLEAPP_WIN32_H
+#define CONSOLEAPP_WIN32_H
 
-#ifdef _WIN32
-#include "win32.h"
-#endif
-
-#define OPTION_AUTOMSG
-
-#include "option.h"
-#include "prompt.h"
+/* for removing worning message */
+#define strtok strtok_s
+#define strlen strlen_s
 
 #endif

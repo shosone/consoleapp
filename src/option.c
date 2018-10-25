@@ -21,25 +21,14 @@
  * SOFTWARE. */
 
 #include "option.h"
+#include "defines.h"
+#include "errmsg.h"
 #include <stdint.h>
 #include <string.h>
 #include <stdlib.h>
 #include <ctype.h>
 #include <limits.h>
 #include <stdbool.h>
-#include <stdio.h>
-
-/* ===================================== macros =============================== */
-
-#define LIBCONSOLE_APP_VERSION "0.0"
-
-#ifndef isNull
-#define isNull(p)    ((p) == NULL)
-#endif
-
-#ifndef isNotNull
-#define isNotNull(p) ((p) != NULL)
-#endif
 
 /* ==================================== structures =================================== */
 
@@ -55,68 +44,6 @@ typedef struct _opt_property_t{
     int          priority;                                             /* オプションが複数指定された時にどのオプションを優先的に処理するかを明示するためのフィールド. 0が最も高い. */
     bool         appeared_yet;                                         /* 同じオプションがすでに指定されたかチェックするためのメモとして用いる */
 }opt_property_t;
-
-/* ====================================== error controllers ============================== */
-
-#define printUsrErrMsg(errcode, short_form, long_form)\
-    fprintf(stderr, option_usr_errmsg[errcode], short_form, isNull(long_form) ? " \b\b" : long_form);\
-    fprintf(stderr, "\n")
-
-#define printProgramerErrMsg(errcode)\
-    fprintf(stderr, option_programer_errmsg[errcode],  __func__);\
-    fprintf(stderr, "\n")
-
-#define printDeveloperErrMsg(errcode)\
-    fprintf(stderr, option_developer_errmsg[errcode], "");\
-    fprintf(stderr, "\n");\
-    fprintf(stderr, " version: %s\n", LIBCONSOLE_APP_VERSION);\
-    fprintf(stderr, " file: %s\n", __FILE__);\
-    fprintf(stderr, " function: %s\n", __func__);\
-    fprintf(stderr, " line no: %d\n", __LINE__);\
-    fprintf(stderr, " please give us a bug info. (https://github.com/shosone/consoleapp)")
-
-/* use printUsrErrMsg(errcode, option_or_content_name) */
-typedef enum{
-    OPTION_DUPLICATE_SAME_OPT, 
-    OPTION_TOO_MANY_CONTENTS, 
-    OPTION_TOO_LITTLE_CONTENTS, 
-}option_usr_errcode_t;
-
-/* use printProgramerErrMsg(errcode) */
-typedef enum{
-    OPTION_SHORT_FORM_IS_NULL,
-    OPTION_MIN_BIGGER_THAN_MAX, 
-    OPTION_PROP_GP_IS_NULL, 
-    OPTION_SAME_PRIORITY,
-    OPTION_SAME_SHORT_LONG_FORMAT,
-    OPTION_PRIORITY_IS_OPTION_SUCCESS,
-}option_programer_errcode_t;
-
-/* use printDeveloperErrMsg(errcode) */
-typedef enum{
-    OPTION_OUT_OF_MEMORY, 
-    OPTION_UNEXPECTED_CONSTANT_VALUE_IN_SWITCH,
-}option_subroutine_errcode_t;
-
-static const char *option_usr_errmsg[] = {
-    "option error: duplicate same option %s(%s).",
-    "option error: the number of contents of option %s(%s) is too many.",
-    "option error: the number of contents of option %s(%s) is too little.",
-};
-
-static const char *option_programer_errmsg[] = {
-    "API usage error (%s@libconsoleapp.a): opt_property_t\'s field short_form cannot be NULL. please check 2nd argument of regOptProperty().",
-    "API usage error (%s@libconsoleapp.a): sopt_property_t\'s filed content_num_min bigger than content_num_max. please check 4th and 5th argument of regOptProperty().",
-    "API usage error (%s@libconsoleapp.a): option property information have not registerd.",
-    "API usage error (%s@libconsoleapp.a): sopt_property_t\'s field priority must be different from the priority of other properties.",
-    "API usage error (%s@libconsoleapp.a): opt_property_t\'s field short_form and long_form must be different from the priority of other properties.",
-    "API usage error (%s@libconsoleapp.a): opt_property_t\'s field priority must note be OPTION_SUCCESS.",
-};
-
-static const char *option_developer_errmsg[] = {
-    "there may be a bug in libconsoleapp.a (;_;): out of memory occurred.",
-    "there may be a bug in libconsoleapp.a (;_;): unexpected constant value in switch statement.",
-};
 
 /* =========================== global variables ========================= */
 
@@ -370,7 +297,7 @@ judgeDestination(
     }
 
     printUsrErrMsg(OPTION_TOO_MANY_CONTENTS, current_options_property -> short_form, current_options_property -> long_form);
-    return OPTION_TOO_MANY_CONTENTS;
+    return OPTION_FAILURE;
 }
 
 /* TODO: テスト */
@@ -414,12 +341,12 @@ updateOptGrpGP(
                     isNull(grp_gp = (opt_group_t**)realloc(grp_gp, sizeof(opt_group_t)*(grp_num_g+1))))
             {
                 printDeveloperErrMsg(OPTION_OUT_OF_MEMORY);
-                return OPTION_OUT_OF_MEMORY;
+                return OPTION_FAILURE;
             }
             if(isNull(grp_gp[grp_num_g] = (opt_group_t*)malloc(sizeof(opt_group_t)))){
                 printDeveloperErrMsg(OPTION_OUT_OF_MEMORY);
                 grp_gp = (opt_group_t**)realloc(grp_gp, sizeof(opt_group_t*)*grp_num_g); /* reducing */
-                return OPTION_OUT_OF_MEMORY;
+                return OPTION_FAILURE;
             }
             initOptGroupT(grp_gp[grp_num_g]);
             grp_gp[grp_num_g] -> priority = *(int *)assign_value_p;
@@ -434,12 +361,12 @@ updateOptGrpGP(
                         isNull(grp->contents = (char **)realloc(grp->contents, sizeof(char *)*(grp->content_num+1))))
                 {
                     printDeveloperErrMsg(OPTION_OUT_OF_MEMORY);
-                    return OPTION_OUT_OF_MEMORY;
+                    return OPTION_FAILURE;
                 }
                 if(isNull(grp->contents[grp->content_num] = (char*)malloc(strlen(assign_value_p)+1))){
                     printDeveloperErrMsg(OPTION_OUT_OF_MEMORY);
                     grp->contents = (char **)realloc(grp->contents, sizeof(char*)*(grp->content_num)); /* reducing */
-                    return OPTION_OUT_OF_MEMORY;
+                    return OPTION_FAILURE;
                 }
                 grp->contents[grp->content_num] = assign_value_p;
                 grp -> content_num++;
@@ -448,7 +375,7 @@ updateOptGrpGP(
 
         default:
             printDeveloperErrMsg(OPTION_UNEXPECTED_CONSTANT_VALUE_IN_SWITCH);
-            return OPTION_UNEXPECTED_CONSTANT_VALUE_IN_SWITCH;
+            return OPTION_FAILURE;
     }
 
     return OPTION_SUCCESS;
