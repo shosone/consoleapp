@@ -21,44 +21,25 @@
  * SOFTWARE. 
  */
 
-#ifndef OPTION_ERRMSG_H
-#define OPTION_ERRMSG_H
+#ifndef CONSOLEAPP_COMMON_H
+#define CONSOLEAPP_COMMON_H
 
-#ifdef _WIN32
-#include "./win32.h"
+#ifndef isNull
+#define isNull(p)    ((p) == NULL)
 #endif
 
-#include "./common.h"
+#ifndef isNotNull
+#define isNotNull(p) ((p) != NULL)
+#endif
+
+#define CONAPP_DEFAULT_ERRNO -1
 
 typedef enum{
-    OPTION_SHORT_FORM_IS_NULL,
-    OPTION_MIN_BIGGER_THAN_MAX, 
-    OPTION_PROP_GP_IS_NULL, 
-    OPTION_SAME_PRIORITY,
-    OPTION_SAME_SHORT_LONG_FORMAT,
-    OPTION_PRIORITY_IS_OPTION_SUCCESS,
-}option_api_usage_errcode_t;
+    CONAPP_UNEXPECTED_CONSTANT_VALUE_IN_SWITCH,
+}conapp_bugcode_t;
 
-typedef enum{
-    OPTION_DUPLICATE_SAME_OPT,
-    OPTION_TOO_MANY_CONTENTS, 
-    OPTION_TOO_LITTLE_CONTENTS, 
-}option_end_usr_errcode_t;
+void
+_conappBugReport(
+        conapp_bugcode_t errno);
 
-extern char *option_errmsg;
-extern int   option_errno;
-
-#define _printAPIusageErrMsg(errno) __printAPIusageErrMsg(errno, __func__)
-
-extern void
-__printAPIusageErrMsg(
-        option_api_usage_errcode_t errcode,
-        const char*                func_name);
-
-extern void
-_makeEndUsrErrMsg(
-        option_end_usr_errcode_t errcode,
-        char *short_form,
-        char *long_form);
-
-#endif 
+#endif

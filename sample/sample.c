@@ -48,6 +48,7 @@ int main(int argc, char *argv[]){
     int    optless_num = 0;
     char **optless     = NULL;
     if(groupingOpt(argc, argv, &optless_num, &optless) == OPTION_FAILURE){
+        fprintf(stderr, "errno: %d, %s\n", option_errno, option_errmsg);
         fprintf(stderr, "sample: an error occurred while parsing options.\n");
         return 0;
     }

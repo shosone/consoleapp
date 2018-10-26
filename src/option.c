@@ -179,12 +179,12 @@ decodeOptions(
                     *new_argc_p > SIZE_MAX/sizeof(char*) || /* overflow check */
                     isNull((*new_argv_p) = (char **)realloc(*new_argv_p, sizeof(char *)*(*new_argc_p))))
             {
-                printDeveloperErrMsg(OPTION_OUT_OF_MEMORY);
+                /* out of memory should be handled in errno, not in this library */
                 goto free_and_exit;
             }
             const size_t copy_src_len_plus1 = strlen(copy_src) + 1;
             if(isNull((*new_argv_p)[*new_argc_p-1] = (char *)malloc(sizeof(char)*(copy_src_len_plus1)))){
-                printDeveloperErrMsg(OPTION_OUT_OF_MEMORY);
+                /* out of memory should be handled in errno, not in this library */
                 goto free_and_exit;
             }
             if(delim == ','){
@@ -238,7 +238,7 @@ judgeDestination(
     /* if str == NULL, this function was called as finalizing.  */
     if(isNull(str)){
         if(current_options_contents_num < current_options_contents_num_min){
-            printUsrErrMsg(OPTION_TOO_LITTLE_CONTENTS, current_options_property -> short_form, current_options_property -> long_form);
+            _makeEndUsrErrMsg(OPTION_TOO_LITTLE_CONTENTS, current_options_property -> short_form, current_options_property -> long_form);
             return OPTION_FAILURE;
         }
         return OPTION_SUCCESS;
@@ -251,11 +251,11 @@ judgeDestination(
                 opt_grp_dbs_flagless_locked = true;
             }
             if(current_options_property -> appeared_yet){
-                printUsrErrMsg(OPTION_DUPLICATE_SAME_OPT, current_options_property -> short_form, current_options_property -> long_form);
+                _makeEndUsrErrMsg(OPTION_DUPLICATE_SAME_OPT, current_options_property -> short_form, current_options_property -> long_form);
                 return OPTION_FAILURE;
             }
             if(current_options_contents_num < current_options_contents_num_min){
-                printUsrErrMsg(OPTION_TOO_LITTLE_CONTENTS, current_options_property -> short_form, current_options_property -> long_form);
+                _makeEndUsrErrMsg(OPTION_TOO_LITTLE_CONTENTS, current_options_property -> short_form, current_options_property -> long_form);
                 return OPTION_FAILURE;
             }
             prop_gp[i]->appeared_yet = 1;
@@ -270,7 +270,7 @@ judgeDestination(
     /* 文字列の先頭の改行コードはdecodeOptionsにてこの関数のために付属された情報で本来の文字列には先頭の改行コードは存在しない */
     if(str[0] == '\n'){
         if(current_options_contents_num >= current_options_contents_num_max){
-            printUsrErrMsg(OPTION_TOO_MANY_CONTENTS, current_options_property -> short_form, current_options_property -> long_form);
+            _makeEndUsrErrMsg(OPTION_TOO_MANY_CONTENTS, current_options_property -> short_form, current_options_property -> long_form);
             return OPTION_FAILURE;
         }
         else{
@@ -294,7 +294,7 @@ judgeDestination(
         return JD_OPT_GRP_DBs_OPTLESS;
     }
 
-    printUsrErrMsg(OPTION_TOO_MANY_CONTENTS, current_options_property -> short_form, current_options_property -> long_form);
+    _makeEndUsrErrMsg(OPTION_TOO_MANY_CONTENTS, current_options_property -> short_form, current_options_property -> long_form);
     return OPTION_FAILURE;
 }
 
@@ -309,7 +309,7 @@ updateOptless(
             (*optless_num+1) > SIZE_MAX/sizeof(char*) || /* overflow check */
             isNull(*optless = (char**)realloc(*optless, sizeof(char*)*(*optless_num+1))))
     {
-        printDeveloperErrMsg(OPTION_OUT_OF_MEMORY);
+        /* out of memory should be handled in errno, not in this library */
         return OPTION_FAILURE;
     }
 
@@ -317,7 +317,7 @@ updateOptless(
     if(isNull((*optless)[*optless_num] = (char*)malloc(str_len_plus1)))
     {
         *optless = realloc(*optless, sizeof(char*)*(*optless_num)); /* reducing */
-        printDeveloperErrMsg(OPTION_OUT_OF_MEMORY);
+        /* out of memory should be handled in errno, not in this library */
         return OPTION_FAILURE;
     }
     memcpy((*optless)[*optless_num], str, str_len_plus1);
@@ -338,11 +338,11 @@ updateOptGrpGP(
                     (grp_num_g+1) > SIZE_MAX/sizeof(opt_group_t) ||  /* overflow check */
                     isNull(grp_gp = (opt_group_t**)realloc(grp_gp, sizeof(opt_group_t)*(grp_num_g+1))))
             {
-                printDeveloperErrMsg(OPTION_OUT_OF_MEMORY);
+                /* out of memory should be handled in errno, not in this library */
                 return OPTION_FAILURE;
             }
             if(isNull(grp_gp[grp_num_g] = (opt_group_t*)malloc(sizeof(opt_group_t)))){
-                printDeveloperErrMsg(OPTION_OUT_OF_MEMORY);
+                /* out of memory should be handled in errno, not in this library */
                 grp_gp = (opt_group_t**)realloc(grp_gp, sizeof(opt_group_t*)*grp_num_g); /* reducing */
                 return OPTION_FAILURE;
             }
@@ -358,11 +358,11 @@ updateOptGrpGP(
                         (grp->content_num+1) > SIZE_MAX/sizeof(char*) || /* overflow check */
                         isNull(grp->contents = (char **)realloc(grp->contents, sizeof(char *)*(grp->content_num+1))))
                 {
-                    printDeveloperErrMsg(OPTION_OUT_OF_MEMORY);
+                /* out of memory should be handled in errno, not in this library */
                     return OPTION_FAILURE;
                 }
                 if(isNull(grp->contents[grp->content_num] = (char*)malloc(strlen(assign_value_p)+1))){
-                    printDeveloperErrMsg(OPTION_OUT_OF_MEMORY);
+                    /* out of memory should be handled in errno, not in this library */
                     grp->contents = (char **)realloc(grp->contents, sizeof(char*)*(grp->content_num)); /* reducing */
                     return OPTION_FAILURE;
                 }
@@ -372,7 +372,7 @@ updateOptGrpGP(
             }
 
         default:
-            printDeveloperErrMsg(OPTION_UNEXPECTED_CONSTANT_VALUE_IN_SWITCH);
+            _conappBugReport(CONAPP_UNEXPECTED_CONSTANT_VALUE_IN_SWITCH);
             return OPTION_FAILURE;
     }
 
@@ -424,29 +424,29 @@ regOptProperty( /* opt_property_db_tのエントリを追加する関数 */
     /* [begin] error check */
 
     if(isNull(short_form)){
-        printProgramerErrMsg(OPTION_SHORT_FORM_IS_NULL);
+        _printAPIusageErrMsg(OPTION_SHORT_FORM_IS_NULL);
         return OPTION_FAILURE;
     }
 
     if(content_num_max < content_num_min){
-        printProgramerErrMsg(OPTION_MIN_BIGGER_THAN_MAX);
+        _printAPIusageErrMsg(OPTION_MIN_BIGGER_THAN_MAX);
         return OPTION_FAILURE;
     }
 
     if(priority == OPTION_SUCCESS){
-        printProgramerErrMsg(OPTION_PRIORITY_IS_OPTION_SUCCESS);
+        _printAPIusageErrMsg(OPTION_PRIORITY_IS_OPTION_SUCCESS);
         return OPTION_FAILURE;
     }
 
     for(int i=0; i<prop_num_g; i++){
         if(prop_gp[i]->priority == priority){
-            printProgramerErrMsg(OPTION_SAME_PRIORITY);
+            _printAPIusageErrMsg(OPTION_SAME_PRIORITY);
             return OPTION_FAILURE;
         }
         if(strcmp(prop_gp[i]->short_form, short_form) == 0 || 
            (isNull(long_form) || isNull(prop_gp[i]->long_form) || strcmp(prop_gp[i]->long_form, long_form) == 0))
         {
-            printProgramerErrMsg(OPTION_SAME_SHORT_LONG_FORMAT);
+            _printAPIusageErrMsg(OPTION_SAME_SHORT_LONG_FORMAT);
             return OPTION_FAILURE;
         }
     }
@@ -457,12 +457,12 @@ regOptProperty( /* opt_property_db_tのエントリを追加する関数 */
             prop_num_g > SIZE_MAX-1 || /* overflow check */
             isNull(prop_gp = realloc(prop_gp, prop_num_g+1)))
     {
-        printDeveloperErrMsg(OPTION_OUT_OF_MEMORY);
+        /* out of memory should be handled in errno, not in this library */
         return OPTION_FAILURE;
     }
 
     if(isNull(prop_gp[prop_num_g] = malloc(sizeof(opt_property_t)))){
-        printDeveloperErrMsg(OPTION_OUT_OF_MEMORY);
+        /* out of memory should be handled in errno, not in this library */
         prop_gp = realloc(prop_gp, prop_num_g); /* reducing */ 
         return OPTION_FAILURE;
     }
@@ -493,7 +493,7 @@ regOptProperty( /* opt_property_db_tのエントリを追加する関数 */
     return OPTION_SUCCESS;
 
 free_and_exit:
-    printDeveloperErrMsg(OPTION_OUT_OF_MEMORY);
+    /* out of memory should be handled in errno, not in this library */
     free(prop_gp[prop_num_g]->short_form);
     free(prop_gp[prop_num_g]->long_form);
     free(prop_gp[prop_num_g]);
@@ -512,7 +512,7 @@ groupingOpt( /* cliより取得したmainの引数であるargc, argvとregOptio
     /* [begin] error check */
 
     if(isNull(prop_gp)){
-        printProgramerErrMsg(OPTION_PROP_GP_IS_NULL);
+        _printAPIusageErrMsg(OPTION_PROP_GP_IS_NULL);
         return OPTION_FAILURE;
     }
 
@@ -550,7 +550,7 @@ groupingOpt( /* cliより取得したmainの引数であるargc, argvとregOptio
                 goto free_and_exit;
 
             default:
-                printDeveloperErrMsg(OPTION_UNEXPECTED_CONSTANT_VALUE_IN_SWITCH);
+                _conappBugReport(CONAPP_UNEXPECTED_CONSTANT_VALUE_IN_SWITCH);
                 goto free_and_exit;
         }
     }

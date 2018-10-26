@@ -24,12 +24,11 @@
 #define CONSOLEAPP_OPTION_H
 
 #ifdef _WIN32
-#include "./common_win32.h"
+#include "./win32.h"
 #endif
 
-#include "./common_defines.h"
+#include "./common.h"
 
-#define OPTION_AUTOMSG
 #define CONSOLEAPP_OPTION_VERSION "0.0"
 
 #include "./option_errmsg.h"

@@ -21,15 +21,13 @@
  * SOFTWARE. 
  */
 
-#ifndef CONSOLEAPP_DEFINES_H
-#define CONSOLEAPP_DEFINES_H
+#ifndef PROMPT_ERRMSG_H
+#define PROMPT_ERRMSG_H
 
-#ifndef isNull
-#define isNull(p)    ((p) == NULL)
+#ifdef _win32
+#include "./win32.h"
 #endif
 
-#ifndef isNotNull
-#define isNotNull(p) ((p) != NULL)
-#endif
+#include "./common.h"
 
 #endif

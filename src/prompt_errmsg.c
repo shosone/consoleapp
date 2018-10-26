@@ -21,44 +21,4 @@
  * SOFTWARE. 
  */
 
-#ifndef OPTION_ERRMSG_H
-#define OPTION_ERRMSG_H
 
-#ifdef _WIN32
-#include "./win32.h"
-#endif
-
-#include "./common.h"
-
-typedef enum{
-    OPTION_SHORT_FORM_IS_NULL,
-    OPTION_MIN_BIGGER_THAN_MAX, 
-    OPTION_PROP_GP_IS_NULL, 
-    OPTION_SAME_PRIORITY,
-    OPTION_SAME_SHORT_LONG_FORMAT,
-    OPTION_PRIORITY_IS_OPTION_SUCCESS,
-}option_api_usage_errcode_t;
-
-typedef enum{
-    OPTION_DUPLICATE_SAME_OPT,
-    OPTION_TOO_MANY_CONTENTS, 
-    OPTION_TOO_LITTLE_CONTENTS, 
-}option_end_usr_errcode_t;
-
-extern char *option_errmsg;
-extern int   option_errno;
-
-#define _printAPIusageErrMsg(errno) __printAPIusageErrMsg(errno, __func__)
-
-extern void
-__printAPIusageErrMsg(
-        option_api_usage_errcode_t errcode,
-        const char*                func_name);
-
-extern void
-_makeEndUsrErrMsg(
-        option_end_usr_errcode_t errcode,
-        char *short_form,
-        char *long_form);
-
-#endif 
