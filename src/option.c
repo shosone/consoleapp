@@ -398,6 +398,7 @@ free_and_exit:
     for(int i=0; i<_errcode_memo_num_g; i++){
         free(_errcode_memo_g);
     }
+    _errcode_memo_g = 0;
     return OPTION_FAILURE;
 }
 
@@ -552,6 +553,7 @@ free_and_exit:
     for(int i=0; i<_grp_num_g; i++){
         free(_grp_gp[i]);
     }
+    _grp_num_g = 0;
     return OPTION_FAILURE;
 }
 
@@ -609,4 +611,7 @@ endOptAnalization(void) /* consoleapp/optionにて確保した動的メモリを
     _grp_gp = NULL;
 
     free(_errcode_memo_g);
+    _prop_num_g = 0;
+    _grp_num_g  = 0;
+    _errcode_memo_num_g = 0;
 }
