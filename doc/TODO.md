@@ -28,4 +28,4 @@
 - errno.hの導入
 - liboption.aとlibprompt.aの２つのライブラリを生成するよう変更したことに伴うREADME.mdの更新
 ### Bug
-- 見つかっておらず
+- consoleapp/promptのrwh()を使っていると途中から文字化けする

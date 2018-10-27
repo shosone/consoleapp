@@ -15,8 +15,8 @@ TARGET_DEBUG     := libprompt_debug.a liboption_debug.a
 
 #for build sample app
 SRC_PATH_SAMPLE := ./sample
-CFLAGS_SAMPLE   :=  -Wall -lprompt_debug -loption_debug -lreadline
-TARGET_SAMPLE   := sample
+CFLAGS_SAMPLE   := -Wall -lprompt_debug -loption_debug -lreadline
+TARGET_SAMPLE   := sample_prompt sample_option
 
 #for install
 LIB_DIR  := /usr/lib
@@ -38,31 +38,34 @@ all:
 	do                           \
 		make $$d;                \
 	done
-	make sample
-	ctags -R
+	@for s in $(TARGET_SAMPLE);  \
+	do                           \
+		make $$s;                \
+	done
+	ctags -R --language-force=C
 
-sample: sample.c $(TARGET_DEBUG)
+sample_%: sample_%.c $(TARGET_DEBUG)
 	$(CC) $(CFLAGS_DEBUG) -I$(INC_PATH) -L$(LIB_PATH_DEBUG) -o$(SRC_PATH_SAMPLE)/$@ $< $(CFLAGS_SAMPLE)
 
 lib%_debug.a: %_debug.o %_errmsg_debug.o common_debug.o
-	mkdir -p $(LIB_PATH_DEBUG)
+	@mkdir -p $(LIB_PATH_DEBUG)
 	$(ARCHIVER) $(OBJFLAGS) $@ $(patsubst %,$(OBJ_PATH_DEBUG)/%,$(filter-out $(OBJ_PATH_DEBUG)%,$^)) $(filter $(OBJ_PATH_DEBUG)%,$^)
-	mv $@ $(LIB_PATH_DEBUG)
+	@mv $@ $(LIB_PATH_DEBUG)
 
 lib%.a: %.o %_errmsg.o common.o
-	mkdir -p $(LIB_PATH_RELEASE)
+	@mkdir -p $(LIB_PATH_RELEASE)
 	$(ARCHIVER) $(OBJFLAGS) $@ $(patsubst %,$(OBJ_PATH_RELEASE)/%,$(filter-out $(OBJ_PATH_RELEASE)%,$^)) $(filter $(OBJ_PATH_RELEASE)%,$^)
-	mv $@ $(LIB_PATH_RELEASE)
+	@mv $@ $(LIB_PATH_RELEASE)
 
 %_debug.o: %.c %.h 
-	mkdir -p $(OBJ_PATH_DEBUG)
+	@mkdir -p $(OBJ_PATH_DEBUG)
 	$(CC) $(CFLAGS_DEBUG) -I$(INC_PATH) -o$@ -c $(SRC_PATH)/$*.c
-	mv $@ $(OBJ_PATH_DEBUG)
+	@mv $@ $(OBJ_PATH_DEBUG)
 
 %.o: %.h %.c confing.h
-	mkdir -p $(OBJ_PATH_RELEASE)
+	@mkdir -p $(OBJ_PATH_RELEASE)
 	$(CC) $(CFLAGS_RELEASE) -I$(INC_PATH) -c $(SRC_PATH)/$*.c
-	mv $@ $(OBJ_PATH_RELEASE)
+	@mv $@ $(OBJ_PATH_RELEASE)
 
 confing.h:
 	touch src/config.h
@@ -84,11 +87,14 @@ uninstall:
 	done
 
 tag:
-	@ctags -R --language-force=C
+	ctags -R --language-force=C
 
 clean:
 	find . -name "*.[ao]" | xargs rm -f
 	rm -rf obj
 	rm -rf lib
 	rm -f tags
-	rm -f $(SRC_PATH_SAMPLE)/sample
+	@for s in $(TARGET_SAMPLE);       \
+	do                                \
+		rm -f $(SRC_PATH_SAMPLE)/$$s; \
+	done

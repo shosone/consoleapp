@@ -28,10 +28,10 @@
 
 static const char *option_api_usage_errmsg[] = {
     "API usage error (%s@libconsoleapp.a): opt_property_t\'s field short_form cannot be NULL. please check 2nd argument of regOptProperty().",
-    "API usage error (%s@libconsoleapp.a): sopt_property_t\'s filed content_num_min bigger than content_num_max. please check 4th and 5th argument of regOptProperty().",
+    "API usage error (%s@libconsoleapp.a): opt_property_t\'s filed content_num_min bigger than content_num_max. please check 4th and 5th argument of regOptProperty().",
     "API usage error (%s@libconsoleapp.a): option property information have not registerd.",
-    "API usage error (%s@libconsoleapp.a): sopt_property_t\'s field priority must be different from the priority of other properties.",
-    "API usage error (%s@libconsoleapp.a): opt_property_t\'s field short_form and long_form must be different from the priority of other properties.",
+    "API usage error (%s@libconsoleapp.a): opt_property_t\'s field priority must be different from each other.",
+    "API usage error (%s@libconsoleapp.a): opt_property_t\'s field short_form and long_form must be different from each other.",
     "API usage error (%s@libconsoleapp.a): opt_property_t\'s field priority must note be OPTION_SUCCESS.",
 };
 
