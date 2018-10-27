@@ -130,7 +130,7 @@ _strninsert( /* NOTE: posの値がstrの範囲内にあるかの確認は呼び�
 /* ====================================== */
 
 static int 
-genCompletionCompare(
+_genCompletionCompare(
     const void* a_,
     const void* b_)
 {
@@ -144,7 +144,7 @@ genCompletionCompare(
 }
 
 completion_t*
-genCompletion(
+_genCompletion(
         const char **strings,
               int    entory_num)
 {
@@ -160,7 +160,7 @@ genCompletion(
     }
     memcpy(strings_copy, strings, sizeof(char *)*entory_num);
 
-    qsort(strings_copy, entory_num, sizeof(char*), genCompletionCompare);
+    qsort(strings_copy, entory_num, sizeof(char*), _genCompletionCompare);
 
     ret -> entory_num = entory_num;
     ret -> entories   = strings_copy;
@@ -170,7 +170,7 @@ genCompletion(
 
 /* lenear search */
 static int /* candidate[戻り値]の文字列は先頭にstrを含む文字列になる */
-search(
+_search(
         int            init_ei,
         char          *str,
         completion_t *candidate)
@@ -193,15 +193,15 @@ search(
 }
 
 static void
-completion(
+_completion(
         char          *str,
         completion_t *candidate)
 {
-    int init_i = search(0, str, candidate);
+    int init_i = _search(0, str, candidate);
 
     if(init_i < candidate->entory_num){
         printf("\n");
-        for(int i=init_i; i<candidate->entory_num; i=search(i+1, str, candidate)){
+        for(int i=init_i; i<candidate->entory_num; i=_search(i+1, str, candidate)){
             printf("%s  ", candidate->entories[i]);
         }
         printf("\n");
@@ -554,14 +554,14 @@ char *
 rwh(
         rwhctx_t    *ctx) 
 {
-    char *line           = NULL;
-    size_t   line_len       = 0;
-    char *tmp            = NULL;
-    int   tmp_len        = 0;
-    size_t   cursor_pos     = 0;
-    int   history_idx    = 0;
-    char *evacated_line  = NULL;
-    const char *prompt   = ctx -> prompt;
+    char   *line          = NULL;
+    size_t  line_len      = 0;
+    char   *tmp           = NULL;
+    int     tmp_len       = 0;
+    size_t  cursor_pos    = 0;
+    int     history_idx   = 0;
+    char   *evacated_line = NULL;
+    const char *prompt = ctx -> prompt;
 
     /* flags */
     bool before_is_dive = 0;
@@ -625,7 +625,7 @@ rwh(
                         goto free_and_break;
 
                     case JS_COMPLETION:
-                        completion(line, ctx->candidate);
+                        _completion(line, ctx->candidate);
                         goto free_and_break;
 
                     case JS_DIVE_HIST:
