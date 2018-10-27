@@ -134,6 +134,14 @@ void printUsage(void){
     printf("\t-v,--version       print version\n");
     printf("\t-p <str..>,\n");
     printf("\t--print=<str..>    print <str>\n");
+    printf("\t-a <num> <num>,\n");
+    printf("\t--add=<num>,<num>  execute <num> + <num>\n");
+    printf("\t-s <num> <num>,\n");
+    printf("\t--sub=<num>,<num>  execute <num> - <num>\n");
+    printf("\t-m <num> <num>,\n");
+    printf("\t--mul=<num>,<num>  execute <num> * <num>\n");
+    printf("\t-d <num> <num>,\n");
+    printf("\t--div=<num>,<num>  execute <num> / <num>\n");
     printf("\n");
 }
 

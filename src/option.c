@@ -106,7 +106,7 @@ static void
 _sortOptGroup(void)
 {
     int compare(const void *a, const void *b){
-        if(((opt_group_t*)a)->priority > ((opt_group_t*)b)->priority){
+        if((*(opt_group_t**)a)->priority > (*(opt_group_t**)b)->priority){
             return 1;
         }
         return 0;

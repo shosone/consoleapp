@@ -29,4 +29,3 @@
 - option_errmsg.cの文言にopt_property_tが入っているが未公開構造体なので修正する
 ### Bug
 - consoleapp/promptのrwh()を使っていると途中から文字化けする
-- priority順になっていない
