@@ -1,16 +1,14 @@
-﻿# libconsoleapp.a
-The libconsoleapp.a is a C library.
-This library aim to provide general-purpose and flexible functions of the console application and to prepare for its development.  
-Currently, this library can be useful for implementing the following two functions in the console app.  
+﻿# Introduction
+This project aim to provide general and flexible functions of the console application and making it easy to its development.  
+Currently, **consoleapp** provides two libraries which can be useful for implementing the following two functions in the console app.  
 
 1. Classification and error check of options received at startup.
 2. Implementation of interactive function.
 
-Hereafter, the function of 1 is called **consoleapp/option**, and the function of 2 is called **consoleapp/prompt**.  
-**consoleapp/option** is implemented in option.c and option.h. **consoleapp/prompt** is implemented in prompt.c and prompt.h.
+The function of 1 is provided by **liboption.a**, and the function of 2 is provided by **libprompt.a**.  
 
-# consoleapp/option
-**consoleapp/option** makes it easy to classification and error check of options received at startup.
+# Specification of liboption.a
+**liboption.a** makes it easy to classification and error check of options received at startup.
 
 ## Struct reference
 
@@ -60,41 +58,46 @@ endOptAnalization(void); /* function to release all dynamic memory secured by co
 ```
 
 ## Sample code
-This is a part of "sample/sample.c". The flow of the Program is,
+This is `main()` of *"sample/sample_option.c"*. The flow of the Program is,
 
-1. register option properties by regOptProperty().
-2. search and classify the strings received from cli for which option belongs to which option.
-3. check error information generated during option analysis.
-4. if there is no error in 3, the process corresponding to the option is executed.
+1. register option properties by `regOptProperty()`.
+2. grouping strings received from cli to each options or does not belong to any options by `gtoupingOpt()`.
+3. determine whether an obvious error occurred while analizating options. if error has occurred, display error details by `option_errno` and `option_errmsg`.
+4. determine whether a user definition error occurred while analizating option by `popOptErrcode()`. if error has occurred, display error details.
+5. pop specified options in decscending order of priority by `popOptGroup()`, and perform processing according to its contents.
 
 ```c:sample.c
 int main(int argc, char *argv[]){
 
-    /* here!!! 1 */
-    regOptProperty(HELP,        "-h", "--help",        0, 0,       NULL);
-    regOptProperty(VERSION,     "-v", "--version",     0, 0,       NULL);
-    regOptProperty(PRINT,       "-p", "--print",       1, INT_MAX, NULL);
-    regOptProperty(INTERACTIVE, "-i", "--interactive", 1, 1,       chkOptInteractive);
-
-    /* here!!! 2 */
     int    optless_num = 0;
     char **optless     = NULL;
+    int    ret         = OPTION_SUCCESS;
+
+    regOptProperty(HELP,    "-h", "--help",    0, 0,       NULL);
+    regOptProperty(VERSION, "-v", "--version", 0, 0,       NULL);
+    regOptProperty(PRINT,   "-p", "--print",   1, INT_MAX, NULL);
+    regOptProperty(ADD,     "-a", "--add",     2, 2,       areNumber);
+    regOptProperty(SUB,     "-s", "--sub",     2, 2,       areNumber);
+    regOptProperty(MUL,     "-m", "--mul",     2, 2,       areNumber);
+    regOptProperty(DIV,     "-d", "--div",     2, 2,       areNumber);
+
     if(groupingOpt(argc, argv, &optless_num, &optless) == OPTION_FAILURE){
-        fprintf(stderr, "sample: an error occurred while parsing options.\n");
-        return 0;
+        fprintf(stderr, "option error: %s\n", option_errmsg);
+        ret = option_errno + OPTION_ERR_BASE;
+        goto free_and_exit;
     }
 
-    /* here!!! 3 */
-    int errcode = OPTION_SUCCESS;
-    while((errcode = popOptErrcode()) != OPTION_SUCCESS){
-        switch(errcode){
-            case INTERACTIVE_ILLIGAL_NUMBER:
-                fprintf(stderr, "error: the history size specified with the option -i(--interactive) is an invalid value\n");
-                exit(1);
-        }
+    ret = popOptErrcode();
+    switch(ret){
+        case ARE_NUMBER_ERR:
+            ret += USR_DEFINITION_ERR_BASE;
+            fprintf(stderr, "option error: not a number\n");
+            goto free_and_exit;
+
+        default:
+            break;
     }
 
-    /* here!!! 4 */
     opt_group_t *opt_grp_p = NULL;
     while((opt_grp_p = popOptGroup()) != NULL){
         switch(opt_grp_p -> priority){
@@ -112,8 +115,36 @@ int main(int argc, char *argv[]){
                 }
                 break;
 
-            case INTERACTIVE:
-                interactive(atoi(opt_grp_p->contents[0]));
+            case ADD:
+                {
+                    int a = atoi(opt_grp_p->contents[0]);
+                    int b = atoi(opt_grp_p->contents[1]); 
+                    printf("%d + %d = %d\n", a, b, a+b);
+                }
+                break;
+
+            case SUB:
+                {
+                    int a = atoi(opt_grp_p->contents[0]);
+                    int b = atoi(opt_grp_p->contents[1]); 
+                    printf("%d - %d = %d\n", a, b, a-b);
+                }
+                break;
+
+            case MUL:
+                {
+                    int a = atoi(opt_grp_p->contents[0]);
+                    int b = atoi(opt_grp_p->contents[1]); 
+                    printf("%d * %d = %d\n", a, b, a*b);
+                }
+                break;
+
+            case DIV:
+                {
+                    int a = atoi(opt_grp_p->contents[0]);
+                    int b = atoi(opt_grp_p->contents[1]); 
+                    printf("%d / %d = %d\n", a, b, a/b);
+                }
                 break;
 
             default:
@@ -125,32 +156,24 @@ int main(int argc, char *argv[]){
     if(optless != NULL){
         printf("these optionless contents are ignored in this sample.\n");
         for(int i=0; i<optless_num; i++){
-            printf("%s\n", optless[i]);
+            printf("%s, ", optless[i]);
         }
+        printf("\b\b \n");
     }
 
-    return 0;
+free_and_exit:
+    endOptAnalization();
+    return ret;
 }
 ```
 
-```c:sample.c
-/* here!!! 3 */
-int chkOptInteractive(char **contents, int dont_care){
-    const int SUCCESS        = 0;
-    const int ILLIGAL_NUMBER = 1;
-
-    int num = atoi(contents[0]);
-    if(num < 1){
-        return ILLIGAL_NUMBER;
-    }
-    return SUCCESS;
-}
-```
 ## Demo
+**NOTE: this is an old version demo.**  
+
 ![option_demo](doc/option_demo.gif)
 
-# consoleapp/prompt
-**consoleapp/prompt** makes it easy to implementation of interactive function.
+# Specification of libprompt.a
+**libprompt.a** makes it easy to implementation of interactive function.
 
 ## Struct reference
 The most important structure is rwhctx_t, and structures other than rwhctx_t are defined for rwhctx_t.
@@ -224,73 +247,80 @@ freeRwhCtx( /* free rwhctx_t pointer recursively. */
 
 
 ## Sample code
-This is a part of "sample/sample.c". The flow of the Program is,
+This is all of *"sample/sample_prompt.c"*. The flow of the Program is,
 
-1. make context of rwhctx\_t for mode1.
-2. make context of rwhctx\_t for mode2.
-3. get line from prompt by rwh() with current mode context.
-4. Perform processing corresponding to the content of acquired line.
+1. make context of rwhctx\_t by `genRwhCtx()`.
+2. get line from prompt by `rwh()` with context.
+3. perform processing corresponding to the content of acquired line.
 
 ```c
-void interactive(int hist_entory_size){
-    char     *line;
-    int       mode = 1;
+#include <stdio.h>
+#include <string.h>
+#include "../src/prompt.h"
 
-    const char *commands1[] = {"help", "quit", "ctx", "modctx", "!echo", "!ls", "!pwd", "!date", "!ls -a", "!ls -l", "!ls -lt"};
-    const char *commands2[] = {"help", "ctx", "head", "tail", "next block", "prev block", "completion", "dive hist", "float hist", "done"};
+#define COMMANDS_SIZE 4
+#define HISTORY_SIZE  10
 
-    /* here!!! 1 */
-    rwhctx_t *ctx1 = genRwhCtx("sample$ "       , hist_entory_size, commands1, sizeof(commands1)/sizeof(char *));
-    /* here!!! 2 */
-    rwhctx_t *ctx2 = genRwhCtx("modctx@sample$ ", hist_entory_size, commands2, sizeof(commands2)/sizeof(char *));
+int main(void){
 
-    printf("input \"help\" to display help\n");
+    rwhctx_t *ctx  = NULL;
+    char     *line = NULL;
+
+    const char *commands[COMMANDS_SIZE] = {
+        "help",
+        "version",
+        "ctx",
+        "quit",
+    };
+
+    ctx = genRwhCtx("sample_prompt$", HISTORY_SIZE, commands, COMMANDS_SIZE);
 
     while(1){
-        switch(mode){
-            case 1:
-                /* here!!! 3 */
-                line = rwh(ctx1);
-
-                /* here!!! 4 */
-                if(strcmp(line, "help") == 0){
-                    interactiveHelp1();
-                }
-                else if(strcmp(line, "ctx") == 0){
-                    interactivePrintCtx(ctx1);
-                }
-                ** Abb **
-                else{
-                    printf("err\n");
-                }
-                break;
-
-            case 2:
-                /* here!!! 3 */
-                line = rwh(ctx2);
-
-                /* here!!! 4 */
-                if(strcmp(line, "help") == 0){
-                    interactiveHelp2();
-                }
-                else if(strcmp(line, "ctx") == 0){
-                    interactivePrintCtx(ctx2);
-                }
-                ** Abb **
-                else{
-                    printf("err\n");
-                }
-                break;
+        line = rwh(ctx);
+        if(strcmp(line, "help") == 0){
+            printf("help:    print this help\n");
+            printf("version: print version of libprompt.a\n");
+            printf("ctx:     print \"rwhctx_t *ctx\" info\n");
+            printf("quit:    quit\n");
+        }
+        else if(strcmp(line, "version") == 0){
+            printf("version: %s\n", CONSOLEAPP_PROMPT_VERSION);
+        }
+        else if(strcmp(line, "ctx") == 0){
+            printf("history: \n");
+            printf(" ↑ old\n");
+            for(int i=0; i<ctx->history->entory_num; i++){
+                printf("    %s\n", ctx->history->buf[i]);
+            }
+            printf(" ↓ new\n");
+            printf("candidate: \n");
+            for(int i=0; i<ctx->candidate->entory_num; i++){
+                printf("    %s\n", ctx->candidate->entories[i]);
+            }
+            printf("sc_head: %s\n", ctx->sc_head);
+            printf("sc_tail: %s\n", ctx->sc_tail);
+            printf("sc_next_block: %s\n", ctx->sc_next_block);
+            printf("sc_prev_block: %s\n", ctx->sc_prev_block);
+            printf("sc_completion: %s\n", ctx->sc_completion);
+            printf("sc_dive_hist: %s\n", ctx->sc_dive_hist);
+            printf("sc_float_hist: %s\n", ctx->sc_float_hist);
+        }
+        else if(strcmp(line, "quit") == 0){
+            break;
+        }
+        else{
+            fprintf(stderr, "error\n");
         }
     }
 
-free_and_exit:
-    freeRwhCtx(ctx1);
-    freeRwhCtx(ctx2);
+    freeRwhCtx(ctx);
+    return 0;
 }
 ```
 
 ## Demo
+**NOTE: this is an old version demo.**  
+
 ![option_demo](doc/prompt_demo.gif)
 
 ## Installation
