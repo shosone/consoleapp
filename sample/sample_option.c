@@ -147,6 +147,7 @@ void printUsage(void){
 
 void printVersion(void){
     printf("version 0.0.0\n");
+    printf("\n");
 }
 
 int areNumber(char **contents, int content_num){
