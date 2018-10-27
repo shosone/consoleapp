@@ -137,7 +137,7 @@ void printVersion(void){
 
 int areNumber(char **contents, int content_num){
     for(int i=0;i<content_num;i++){
-        char *p = contents[content_num];
+        char *p = contents[i];
         while(1){
             if(!isdigit(*p)){
                 return ARE_NUMBER_ERR;
@@ -145,6 +145,7 @@ int areNumber(char **contents, int content_num){
             if(*p == '\0'){
                 break;
             }
+            p++;
         }
     }
     return OPTION_SUCCESS;
