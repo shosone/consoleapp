@@ -5,12 +5,17 @@
 #include <ctype.h>
 #include "../src/option.h"
 
-#define ARE_NUMBER_ERR 100
+#define OPTION_ERR_BASE         50
+#define USR_DEFINITION_ERR_BASE 100
+
+enum {
+    ARE_NUMBER_ERR = 1,
+};
 
 /* priority */
 enum {
     /* high */
-    HELP = 1,
+    HELP = 1, /* because OPTION_SUCCESS is 0 */
     VERSION,
     PRINT,
     ADD,
@@ -29,7 +34,6 @@ int main(int argc, char *argv[]){
     int    optless_num = 0;
     char **optless     = NULL;
     int    ret         = OPTION_SUCCESS;
-    int    errcode     = OPTION_SUCCESS;
 
     regOptProperty(HELP,    "-h", "--help",    0, 0,       NULL);
     regOptProperty(VERSION, "-v", "--version", 0, 0,       NULL);
@@ -39,20 +43,21 @@ int main(int argc, char *argv[]){
     regOptProperty(MUL,     "-m", "--mul",     2, 2,       areNumber);
     regOptProperty(DIV,     "-d", "--div",     2, 2,       areNumber);
 
-    ret  = groupingOpt(argc, argv, &optless_num, &optless);
-    if(ret != OPTION_SUCCESS){
-        fprintf(stderr, "errno: %d, %s\n", option_errno, option_errmsg);
-        fprintf(stderr, "sample: an error occurred while parsing options.\n");
-        return 0;
+    if(groupingOpt(argc, argv, &optless_num, &optless) == OPTION_FAILURE){
+        fprintf(stderr, "option error: %s\n", option_errmsg);
+        ret = option_errno + OPTION_ERR_BASE;
+        goto free_and_exit;
     }
 
-    errcode = popOptErrcode();
-    while(errcode != OPTION_SUCCESS){
-        switch(errcode){
-            default:
-                break;
-        }
-        errcode = popOptErrcode();
+    ret = popOptErrcode();
+    switch(ret){
+        case ARE_NUMBER_ERR:
+            ret += USR_DEFINITION_ERR_BASE;
+            fprintf(stderr, "option error: not a number\n");
+            goto free_and_exit;
+
+        default:
+            break;
     }
 
     opt_group_t *opt_grp_p = NULL;
@@ -118,8 +123,9 @@ int main(int argc, char *argv[]){
         printf("\b\b \n");
     }
 
+free_and_exit:
     endOptAnalization();
-    return 0;
+    return ret;
 }
 
 void printUsage(void){
@@ -139,11 +145,11 @@ int areNumber(char **contents, int content_num){
     for(int i=0;i<content_num;i++){
         char *p = contents[i];
         while(1){
-            if(!isdigit(*p)){
-                return ARE_NUMBER_ERR;
-            }
             if(*p == '\0'){
                 break;
+            }
+            if(!isdigit(*p)){
+                return ARE_NUMBER_ERR;
             }
             p++;
         }
