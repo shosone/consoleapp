@@ -52,7 +52,7 @@ static int            _grp_num_g = 0;
 static opt_group_t **_grp_gp     = NULL;
 
 static int  _errcode_memo_num_g = 0;
-static int *_errcode_memo_g     = NULL;
+static int *_errcode_memo_gp    = NULL;
 
 /* =========================== static functions ========================= */
 
@@ -93,13 +93,13 @@ static void
 _sortErrcodeMemo(void)
 {
     int compare(const void *a, const void *b){
-        if(*(int *)a > *(int *)b){
+        if((*(int *)a) < (*(int *)b)){
             return 1;
         }
         return 0;
     }
 
-    qsort(_errcode_memo_g, _errcode_memo_num_g, sizeof(int), compare);
+    qsort(_errcode_memo_gp, _errcode_memo_num_g, sizeof(int), compare);
 }
 
 static void
@@ -382,11 +382,11 @@ _adaptContentsChecker(void)
             if(prop->priority == grp->priority){
                 if(
                         (_errcode_memo_num_g+1) > SIZE_MAX/sizeof(int) || /* overflow check */
-                        isNull(_errcode_memo_g = realloc(_errcode_memo_g, sizeof(int)*(_errcode_memo_num_g+1))))
+                        isNull(_errcode_memo_gp = realloc(_errcode_memo_gp, sizeof(int)*(_errcode_memo_num_g+1))))
                 {
                     goto free_and_exit;
                 }
-                _errcode_memo_g[_errcode_memo_num_g++] = prop->contentsChecker(grp->contents, grp->content_num);
+                _errcode_memo_gp[_errcode_memo_num_g++] = prop->contentsChecker(grp->contents, grp->content_num);
                 break;
             }
         }
@@ -396,9 +396,9 @@ _adaptContentsChecker(void)
 
 free_and_exit:
     for(int i=0; i<_errcode_memo_num_g; i++){
-        free(_errcode_memo_g);
+        free(_errcode_memo_gp);
     }
-    _errcode_memo_g = 0;
+    _errcode_memo_gp = 0;
     return OPTION_FAILURE;
 }
 
@@ -586,7 +586,7 @@ popOptErrcode(void) /* regOptionPropertyにて登録したcontentsCheckerを各�
 
     int ret = OPTION_SUCCESS;
     if(cnt < _errcode_memo_num_g){
-        ret = _errcode_memo_g[cnt];
+        ret = _errcode_memo_gp[cnt];
         cnt++;
     }
 
@@ -610,7 +610,7 @@ endOptAnalization(void) /* consoleapp/optionにて確保した動的メモリを
     free(_grp_gp);
     _grp_gp = NULL;
 
-    free(_errcode_memo_g);
+    free(_errcode_memo_gp);
     _prop_num_g = 0;
     _grp_num_g  = 0;
     _errcode_memo_num_g = 0;
