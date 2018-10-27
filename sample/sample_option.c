@@ -9,13 +9,13 @@
 #define USR_DEFINITION_ERR_BASE 100
 
 enum {
-    ARE_NUMBER_ERR = 1,
+    ARE_NUMBER_ERR = 1, /* because OPTION_SUCCESS is 0 */
 };
 
 /* priority */
 enum {
     /* high */
-    HELP = 1, /* because OPTION_SUCCESS is 0 */
+    HELP,
     VERSION,
     PRINT,
     ADD,

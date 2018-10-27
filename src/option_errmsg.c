@@ -32,7 +32,6 @@ static const char *_option_api_usage_errmsg[] = {
     "API usage error (%s@libconsoleapp.a): option property information have not registerd.",
     "API usage error (%s@libconsoleapp.a): opt_property_t\'s field priority must be different from each other.",
     "API usage error (%s@libconsoleapp.a): opt_property_t\'s field short_form and long_form must be different from each other.",
-    "API usage error (%s@libconsoleapp.a): opt_property_t\'s field priority must note be OPTION_SUCCESS.",
 };
 
 static const char *_option_end_usr_errmsg[] = {

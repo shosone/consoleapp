@@ -25,7 +25,8 @@
 - ソースのコメントを英語にする
 - 現在はrwh()内でショートカットが入力された際の動作を実装しているが、割り込み処理で実現できないか調べる
 - getchは自作しなくてもcurses.hにwgetchが定義されていたのでこっちが使えるかも
-- errno.hの導入
 - liboption.aとlibprompt.aの２つのライブラリを生成するよう変更したことに伴うREADME.mdの更新
+- option_errmsg.cの文言にopt_property_tが入っているが未公開構造体なので修正する
 ### Bug
 - consoleapp/promptのrwh()を使っていると途中から文字化けする
+- priority順になっていない

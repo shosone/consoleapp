@@ -424,11 +424,6 @@ regOptProperty( /* opt_property_db_tのエントリを追加する関数 */
         return OPTION_FAILURE;
     }
 
-    if(priority == OPTION_SUCCESS){
-        _printAPIusageErrMsg(OPTION_PRIORITY_IS_OPTION_SUCCESS);
-        return OPTION_FAILURE;
-    }
-
     for(int i=0; i<_prop_num_g; i++){
         if(_prop_gp[i]->priority == priority){
             _printAPIusageErrMsg(OPTION_SAME_PRIORITY);

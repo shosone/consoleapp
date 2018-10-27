@@ -36,7 +36,6 @@ typedef enum{
     OPTION_PROP_GP_IS_NULL, 
     OPTION_SAME_PRIORITY,
     OPTION_SAME_SHORT_LONG_FORMAT,
-    OPTION_PRIORITY_IS_OPTION_SUCCESS,
 }option_api_usage_errcode_t;
 
 typedef enum{
