@@ -1,4 +1,4 @@
-#for build libraries
+﻿#for build libraries
 CC               := gcc
 CFLAGS_RELEASE   := -Wall -O3 
 CFLAGS_DEBUG     := -Wall -g3 -O0 

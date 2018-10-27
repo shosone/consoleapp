@@ -1,4 +1,4 @@
-/* MIT License
+﻿/* MIT License
  * 
  * Copyright (c) 2018 Sho Sone
  * 
@@ -26,7 +26,7 @@
 #include <string.h>
 #include "./option_errmsg.h"
 
-static const char *option_api_usage_errmsg[] = {
+static const char *_option_api_usage_errmsg[] = {
     "API usage error (%s@libconsoleapp.a): opt_property_t\'s field short_form cannot be NULL. please check 2nd argument of regOptProperty().",
     "API usage error (%s@libconsoleapp.a): opt_property_t\'s filed content_num_min bigger than content_num_max. please check 4th and 5th argument of regOptProperty().",
     "API usage error (%s@libconsoleapp.a): option property information have not registerd.",
@@ -35,7 +35,7 @@ static const char *option_api_usage_errmsg[] = {
     "API usage error (%s@libconsoleapp.a): opt_property_t\'s field priority must note be OPTION_SUCCESS.",
 };
 
-static const char *option_end_usr_errmsg[] = {
+static const char *_option_end_usr_errmsg[] = {
     "duplicate same option %s(%s).",
     "the number of contents of option %s(%s) is too many.",
     "the number of contents of option %s(%s) is too little.",
@@ -49,7 +49,7 @@ __printAPIusageErrMsg(
         option_api_usage_errcode_t errno,
         const char*                func_name)
 {
-    fprintf(stderr, option_api_usage_errmsg[errno],  func_name);
+    fprintf(stderr, _option_api_usage_errmsg[errno],  func_name);
     fprintf(stderr, "\n");
 }
 
@@ -61,6 +61,6 @@ _makeEndUsrErrMsg(
 {
     option_errno = errno;
     free(option_errmsg);
-    option_errmsg = malloc(strlen(option_end_usr_errmsg[errno]) + strlen(short_form) + strlen(long_form == NULL ? "" : long_form));
-    sprintf(option_errmsg, option_end_usr_errmsg[errno], short_form, long_form == NULL ? " \b\b" : long_form);
+    option_errmsg = malloc(strlen(_option_end_usr_errmsg[errno]) + strlen(short_form) + strlen(long_form == NULL ? "" : long_form));
+    sprintf(option_errmsg, _option_end_usr_errmsg[errno], short_form, long_form == NULL ? " \b\b" : long_form);
 }

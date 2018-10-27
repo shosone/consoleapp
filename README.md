@@ -1,4 +1,4 @@
-# libconsoleapp.a
+﻿# libconsoleapp.a
 The libconsoleapp.a is a C library.
 This library aim to provide general-purpose and flexible functions of the console application and to prepare for its development.  
 Currently, this library can be useful for implementing the following two functions in the console app.  

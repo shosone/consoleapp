@@ -1,4 +1,4 @@
-/* MIT License
+﻿/* MIT License
  * 
  * Copyright (c) 2018 Sho Sone
  * 
@@ -50,6 +50,7 @@ extern int   option_errno;
 
 #define _printAPIusageErrMsg(errno) __printAPIusageErrMsg(errno, __func__)
 
+/* use _printAPIusageErrMsg macro instead of __printAPIusageErrMsg */
 extern void
 __printAPIusageErrMsg(
         option_api_usage_errcode_t errcode,

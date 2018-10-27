@@ -42,7 +42,7 @@ static const char delete[]         = {0x1b, 0x5b, 0x33, 0x7e, 0x00};
 /* ====================================== */
 
 static char
-getch(void)
+_getch(void)
 {
     char   buf         = 0;
     struct termios old = {0};
@@ -77,7 +77,7 @@ getch(void)
 }
 
 static void
-strndelete( /* NOTE: posの値がstrの範囲内にあるかの確認は呼び出しもとで行っているものとする */
+_strndelete( /* NOTE: posの値がstrの範囲内にあるかの確認は呼び出しもとで行っているものとする */
         int    pos,
         char **str) /* [out] */
 {
@@ -101,7 +101,7 @@ strndelete( /* NOTE: posの値がstrの範囲内にあるかの確認は呼び�
 }
 
 static void
-strninsert( /* NOTE: posの値がstrの範囲内にあるかの確認は呼び出しもとで行っているものとする */
+_strninsert( /* NOTE: posの値がstrの範囲内にあるかの確認は呼び出しもとで行っているものとする */
         int    pos,
         char **str, /* [out] */
         char   ch)
@@ -572,7 +572,7 @@ rwh(
     fflush(stdout);
 
     while(1){
-        char ch = getch();
+        char ch = _getch();
         switch(ch){
             case '\n':
                 if(line){
@@ -585,7 +585,7 @@ rwh(
                 if(cursor_pos != 0){
                     cursor_pos--;
                     line_len--;
-                    strndelete(cursor_pos, &line);
+                    _strndelete(cursor_pos, &line);
                     line_modified = 1;
                 }
                 break;
@@ -598,7 +598,7 @@ rwh(
                 tmp_len++;
                 switch(judgeShortCut(ctx, tmp)){
                     case JS_NOT_SHORT_CUT:
-                        strninsert(cursor_pos, &line, ch);
+                        _strninsert(cursor_pos, &line, ch);
                         cursor_pos++;
                         line_len++;
                         line_modified = 1;
@@ -672,7 +672,7 @@ rwh(
 
                     case JS_DELETE:
                         if(cursor_pos < line_len){
-                            strndelete(cursor_pos, &line);
+                            _strndelete(cursor_pos, &line);
                             line_len--;
                             line_modified = 1;
                         }
