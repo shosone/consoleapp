@@ -182,12 +182,9 @@ _decodeOptions(
                 /* out of memory should be handled in errno, not in this library */
                 goto free_and_exit;
             }
+            memcpy((*new_argv_p)[*new_argc_p-1], copy_src, copy_src_len_plus1);
             if(delim == ','){
-                (*new_argv_p)[*new_argc_p-1][0] = '\n'; // あまり良いやり方ではないかもしれないが、この情報はjudgeDestinationで必要になる
-                memcpy(&((*new_argv_p)[*new_argc_p-1][1]), copy_src, copy_src_len_plus1);
-            }
-            else{
-                memcpy((*new_argv_p)[*new_argc_p-1], copy_src, copy_src_len_plus1);
+                (*new_argv_p)[*new_argc_p-1][copy_src_len_plus1-1] = '\n'; // あまり良いやり方ではないかもしれないが、この情報はjudgeDestinationで必要になる
             }
             if(&copy_src[strlen(copy_src)] != last_null_ptr){
                 copy_src[strlen(copy_src)] = delim; /* 分割した文字列をもとに戻す */
@@ -263,14 +260,16 @@ _judgeDestination(
     }
 
     /* 文字列の先頭の改行コードはdecodeOptionsにてこの関数のために付属された情報で本来の文字列には先頭の改行コードは存在しない */
-    if(str[0] == '\n'){
+    const size_t len_minus1 = strlen(str) - 1;
+    if(str[len_minus1] == '\n'){
         if(current_options_contents_num >= current_options_contents_num_max){
             _makeEndUsrErrMsg(OPTION_TOO_MANY_CONTENTS, current_options_property -> short_form, current_options_property -> long_form);
             return OPTION_FAILURE;
         }
         else{
-            /* 先頭の改行コードを削除 */
-            str = &str[1];
+            /* 終端の改行コードを削除 */
+            str[len_minus1] = '\0';
+            str = realloc(str, sizeof(char)*(len_minus1+1));
             current_options_contents_num++;
             *assign_value = str;
             return JD_OPT_GRPs_CONTENTS;
