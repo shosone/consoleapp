@@ -30,35 +30,28 @@
 
 #include "./common.h"
 
+/* An error message will be forcibly displayed on the console when the following error occurs. */
 typedef enum{
-    OPTION_SHORT_FORM_IS_NULL,
+    OPTION_SHORT_FORM_IS_NULL = CONAPP_LOGIC_ERRNO_BASE,
     OPTION_MIN_BIGGER_THAN_MAX, 
     OPTION_PROP_GP_IS_NULL, 
     OPTION_SAME_PRIORITY,
     OPTION_SAME_SHORT_LONG_FORMAT,
-}option_api_usage_errcode_t;
+}option_logic_errno_t;
 
+/* When the API of liboption.a returns OPTION_FAILURE, the following error occurs.
+ * Then, gloval valiable option_errno has been set.
+ * And you can earn the string of error message by optionErrno2msg(option_errno). */
 typedef enum{
-    OPTION_DUPLICATE_SAME_OPT,
+    OPTION_DUPLICATE_SAME_OPT = CONAPP_RUNTIME_ERRNO_BASE,
     OPTION_TOO_MANY_CONTENTS, 
     OPTION_TOO_LITTLE_CONTENTS, 
-}option_end_usr_errcode_t;
+}option_runtime_errno_t;
 
-extern char *option_errmsg;
 extern int   option_errno;
 
-#define _printAPIusageErrMsg(errno) __printAPIusageErrMsg(errno, __func__)
-
-/* use _printAPIusageErrMsg macro instead of __printAPIusageErrMsg */
-extern void
-__printAPIusageErrMsg(
-        option_api_usage_errcode_t errcode,
-        const char*                func_name);
-
-extern void
-_makeEndUsrErrMsg(
-        option_end_usr_errcode_t errcode,
-        char *short_form,
-        char *long_form);
+extern char*
+optionErrno2msg(
+         option_runtime_errno_t errno);
 
 #endif 

@@ -274,7 +274,7 @@ genRwhCtx(
         return NULL;
     }
 
-    if(!(cpl = genCompletion(candidates, candidate_num))){
+    if(!(cpl = _genCompletion(candidates, candidate_num))){
         free(ctx);
         return NULL;
     }

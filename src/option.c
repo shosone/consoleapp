@@ -20,13 +20,26 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE. */
 
-#include "./option.h"
 #include <stdint.h>
 #include <string.h>
 #include <stdlib.h>
 #include <ctype.h>
 #include <limits.h>
 #include <stdbool.h>
+#include "./option.h"
+
+/* ================================ imports from option_errmsg.c ===================== */
+
+extern void
+_printAPIusageErrMsg(
+        option_logic_errno_t errno,
+        const char*            func_name);
+
+extern void
+_makeEndUsrErrMsg(
+        option_runtime_errno_t errno,
+        char *short_form,
+        char *long_form);
 
 /* ==================================== structures =================================== */
 
@@ -415,24 +428,24 @@ regOptProperty( /* opt_property_db_tのエントリを追加する関数 */
     /* [begin] error check */
 
     if(isNull(short_form)){
-        _printAPIusageErrMsg(OPTION_SHORT_FORM_IS_NULL);
+        _printAPIusageErrMsg(OPTION_SHORT_FORM_IS_NULL, __func__);
         return OPTION_FAILURE;
     }
 
     if(content_num_max < content_num_min){
-        _printAPIusageErrMsg(OPTION_MIN_BIGGER_THAN_MAX);
+        _printAPIusageErrMsg(OPTION_MIN_BIGGER_THAN_MAX, __func__);
         return OPTION_FAILURE;
     }
 
     for(int i=0; i<_prop_num_g; i++){
         if(_prop_gp[i]->priority == priority){
-            _printAPIusageErrMsg(OPTION_SAME_PRIORITY);
+            _printAPIusageErrMsg(OPTION_SAME_PRIORITY, __func__);
             return OPTION_FAILURE;
         }
         if(strcmp(_prop_gp[i]->short_form, short_form) == 0 || 
            (isNull(long_form) || isNull(_prop_gp[i]->long_form) || strcmp(_prop_gp[i]->long_form, long_form) == 0))
         {
-            _printAPIusageErrMsg(OPTION_SAME_SHORT_LONG_FORMAT);
+            _printAPIusageErrMsg(OPTION_SAME_SHORT_LONG_FORMAT, __func__);
             return OPTION_FAILURE;
         }
     }
@@ -497,7 +510,7 @@ groupingOpt( /* cliより取得したmainの引数であるargc, argvとregOptio
     /* [begin] error check */
 
     if(isNull(_prop_gp)){
-        _printAPIusageErrMsg(OPTION_PROP_GP_IS_NULL);
+        _printAPIusageErrMsg(OPTION_PROP_GP_IS_NULL, __func__);
         return OPTION_FAILURE;
     }
 

@@ -5,11 +5,8 @@
 #include <ctype.h>
 #include "../src/option.h"
 
-#define OPTION_ERR_BASE         50
-#define USR_DEFINITION_ERR_BASE 100
-
 enum {
-    ARE_NUMBER_ERR = 1, /* because OPTION_SUCCESS is 0 */
+    ARE_NUMBER_ERR = 500, 
 };
 
 /* priority */
@@ -44,15 +41,14 @@ int main(int argc, char *argv[]){
     regOptProperty(DIV,     "-d", "--div",     2, 2,       areNumber);
 
     if(groupingOpt(argc, argv, &optless_num, &optless) == OPTION_FAILURE){
-        fprintf(stderr, "option error: %s\n", option_errmsg);
-        ret = option_errno + OPTION_ERR_BASE;
+        fprintf(stderr, "option error: %s\n", optionErrno2msg(option_errno));
+        ret = option_errno;
         goto free_and_exit;
     }
 
     ret = popOptErrcode();
     switch(ret){
         case ARE_NUMBER_ERR:
-            ret += USR_DEFINITION_ERR_BASE;
             fprintf(stderr, "option error: not a number\n");
             goto free_and_exit;
 

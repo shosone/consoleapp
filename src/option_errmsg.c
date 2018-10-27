@@ -26,10 +26,12 @@
 #include <string.h>
 #include "./option_errmsg.h"
 
+/* ============== static global variables ============== */
+
 static const char *_option_api_usage_errmsg[] = {
     "API usage error (%s@libconsoleapp.a): the 2nd argument of regOptProperty() cannot be NULL. please set a string of short form of option",
     "API usage error (%s@libconsoleapp.a): in regOptProperty(), the 4th argument content_num_min bigger than 5th argument content_num_max.",
-    "API usage error (%s@libconsoleapp.a): option properties have not been registerd.",
+    "API usage error (%s@libconsoleapp.a): option properties have not been registerd yet.",
     "API usage error (%s@libconsoleapp.a): priorities of option properties registerd by regOptProperty() must be different constant value from each other.",
     "API usage error (%s@libconsoleapp.a): short_form and long_form registerd by regOptProperty() must be different from each other.",
 };
@@ -40,26 +42,51 @@ static const char *_option_end_usr_errmsg[] = {
     "the number of contents of option %s(%s) is too little.",
 };
 
-char *option_errmsg = NULL;
-int   option_errno  = CONAPP_DEFAULT_ERRNO;
+static char *_option_errcause1 = NULL;
+static char *_option_errcause2 = NULL;
+
+/* ============== publish only in option.c ============== */
 
 void
-__printAPIusageErrMsg(
-        option_api_usage_errcode_t errno,
+_printAPIusageErrMsg(
+        option_runtime_errno_t errno,
         const char*                func_name)
 {
+    option_errno = errno;
     fprintf(stderr, _option_api_usage_errmsg[errno],  func_name);
     fprintf(stderr, "\n");
 }
 
 void
 _makeEndUsrErrMsg(
-        option_end_usr_errcode_t errno,
+        option_runtime_errno_t errno,
         char *short_form,
         char *long_form)
 {
-    option_errno = errno;
-    free(option_errmsg);
-    option_errmsg = malloc(strlen(_option_end_usr_errmsg[errno]) + strlen(short_form) + strlen(long_form == NULL ? "" : long_form));
-    sprintf(option_errmsg, _option_end_usr_errmsg[errno], short_form, long_form == NULL ? " \b\b" : long_form);
+    option_errno      = errno;
+    _option_errcause1 = short_form;
+    _option_errcause2 = long_form;
+}
+
+/* ============== publications ============== */
+
+int option_errno = CONAPP_DEFAULT_ERRNO;
+
+char*
+optionErrno2msg(
+        option_runtime_errno_t errno)
+{
+    static char *errmsg = NULL;
+    free(errmsg);
+
+    errno -= CONAPP_RUNTIME_ERRNO_BASE;
+    if(errno < 0 || errno >= 3){
+        return "unknown error number.";
+    }
+    else{
+        errmsg = malloc(strlen(_option_end_usr_errmsg[errno]) + strlen(_option_errcause1) + strlen(_option_errcause2 == NULL ? "" : _option_errcause2));
+        sprintf(errmsg, _option_end_usr_errmsg[errno], _option_errcause1, _option_errcause2 == NULL ? " \b\b" : _option_errcause2); 
+    }
+
+    return errmsg;
 }
