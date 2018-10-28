@@ -54,8 +54,8 @@ dkms.conf
 # my settings
 tags
 *~
-sample/sample_option
-sample/sample_prompt
+sample/prompt_*
+sample/option_*
 lib*/
 obj*/
 

@@ -13,15 +13,17 @@ OBJ_PATH_DEBUG   := ./obj/debug
 TARGET_RELEASE   := libprompt.a liboption.a
 TARGET_DEBUG     := libprompt_debug.a liboption_debug.a
 
-#for build c sample
-SRC_PATH_CSAMPLE := ./sample/c
-TARGET_CSAMPLE   := c_prompt c_option
-FLAGS_CSAMPLE    := -g3 -Wall -lprompt_debug -loption_debug -O0 
 
-#for build cpp sample
+#for build sample
+SAMPLE_EXE_PATH  := ./sample
+# c
+SRC_PATH_CSAMPLE := ./sample/c
+TARGET_CSAMPLE   := prompt_c_sample option_c_sample
+FLAGS_CSAMPLE    := -g3 -Wall -lprompt_debug -loption_debug -O0 
+# cpp
 CPPC               := g++
 SRC_PATH_CPPSAMPLE := ./sample/cpp
-TARGET_CPPSAMPLE   := cpp_prompt cpp_option
+TARGET_CPPSAMPLE   := prompt_cpp_sample option_cpp_sample
 FLAGS_CPPSAMPLE    := -g3 -Wall -lprompt_debug -loption_debug  -O0
 
 #for install
@@ -55,11 +57,11 @@ all:
 	done
 	ctags -R --language-force=C
 
-c_%: sample_%.c $(TARGET_DEBUG)
-	$(CC) -I$(INC_PATH) -L$(LIB_PATH_DEBUG) -o$(SRC_PATH_CSAMPLE)/$@ $< $(FLAGS_CSAMPLE)
+%_c_sample: %_sample.c $(TARGET_DEBUG)
+	$(CC) -I$(INC_PATH) -L$(LIB_PATH_DEBUG) -o$(SAMPLE_EXE_PATH)/$@ $< $(FLAGS_CSAMPLE)
 
-cpp_%: sample_%.cpp $(TARGET_DEBUG)
-	$(CPPC) -I$(INC_PATH) -L$(LIB_PATH_DEBUG) -o$(SRC_PATH_CPPSAMPLE)/$@ $< $(FLAGS_CPPSAMPLE) 
+%_cpp_sample: %_sample.cpp $(TARGET_DEBUG)
+	$(CPPC) -I$(INC_PATH) -L$(LIB_PATH_DEBUG) -o$(SAMPLE_EXE_PATH)/$@ $< $(FLAGS_CPPSAMPLE) 
 
 lib%_debug.a: %_debug.o %_errmsg_debug.o common_debug.o
 	@mkdir -p $(LIB_PATH_DEBUG)
@@ -110,9 +112,9 @@ clean:
 	rm -f tags
 	@for s in $(TARGET_CSAMPLE);       \
 	do                                 \
-		rm -f $(SRC_PATH_CSAMPLE)/$$s; \
+		rm -f $(SAMPLE_EXE_PATH)/$$s;                     \
 	done
 	@for s in $(TARGET_CPPSAMPLE);       \
 	do                                   \
-		rm -f $(SRC_PATH_CPPSAMPLE)/$$s; \
+		rm -f $(SAMPLE_EXE_PATH)/$$s;                       \
 	done
