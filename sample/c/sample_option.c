@@ -3,7 +3,7 @@
 #include <string.h>
 #include <limits.h>
 #include <ctype.h>
-#include "../src/option.h"
+#include "../../src/option.h"
 
 enum {
     ARE_NUMBER_ERR = 500, 

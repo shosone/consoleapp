@@ -36,6 +36,10 @@
 #define OPTION_SUCCESS  0
 #define OPTION_FAILURE -1
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /* structure for holding information on each option specified at program execution */
 typedef struct _opt_group_t{
     unsigned int priority;    /* a unique number corresponding to option */
@@ -68,4 +72,7 @@ popOptErrcode(void); /* a function that returns the error code obtained by adapt
 extern void
 endOptAnalization(void); /* function to release all dynamic memory secured by consoleapp/option */
 
+#ifdef __cplusplus
+}
 #endif
+#endif /* CONSOLEAPP_OPTION_H */

@@ -33,7 +33,11 @@
 
 #define CONSOLEAPP_PROMPT_VERSION "0.0"
 
-// #include "./prompt_errmsg.h"
+#include "./prompt_errmsg.h"
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 extern const char DEFAULT_SC_HEAD[];
 extern const char DEFAULT_SC_TAIL[];
@@ -91,5 +95,9 @@ rwh( /* acquire the line entered in the console and keep history. */
 extern void
 freeRwhCtx( /* free rwhctx_t pointer recursively. */
         rwhctx_t *ctx); /* [mod] to be freed */
-#endif 
+
+#ifdef __cplusplus
+}
 #endif
+#endif /* CONSOLEAPP_DISABLE_PROMPT */
+#endif /* CONSOLEAPP_PROMPT_H */

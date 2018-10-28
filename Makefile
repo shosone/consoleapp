@@ -14,16 +14,17 @@ TARGET_RELEASE   := libprompt.a liboption.a
 TARGET_DEBUG     := libprompt_debug.a liboption_debug.a
 
 #for build sample app
-SRC_PATH_SAMPLE := ./sample
-CFLAGS_SAMPLE   := -Wall -lprompt_debug -loption_debug -lreadline
-TARGET_SAMPLE   := sample_prompt sample_option
+SRC_PATH_CSAMPLE   := ./sample/c
+SRC_PATH_CPPSAMPLE := ./sample/cpp
+CFLAGS_SAMPLE      := -Wall -lprompt_debug -loption_debug -lreadline
+TARGET_SAMPLE      := sample_prompt sample_option
 
 #for install
 LIB_DIR  := /usr/lib
 INC_DIR  := /usr/include/consoleapp
 
 vpath %.h $(INC_PATH)
-vpath %.c $(SRC_PATH) $(SRC_PATH_SAMPLE)
+vpath %.c $(SRC_PATH) $(SRC_PATH_CSAMPLE)
 vpath %.o $(OBJ_PATH_RELEASE) $(OBJ_PATH_DEBUG)
 vpath %.a $(LIB_PATH_RELEASE) $(LIB_PATH_DEBUG) 
 
@@ -45,7 +46,7 @@ all:
 	ctags -R --language-force=C
 
 sample_%: sample_%.c $(TARGET_DEBUG)
-	$(CC) $(CFLAGS_DEBUG) -I$(INC_PATH) -L$(LIB_PATH_DEBUG) -o$(SRC_PATH_SAMPLE)/$@ $< $(CFLAGS_SAMPLE)
+	$(CC) $(CFLAGS_DEBUG) -I$(INC_PATH) -L$(LIB_PATH_DEBUG) -o$(SRC_PATH_CSAMPLE)/$@ $< $(CFLAGS_SAMPLE)
 
 lib%_debug.a: %_debug.o %_errmsg_debug.o common_debug.o
 	@mkdir -p $(LIB_PATH_DEBUG)
@@ -96,5 +97,5 @@ clean:
 	rm -f tags
 	@for s in $(TARGET_SAMPLE);       \
 	do                                \
-		rm -f $(SRC_PATH_SAMPLE)/$$s; \
+		rm -f $(SRC_PATH_CSAMPLE)/$$s; \
 	done

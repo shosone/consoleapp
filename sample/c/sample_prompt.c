@@ -1,6 +1,6 @@
 ﻿#include <stdio.h>
 #include <string.h>
-#include "../src/prompt.h"
+#include "../../src/prompt.h"
 
 #define COMMANDS_SIZE 4
 #define HISTORY_SIZE  10
