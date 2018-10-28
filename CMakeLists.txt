@@ -46,7 +46,7 @@ add_library(consoleapp STATIC ${consoleapp_src})
 # 指定したファイルは、INSTALL(TARGETS) の PUBLIC_HEADER で指定した
 # ディレクトリにインストールされる。
 set_target_properties(consoleapp PROPERTIES
-    PUBLIC_HEADER "src/option.h;src/option_errmsg.h;src/prompt.h;src/prompt_errmsg.h;src/consoleapp.h;src/config.h"
+    PUBLIC_HEADER "src/common.h;src/option.h;src/option_errmsg.h;src/prompt.h;src/prompt_errmsg.h;src/consoleapp.h;src/config.h"
 )
 # 5. ターゲットのインストール指定
 install(TARGETS consoleapp
