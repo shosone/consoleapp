@@ -63,12 +63,12 @@ lib%.a: %.o %_errmsg.o common.o
 	$(CC) $(CFLAGS_DEBUG) -I$(INC_PATH) -o$@ -c $(SRC_PATH)/$*.c
 	@mv $@ $(OBJ_PATH_DEBUG)
 
-%.o: %.h %.c confing.h
+%.o: %.h %.c config.h
 	@mkdir -p $(OBJ_PATH_RELEASE)
 	$(CC) $(CFLAGS_RELEASE) -I$(INC_PATH) -c $(SRC_PATH)/$*.c
 	@mv $@ $(OBJ_PATH_RELEASE)
 
-confing.h:
+config.h:
 	touch src/config.h
 
 install:
