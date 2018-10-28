@@ -108,30 +108,29 @@ _freeOptProp(
     opt_prop -> long_form = NULL;
 }
 
-static void
-_sortErrcodeMemo(void)
-{
-    int compare(const void *a, const void *b){
-        if((*(int *)a) < (*(int *)b)){
-            return 1;
-        }
-        return 0;
+static int _sortErrcodeMemoCompare(const void *a, const void *b){
+    if((*(int *)a) < (*(int *)b)){
+        return 1;
     }
-
-    qsort(_errcode_memo_gp, _errcode_memo_num_g, sizeof(int), compare);
+    return 0;
 }
 
 static void
+_sortErrcodeMemo(void)
+{
+    qsort(_errcode_memo_gp, _errcode_memo_num_g, sizeof(int), _sortErrcodeMemoCompare);
+}
+
+static int _sortOptGroupCompare(const void *a, const void *b){
+    if((*(opt_group_t**)a)->priority > (*(opt_group_t**)b)->priority){
+        return 1;
+    }
+    return 0;
+}
+static void
 _sortOptGroup(void)
 {
-    int compare(const void *a, const void *b){
-        if((*(opt_group_t**)a)->priority > (*(opt_group_t**)b)->priority){
-            return 1;
-        }
-        return 0;
-    }
-
-    qsort(_grp_gp, _grp_num_g, sizeof(opt_group_t*), compare);
+    qsort(_grp_gp, _grp_num_g, sizeof(opt_group_t*), _sortOptGroupCompare);
 }
 
 static void
