@@ -78,14 +78,14 @@ _getch(void)
 
 static void
 _strndelete( /* NOTE: posの値がstrの範囲内にあるかの確認は呼び出しもとで行っているものとする */
-        int    pos,
+        size_t    pos,
         char **str) /* [out] */
 {
     if(*str == NULL){
         return;
     }
 
-    int str_len = strlen(*str);
+    size_t str_len = strlen(*str);
 
     if(str_len == 1){
         free(*str);
@@ -557,7 +557,7 @@ rwh(
     char   *line          = NULL;
     size_t  line_len      = 0;
     char   *tmp           = NULL;
-    int     tmp_len       = 0;
+    size_t     tmp_len       = 0;
     size_t  cursor_pos    = 0;
     int     history_idx   = 0;
     char   *evacated_line = NULL;

@@ -58,7 +58,7 @@ typedef struct __opt_property_t{
     int          (*contentsChecker)(char **contents, int content_num); /* オプションに付属するcontentsの正しさを調べるコールバック関数 */
     unsigned int content_num_min;                                      /* オプションに付属するcontentsの最小数 */
     unsigned int content_num_max;                                      /* オプションに付属するcontentsの最大数 */
-    int          priority;                                             /* オプションが複数指定された時にどのオプションを優先的に処理するかを明示するためのフィールド. 0が最も高い. */
+    unsigned int priority;                                             /* オプションが複数指定された時にどのオプションを優先的に処理するかを明示するためのフィールド. 0が最も高い. */
     bool         appeared_yet;                                         /* 同じオプションがすでに指定されたかチェックするためのメモとして用いる */
 }_opt_property_t;
 
@@ -190,7 +190,7 @@ _decodeOptions(
         do{
             (*new_argc_p)++;
             if(
-                    *new_argc_p > SIZE_MAX/sizeof(char*) || /* overflow check */
+                    isOverflowForRealloc(*new_argc_p, char*) ||
                     isNull((*new_argv_p) = (char **)realloc(*new_argv_p, sizeof(char *)*(*new_argc_p))))
             {
                 /* out of memory should be handled in errno, not in this library */
@@ -318,7 +318,7 @@ _updateOptless(
         char   *str)
 {
     if(
-            (*optless_num+1) > SIZE_MAX/sizeof(char*) || /* overflow check */
+            isOverflowForRealloc(*optless_num+1, char*) ||
             isNull(*optless = (char**)realloc(*optless, sizeof(char*)*(*optless_num+1))))
     {
         /* out of memory should be handled in errno, not in this library */
@@ -346,7 +346,7 @@ _updateOptGrpGP(
     switch(direction){
         case JD_OPT_GRPs_OPTION:
             if(
-                    (_grp_num_g+1) > SIZE_MAX/sizeof(opt_group_t) ||  /* overflow check */
+                    isOverflowForRealloc(_grp_num_g+1, opt_group_t) ||
                     isNull(_grp_gp = (opt_group_t**)realloc(_grp_gp, sizeof(opt_group_t)*(_grp_num_g+1))))
             {
                 /* out of memory should be handled in errno, not in this library */
@@ -366,7 +366,7 @@ _updateOptGrpGP(
             {
                 opt_group_t *grp  = _grp_gp[_grp_num_g - 1];
                 if(
-                        (grp->content_num+1) > SIZE_MAX/sizeof(char*) || /* overflow check */
+                        isOverflowForRealloc(grp->content_num+1, char*) ||
                         isNull(grp->contents = (char **)realloc(grp->contents, sizeof(char *)*(grp->content_num+1))))
                 {
                 /* out of memory should be handled in errno, not in this library */
@@ -399,7 +399,7 @@ _adaptContentsChecker(void)
             _opt_property_t *prop = _prop_gp[j];
             if(prop->priority == grp->priority){
                 if(
-                        (_errcode_memo_num_g+1) > SIZE_MAX/sizeof(int) || /* overflow check */
+                        isOverflowForRealloc(_errcode_memo_num_g+1, int) ||
                         isNull(_errcode_memo_gp = realloc(_errcode_memo_gp, sizeof(int)*(_errcode_memo_num_g+1))))
                 {
                     goto free_and_exit;
@@ -459,7 +459,7 @@ regOptProperty( /* opt_property_db_tのエントリを追加する関数 */
     /* [done] error check */
 
     if(
-            _prop_num_g > SIZE_MAX-1 || /* overflow check */
+            isOverflowForRealloc(_prop_num_g+1, _opt_property_t*) ||
             isNull(_prop_gp = realloc(_prop_gp, sizeof(_opt_property_t*)*(_prop_num_g+1))))
     {
         /* out of memory should be handled in errno, not in this library */

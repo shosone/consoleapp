@@ -23,9 +23,14 @@
 
 #ifndef CONSOLEAPP_COMMON_H
 #define CONSOLEAPP_COMMON_H
+#include <limits.h>
 
 #ifndef isNull
 #define isNull(p)    ((p) == NULL)
+#endif
+
+#ifndef isOverflowForRealloc
+#define isOverflowForRealloc(ssize, type) ((ssize) < 0 || ((size_t)(ssize)) > SIZE_MAX/sizeof(type))
 #endif
 
 #ifndef isNotNull
