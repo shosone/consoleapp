@@ -30,6 +30,10 @@
 
 #include "./common.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /* An error message will be forcibly displayed on the console when the following error occurs. */
 typedef enum{
     OPTION_SHORT_FORM_IS_NULL = CONSOLEAPP_LOGIC_ERRNO_BASE,
@@ -48,10 +52,13 @@ typedef enum{
     OPTION_TOO_LITTLE_CONTENTS, 
 }option_runtime_errno_t;
 
-extern int   option_errno;
+extern int option_errno;
 
 extern char*
 optionErrno2msg(
-         option_runtime_errno_t errno);
+         int errno);
 
+#ifdef __cplusplus
+}
+#endif
 #endif 

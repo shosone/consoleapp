@@ -27,6 +27,7 @@
 #include "./win32.h"
 #endif
 
+#include <stdbool.h>
 #include "./common.h"
 
 #define CONSOLEAPP_OPTION_VERSION "0.0"
@@ -40,6 +41,18 @@
 extern "C" {
 #endif
 
+/* structure that holds option properties that can be used in the program 
+ * NOTE: there is no need for the user to touch this structure*/
+typedef struct __opt_property_t{
+    char        *short_form;                                           /* short format of option, eg "-v" */
+    char        *long_form;                                            /* detailed format of option, eg "--version" */
+    int          (*contentsChecker)(char **contents, int content_num); /* callback function to check correctness of contents attached to option */
+    unsigned int content_num_min;                                      /* minimum number of contents attached to options */
+    unsigned int content_num_max;                                      /* maximum number of contents attached to options */
+    int          priority;                                             /* a field for clarifying which option is processed preferentially when multiple options are specified, 0 being the highest. */
+    bool         appeared_yet;                                         /* use as a memo to check if the same option has already been specified */
+}_opt_property_t;
+
 /* structure for holding information on each option specified at program execution */
 typedef struct _opt_group_t{
     unsigned int priority;    /* a unique number corresponding to option */
@@ -50,8 +63,8 @@ typedef struct _opt_group_t{
 extern int /* OPTION_SUCCESS or OPTION_FAILURE */
 regOptProperty( /*  */
         unsigned int priority,        /* order of options to be extracted by popOptGroup (priority) */
-        const char *short_form,      /* [in] short format of option, for example, -h. */
-        const char *long_form,       /* [in] long format of option. for example, --help. */
+        const char *short_form,       /* [in] short format of option, for example, -h. */
+        const char *long_form,        /* [in] long format of option. for example, --help. */
         int          content_num_min, /* minimum number of contents attached to option */
         int          content_num_max, /* maximum number of contents attached to option */
         int        (*contentsChecker)(char **contents, int content_num)); /* callback function to check option contents */

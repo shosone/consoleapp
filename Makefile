@@ -13,22 +13,28 @@ OBJ_PATH_DEBUG   := ./obj/debug
 TARGET_RELEASE   := libprompt.a liboption.a
 TARGET_DEBUG     := libprompt_debug.a liboption_debug.a
 
-#for build sample app
-SRC_PATH_CSAMPLE   := ./sample/c
+#for build c sample
+SRC_PATH_CSAMPLE := ./sample/c
+TARGET_CSAMPLE   := c_prompt c_option
+FLAGS_CSAMPLE    := -g3 -Wall -lprompt_debug -loption_debug -O0 
+
+#for build cpp sample
+CPPC               := g++
 SRC_PATH_CPPSAMPLE := ./sample/cpp
-CFLAGS_SAMPLE      := -Wall -lprompt_debug -loption_debug -lreadline
-TARGET_SAMPLE      := sample_prompt sample_option
+TARGET_CPPSAMPLE   := cpp_prompt cpp_option
+FLAGS_CPPSAMPLE    := -g3 -Wall -lprompt_debug -loption_debug  -O0
 
 #for install
 LIB_DIR  := /usr/lib
 INC_DIR  := /usr/include/consoleapp
 
-vpath %.h $(INC_PATH)
-vpath %.c $(SRC_PATH) $(SRC_PATH_CSAMPLE)
-vpath %.o $(OBJ_PATH_RELEASE) $(OBJ_PATH_DEBUG)
-vpath %.a $(LIB_PATH_RELEASE) $(LIB_PATH_DEBUG) 
+vpath %.h   $(INC_PATH)
+vpath %.c   $(SRC_PATH) $(SRC_PATH_CSAMPLE)
+vpath %.o   $(OBJ_PATH_RELEASE) $(OBJ_PATH_DEBUG)
+vpath %.a   $(LIB_PATH_RELEASE) $(LIB_PATH_DEBUG) 
+vpath %.cpp $(SRC_PATH_CPPSAMPLE)
 
-.PHONY: all clean tag install uninstall 
+.PHONY: clean tag install uninstall 
 
 all: 
 	@for r in $(TARGET_RELEASE); \
@@ -39,14 +45,21 @@ all:
 	do                           \
 		make $$d;                \
 	done
-	@for s in $(TARGET_SAMPLE);  \
-	do                           \
-		make $$s;                \
+	@for s in $(TARGET_CSAMPLE);  \
+	do                            \
+		make $$s;                 \
+	done
+	@for s in $(TARGET_CPPSAMPLE);  \
+	do                              \
+		make $$s;                   \
 	done
 	ctags -R --language-force=C
 
-sample_%: sample_%.c $(TARGET_DEBUG)
-	$(CC) $(CFLAGS_DEBUG) -I$(INC_PATH) -L$(LIB_PATH_DEBUG) -o$(SRC_PATH_CSAMPLE)/$@ $< $(CFLAGS_SAMPLE)
+c_%: sample_%.c $(TARGET_DEBUG)
+	$(CC) -I$(INC_PATH) -L$(LIB_PATH_DEBUG) -o$(SRC_PATH_CSAMPLE)/$@ $< $(FLAGS_CSAMPLE)
+
+cpp_%: sample_%.cpp $(TARGET_DEBUG)
+	$(CPPC) -I$(INC_PATH) -L$(LIB_PATH_DEBUG) -o$(SRC_PATH_CPPSAMPLE)/$@ $< $(FLAGS_CPPSAMPLE) 
 
 lib%_debug.a: %_debug.o %_errmsg_debug.o common_debug.o
 	@mkdir -p $(LIB_PATH_DEBUG)
@@ -95,7 +108,11 @@ clean:
 	rm -rf obj
 	rm -rf lib
 	rm -f tags
-	@for s in $(TARGET_SAMPLE);       \
-	do                                \
+	@for s in $(TARGET_CSAMPLE);       \
+	do                                 \
 		rm -f $(SRC_PATH_CSAMPLE)/$$s; \
+	done
+	@for s in $(TARGET_CPPSAMPLE);       \
+	do                                   \
+		rm -f $(SRC_PATH_CPPSAMPLE)/$$s; \
 	done

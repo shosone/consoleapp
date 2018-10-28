@@ -25,7 +25,6 @@
 #include <stdlib.h>
 #include <ctype.h>
 #include <limits.h>
-#include <stdbool.h>
 #include "./option.h"
 
 /* ================================ imports from common.c ============================ */
@@ -46,21 +45,6 @@ _makeEndUsrErrMsg(
         option_runtime_errno_t errno,
         char *short_form,
         char *long_form);
-
-/* ==================================== structures =================================== */
-
-/* NOTE: opt_group_t is defined in option.h */
-
-/* プログラムで使用できるオプションの情報を保持する構造体 */
-typedef struct __opt_property_t{
-    char        *short_form;                                           /* オプションの短縮形式. 例えば"-v" */
-    char        *long_form;                                            /* オプションの詳細形式. 例えば"--version" */
-    int          (*contentsChecker)(char **contents, int content_num); /* オプションに付属するcontentsの正しさを調べるコールバック関数 */
-    unsigned int content_num_min;                                      /* オプションに付属するcontentsの最小数 */
-    unsigned int content_num_max;                                      /* オプションに付属するcontentsの最大数 */
-    int          priority;                                             /* オプションが複数指定された時にどのオプションを優先的に処理するかを明示するためのフィールド. 0が最も高い. */
-    bool         appeared_yet;                                         /* 同じオプションがすでに指定されたかチェックするためのメモとして用いる */
-}_opt_property_t;
 
 /* =========================== global variables ========================= */
 
