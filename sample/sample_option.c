@@ -125,24 +125,31 @@ free_and_exit:
 }
 
 void printUsage(void){
-    printf("Usage: sample\n");
-    printf("\t-h,--help          print this help\n");
-    printf("\t-v,--version       print version\n");
-    printf("\t-p <str..>,\n");
-    printf("\t--print=<str..>    print <str>\n");
-    printf("\t-a <num> <num>,\n");
-    printf("\t--add=<num>,<num>  execute <num> + <num>\n");
-    printf("\t-s <num> <num>,\n");
-    printf("\t--sub=<num>,<num>  execute <num> - <num>\n");
-    printf("\t-m <num> <num>,\n");
-    printf("\t--mul=<num>,<num>  execute <num> * <num>\n");
-    printf("\t-d <num> <num>,\n");
-    printf("\t--div=<num>,<num>  execute <num> / <num>\n");
+    printf("Usage: sample_option\n");
+    printf("[short format option]\n");
+    printf("\t-h              print this help\n");
+    printf("\t-v              print version of liboption.a\n");
+    printf("\t-p <str..>      print specified strs\n");
+    printf("\t-a <num> <num>  add two specified numbers\n");
+    printf("\t-s <num> <num>  sub two specified numbers\n");
+    printf("\t-m <num> <num>  mul two specified numbers\n");
+    printf("\t-d <num> <num>  div two specified numbers\n");
+    printf("\n");
+    printf("[long format option]\n");
+    printf("these option\'s cantens can be specified \"option=contents,contents,..\" or \"option contents contents ..\"\n");
+    printf("\t--print         same as -p\n");
+    printf("\t--add           same as -a\n");
+    printf("\t--sub           same as -s\n");
+    printf("\t--mul           same as -m\n");
+    printf("\t--div           same as -d\n");
     printf("\n");
 }
 
 void printVersion(void){
-    printf("version 0.0.0\n");
+    printf("liboption.a v%s\n", CONSOLEAPP_OPTION_VERSION);
+    printf("\n");
+    printf("Copyright (c) This software is provided under the MIT license.\n");
+    printf("See \"https://opensource.org/licenses/MIT\" for details.\n");
     printf("\n");
 }
 

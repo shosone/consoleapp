@@ -70,7 +70,7 @@ _makeEndUsrErrMsg(
 
 /* ============== publications ============== */
 
-int option_errno = CONAPP_DEFAULT_ERRNO;
+int option_errno = CONSOLEAPP_DEFAULT_ERRNO;
 
 char*
 optionErrno2msg(
@@ -79,7 +79,7 @@ optionErrno2msg(
     static char *errmsg = NULL;
     free(errmsg);
 
-    errno -= CONAPP_RUNTIME_ERRNO_BASE;
+    errno -= CONSOLEAPP_RUNTIME_ERRNO_BASE;
     if(errno < 0 || errno >= 3){
         return "unknown error number.";
     }

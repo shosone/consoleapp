@@ -28,6 +28,12 @@
 #include <stdbool.h>
 #include "./option.h"
 
+/* ================================ imports from common.c ============================ */
+
+extern void
+_consoleappBugReport(
+    consoleapp_bugcode_t errno);
+
 /* ================================ imports from option_errmsg.c ===================== */
 
 extern void
@@ -377,7 +383,7 @@ _updateOptGrpGP(
             }
 
         default:
-            _conappBugReport(CONAPP_UNEXPECTED_CONSTANT_VALUE_IN_SWITCH);
+            _consoleappBugReport(CONSOLEAPP_UNEXPECTED_CONSTANT_VALUE_IN_SWITCH);
             return OPTION_FAILURE;
     }
 
@@ -548,7 +554,7 @@ groupingOpt( /* cliより取得したmainの引数であるargc, argvとregOptio
                 goto free_and_exit;
 
             default:
-                _conappBugReport(CONAPP_UNEXPECTED_CONSTANT_VALUE_IN_SWITCH);
+                _consoleappBugReport(CONSOLEAPP_UNEXPECTED_CONSTANT_VALUE_IN_SWITCH);
                 goto free_and_exit;
         }
     }

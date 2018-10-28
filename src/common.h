@@ -32,16 +32,12 @@
 #define isNotNull(p) ((p) != NULL)
 #endif
 
-#define CONAPP_DEFAULT_ERRNO      -1
-#define CONAPP_LOGIC_ERRNO_BASE   50
-#define CONAPP_RUNTIME_ERRNO_BASE 100
+#define CONSOLEAPP_DEFAULT_ERRNO      -1
+#define CONSOLEAPP_LOGIC_ERRNO_BASE   50
+#define CONSOLEAPP_RUNTIME_ERRNO_BASE 100
 
 typedef enum{
-    CONAPP_UNEXPECTED_CONSTANT_VALUE_IN_SWITCH,
-}conapp_bugcode_t;
-
-void
-_conappBugReport(
-        conapp_bugcode_t errno);
+    CONSOLEAPP_UNEXPECTED_CONSTANT_VALUE_IN_SWITCH,
+}consoleapp_bugcode_t;
 
 #endif

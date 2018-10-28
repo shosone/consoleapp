@@ -36,15 +36,6 @@
 #define OPTION_SUCCESS  0
 #define OPTION_FAILURE -1
 
-/* [USAGE
- * 1: startOptionAnalize()
- * 2: regOptProperty()
- * 3: groupingOpt()
- * 4: popOptionErrcode()
- * 5: popOption()
- * 6: finishOptAnalize()
- */
-
 /* structure for holding information on each option specified at program execution */
 typedef struct _opt_group_t{
     unsigned int priority;    /* a unique number corresponding to option */

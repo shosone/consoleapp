@@ -32,7 +32,7 @@
 
 /* An error message will be forcibly displayed on the console when the following error occurs. */
 typedef enum{
-    OPTION_SHORT_FORM_IS_NULL = CONAPP_LOGIC_ERRNO_BASE,
+    OPTION_SHORT_FORM_IS_NULL = CONSOLEAPP_LOGIC_ERRNO_BASE,
     OPTION_MIN_BIGGER_THAN_MAX, 
     OPTION_PROP_GP_IS_NULL, 
     OPTION_SAME_PRIORITY,
@@ -43,7 +43,7 @@ typedef enum{
  * Then, gloval valiable option_errno has been set.
  * And you can earn the string of error message by optionErrno2msg(option_errno). */
 typedef enum{
-    OPTION_DUPLICATE_SAME_OPT = CONAPP_RUNTIME_ERRNO_BASE,
+    OPTION_DUPLICATE_SAME_OPT = CONSOLEAPP_RUNTIME_ERRNO_BASE,
     OPTION_TOO_MANY_CONTENTS, 
     OPTION_TOO_LITTLE_CONTENTS, 
 }option_runtime_errno_t;
