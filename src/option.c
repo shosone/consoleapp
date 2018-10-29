@@ -49,7 +49,7 @@ _makeEndUsrErrMsg(
 /* =========================== global variables ========================= */
 
 static int               _prop_num_g = 0;
-static _opt_property_t **_prop_gp    = NULL;
+static opt_property_t **_prop_gp    = NULL;
 
 static int            _grp_num_g = 0;
 static opt_group_t **_grp_gp     = NULL;
@@ -84,7 +84,7 @@ _freeOptGroup(
 
 static void
 _freeOptProp(
-        _opt_property_t *opt_prop)
+        opt_property_t *opt_prop)
 {
     free(opt_prop -> short_form);
     opt_prop -> short_form = NULL;
@@ -128,7 +128,7 @@ _initOptGroupT(
 
 static void
 _initOptPropertyT(
-        _opt_property_t *prop)
+        opt_property_t *prop)
 {
     prop -> short_form      = NULL;
     prop -> long_form       = NULL;
@@ -224,7 +224,7 @@ _judgeDestination(
     static bool opt_grp_dbs_flagless_locked   = false;
 
     /* memos */
-    static _opt_property_t *current_options_property;
+    static opt_property_t *current_options_property;
     static int   current_options_contents_num     = 0;
     static int   current_options_contents_num_max = 0;
     static int   current_options_contents_num_min = 0;
@@ -379,7 +379,7 @@ _adaptContentsChecker(void)
     for(int i=0; i<_grp_num_g; i++){
         opt_group_t *grp = _grp_gp[i];
         for(int j=0; j<_prop_num_g; j++){
-            _opt_property_t *prop = _prop_gp[j];
+            opt_property_t *prop = _prop_gp[j];
             if(prop->priority == grp->priority){
                 if(
                         isOverflow4Realloc(_errcode_memo_num_g+1, int) ||
@@ -442,16 +442,16 @@ regOptProperty( /* opt_property_db_tのエントリを追加する関数 */
     /* [done] error check */
 
     if(
-            isOverflow4Realloc(_prop_num_g+1, _opt_property_t*) ||
-            isNull(_prop_gp = realloc(_prop_gp, sizeof(_opt_property_t*)*(_prop_num_g+1))))
+            isOverflow4Realloc(_prop_num_g+1, opt_property_t*) ||
+            isNull(_prop_gp = realloc(_prop_gp, sizeof(opt_property_t*)*(_prop_num_g+1))))
     {
         /* out of memory should be handled in errno, not in this library */
         return OPTION_FAILURE;
     }
 
-    if(isNull(_prop_gp[_prop_num_g] = malloc(sizeof(_opt_property_t)))){
+    if(isNull(_prop_gp[_prop_num_g] = malloc(sizeof(opt_property_t)))){
         /* out of memory should be handled in errno, not in this library */
-        _prop_gp = realloc(_prop_gp, sizeof(_opt_property_t*)*_prop_num_g); /* reducing */ 
+        _prop_gp = realloc(_prop_gp, sizeof(opt_property_t*)*_prop_num_g); /* reducing */ 
         return OPTION_FAILURE;
     }
 
@@ -485,7 +485,7 @@ free_and_exit:
     free(_prop_gp[_prop_num_g]->short_form);
     free(_prop_gp[_prop_num_g]->long_form);
     free(_prop_gp[_prop_num_g]);
-    _prop_gp = realloc(_prop_gp, sizeof(_opt_property_t)*_prop_num_g); /* reducing */ 
+    _prop_gp = realloc(_prop_gp, sizeof(opt_property_t)*_prop_num_g); /* reducing */ 
     return OPTION_FAILURE;
 }
 

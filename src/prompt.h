@@ -48,7 +48,7 @@ extern const char DEFAULT_SC_DIVE_HIST[];
 extern const char DEFAULT_SC_FLOAT_HIST[]; 
 
 /* structure for ring buffer. this is used for rwh_ctx_t's member. there is no need for user to know. */
-typedef struct _ringbuf_t{
+typedef struct tag_ringbuf_t{
     char **buf;         /* buffer for entories */
     int    size;        /* max size of buffer */
     int    head;        /* buffer index at an oldest entory */
@@ -57,13 +57,13 @@ typedef struct _ringbuf_t{
 }ringbuf_t;
 
 /* structure for holding candidates at completion. */
-typedef struct _completion_t{
+typedef struct tag_completion_t{
     char** entories;   /* entories are sorted in ascending order */
     int    entory_num; /* number of entories */
 }completion_t;
 
 /* structure for preserve context for rwh(). */
-typedef struct _rwhctx_t{
+typedef struct tag_rwhctx_t{
     const char   *prompt;        /* prompt */
     ringbuf_t    *history;       /* history of lines enterd in the console */
     completion_t *candidate;     /* search target at completion */

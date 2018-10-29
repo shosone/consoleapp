@@ -43,7 +43,7 @@ extern "C" {
 
 /* structure that holds option properties that can be used in the program 
  * NOTE: there is no need for the user to touch this structure*/
-typedef struct __opt_property_t{
+typedef struct tagopt_property_t{
     char        *short_form;                                           /* short format of option, eg "-v" */
     char        *long_form;                                            /* detailed format of option, eg "--version" */
     int          (*contentsChecker)(char **contents, int content_num); /* callback function to check correctness of contents attached to option */
@@ -51,10 +51,10 @@ typedef struct __opt_property_t{
     unsigned int content_num_max;                                      /* maximum number of contents attached to options */
     unsigned int priority;                                             /* a field for clarifying which option is processed preferentially when multiple options are specified, 0 being the highest. */
     bool         appeared_yet;                                         /* use as a memo to check if the same option has already been specified */
-}_opt_property_t;
+}opt_property_t;
 
 /* structure for holding information on each option specified at program execution */
-typedef struct _opt_group_t{
+typedef struct tag_opt_group_t{
     unsigned int priority;    /* a unique number corresponding to option */
     int          content_num; /* number of elements of content */
     char       **contents;    /* content attached to options. for example, For example, 1 and 2 in "somecommand - foo = 1, 2 bar" are assigned to the contents [0] and contents [1] of the foo option. */
