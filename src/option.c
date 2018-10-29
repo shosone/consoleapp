@@ -30,38 +30,38 @@
 /* ================================ imports from common.c ============================ */
 
 extern void
-_consoleappBugReport(
-    consoleapp_bugno_t errno);
+consoleappBugReport_(
+    consoleapp_bugcode_t errno);
 
 /* ================================ imports from option_errmsg.c ===================== */
 
 extern void
-_printAPIusageErrMsg(
+printAPIusageErrMsg_(
         option_logic_errno_t errno,
         const char*            func_name);
 
 extern void
-_makeEndUsrErrMsg(
+makeEndUsrErrMsg_(
         option_runtime_errno_t errno,
         char *short_form,
         char *long_form);
 
 /* =========================== global variables ========================= */
 
-static int               _prop_num_g = 0;
-static _opt_property_t **_prop_gp    = NULL;
+static int               prop_num_g_ = 0;
+static opt_property_t **prop_gp_    = NULL;
 
-static int            _grp_num_g = 0;
-static opt_group_t **_grp_gp     = NULL;
+static int            grp_num_g_ = 0;
+static opt_group_t **grp_gp_     = NULL;
 
-static int  _errcode_memo_num_g = 0;
-static int *_errcode_memo_gp    = NULL;
+static int  errcode_memo_num_g_ = 0;
+static int *errcode_memo_gp_    = NULL;
 
 /* =========================== static functions ========================= */
 
 /* used for initialized opt_property_t's contentsChecker */
 static int 
-_alwaysReturnTrue(
+alwaysReturnTrue_(
         char **contents,
         int  content_num)
 {
@@ -71,7 +71,7 @@ _alwaysReturnTrue(
 }
 
 static void
-_freeOptGroup(
+freeOptGroup_(
         opt_group_t *opt_grp)
 {
     for(int i=0; i<opt_grp->content_num; i++){
@@ -83,8 +83,8 @@ _freeOptGroup(
 }
 
 static void
-_freeOptProp(
-        _opt_property_t *opt_prop)
+freeOptProp_(
+        opt_property_t *opt_prop)
 {
     free(opt_prop -> short_form);
     opt_prop -> short_form = NULL;
@@ -92,7 +92,7 @@ _freeOptProp(
     opt_prop -> long_form = NULL;
 }
 
-static int _sortErrcodeMemoCompare(const void *a, const void *b){
+static int sortErrcodeMemoCompare_(const void *a, const void *b){
     if((*(int *)a) < (*(int *)b)){
         return 1;
     }
@@ -100,25 +100,25 @@ static int _sortErrcodeMemoCompare(const void *a, const void *b){
 }
 
 static void
-_sortErrcodeMemo(void)
+sortErrcodeMemo_(void)
 {
-    qsort(_errcode_memo_gp, _errcode_memo_num_g, sizeof(int), _sortErrcodeMemoCompare);
+    qsort(errcode_memo_gp_, errcode_memo_num_g_, sizeof(int), sortErrcodeMemoCompare_);
 }
 
-static int _sortOptGroupCompare(const void *a, const void *b){
+static int sortOptGroupCompare_(const void *a, const void *b){
     if((*(opt_group_t**)a)->priority > (*(opt_group_t**)b)->priority){
         return 1;
     }
     return 0;
 }
 static void
-_sortOptGroup(void)
+sortOptGroup_(void)
 {
-    qsort(_grp_gp, _grp_num_g, sizeof(opt_group_t*), _sortOptGroupCompare);
+    qsort(grp_gp_, grp_num_g_, sizeof(opt_group_t*), sortOptGroupCompare_);
 }
 
 static void
-_initOptGroupT(
+initOptGroupT_(
         opt_group_t *grp)
 {
     grp -> priority    = 0;
@@ -127,12 +127,12 @@ _initOptGroupT(
 }
 
 static void
-_initOptPropertyT(
-        _opt_property_t *prop)
+initOptPropertyT_(
+        opt_property_t *prop)
 {
     prop -> short_form      = NULL;
     prop -> long_form       = NULL;
-    prop -> contentsChecker = _alwaysReturnTrue;
+    prop -> contentsChecker = alwaysReturnTrue_;
     prop -> content_num_min = 0;
     prop -> content_num_max = 0;
     prop -> priority        = 0;
@@ -140,7 +140,7 @@ _initOptPropertyT(
 }
 
 static int 
-_decodeOptions(
+decodeOptions_(
         int               org_argc,
         char            **org_argv,
         int              *new_argc_p,
@@ -156,10 +156,10 @@ _decodeOptions(
         char  delim                = '\0';
 
         /* このブロック終了後にa_part_of_conditionがtrueになっていたらorg_argv[org_argv_i]は--hoge=geho形式で--hogeがオプションになっている */
-        for(int i = 0; i<_prop_num_g; i++){
+        for(int i = 0; i<prop_num_g_; i++){
             char *memo = strchr(copy_src, '=');
             if(memo){
-                if(strcmp(_prop_gp[i]->long_form, strtok(copy_src, "=")) == 0){
+                if(strcmp(prop_gp_[i]->long_form, strtok(copy_src, "=")) == 0){
                     a_part_of_condition = true;
                     delim = '=';
                     break;
@@ -174,13 +174,13 @@ _decodeOptions(
             (*new_argc_p)++;
             if(
                     isOverflow4Realloc(*new_argc_p, char*) ||
-                    ((*new_argv_p) = (char **)realloc(*new_argv_p, sizeof(char *)*(*new_argc_p))) == NULL)
+                    isNull((*new_argv_p) = (char **)realloc(*new_argv_p, sizeof(char *)*(*new_argc_p))))
             {
                 /* out of memory should be handled in errno, not in this library */
                 goto free_and_exit;
             }
             const size_t copy_src_len_plus1 = strlen(copy_src) + 1;
-            if(((*new_argv_p)[*new_argc_p-1] = (char *)malloc(sizeof(char)*(copy_src_len_plus1))) == NULL){
+            if(isNull((*new_argv_p)[*new_argc_p-1] = (char *)malloc(sizeof(char)*(copy_src_len_plus1)))){
                 /* out of memory should be handled in errno, not in this library */
                 goto free_and_exit;
             }
@@ -192,7 +192,7 @@ _decodeOptions(
                 copy_src[strlen(copy_src)] = delim; /* 分割した文字列をもとに戻す */
             }
         }while(a_part_of_condition && 
-                (((copy_src = strtok(NULL, ",")) != NULL && (delim = ',')) ||
+                ((isNotNull(copy_src = strtok(NULL, ",")) && (delim = ',')) ||
                  ((delim = '\0') && (a_part_of_condition = false))));
     }
 
@@ -215,7 +215,7 @@ typedef enum{
 }judgeDestination_errcode_t;
 
 static int /* destination */
-_judgeDestination(
+judgeDestination_(
         char  *str,             /* [out] */
         void **assign_value)    /* [out] */
 {
@@ -224,39 +224,39 @@ _judgeDestination(
     static bool opt_grp_dbs_flagless_locked   = false;
 
     /* memos */
-    static _opt_property_t *current_options_property;
+    static opt_property_t *current_options_property;
     static int   current_options_contents_num     = 0;
     static int   current_options_contents_num_max = 0;
     static int   current_options_contents_num_min = 0;
 
     /* if str == NULL, this function was called as finalizing.  */
-    if(str == NULL){
+    if(isNull(str)){
         if(current_options_contents_num < current_options_contents_num_min){
-            _makeEndUsrErrMsg(OPTION_TOO_LITTLE_CONTENTS, current_options_property -> short_form, current_options_property -> long_form);
+            makeEndUsrErrMsg_(OPTION_TOO_LITTLE_CONTENTS, current_options_property -> short_form, current_options_property -> long_form);
             return OPTION_FAILURE;
         }
         return OPTION_SUCCESS;
     }
 
-    for(int i=0; i<_prop_num_g; i++){
-        if(strcmp(_prop_gp[i]->short_form, str) == 0 || strcmp(_prop_gp[i]->long_form, str) == 0){
-            current_options_property = _prop_gp[i];
+    for(int i=0; i<prop_num_g_; i++){
+        if(strcmp(prop_gp_[i]->short_form, str) == 0 || strcmp(prop_gp_[i]->long_form, str) == 0){
+            current_options_property = prop_gp_[i];
             if(opt_grp_dbs_flagless_is_empty == false){
                 opt_grp_dbs_flagless_locked = true;
             }
             if(current_options_property -> appeared_yet){
-                _makeEndUsrErrMsg(OPTION_DUPLICATE_SAME_OPT, current_options_property -> short_form, current_options_property -> long_form);
+                makeEndUsrErrMsg_(OPTION_DUPLICATE_SAME_OPT, current_options_property -> short_form, current_options_property -> long_form);
                 return OPTION_FAILURE;
             }
             if(current_options_contents_num < current_options_contents_num_min){
-                _makeEndUsrErrMsg(OPTION_TOO_LITTLE_CONTENTS, current_options_property -> short_form, current_options_property -> long_form);
+                makeEndUsrErrMsg_(OPTION_TOO_LITTLE_CONTENTS, current_options_property -> short_form, current_options_property -> long_form);
                 return OPTION_FAILURE;
             }
-            _prop_gp[i]->appeared_yet = 1;
+            prop_gp_[i]->appeared_yet = 1;
             current_options_contents_num       = 0;
             current_options_contents_num_max   = current_options_property -> content_num_max;
             current_options_contents_num_min   = current_options_property -> content_num_min;
-            *assign_value = &(_prop_gp[i] -> priority);
+            *assign_value = &(prop_gp_[i] -> priority);
             return JD_OPT_GRPs_OPTION;
         }
     }
@@ -265,7 +265,7 @@ _judgeDestination(
     const size_t len_minus1 = strlen(str) - 1;
     if(str[len_minus1] == '\n'){
         if(current_options_contents_num >= current_options_contents_num_max){
-            _makeEndUsrErrMsg(OPTION_TOO_MANY_CONTENTS, current_options_property -> short_form, current_options_property -> long_form);
+            makeEndUsrErrMsg_(OPTION_TOO_MANY_CONTENTS, current_options_property -> short_form, current_options_property -> long_form);
             return OPTION_FAILURE;
         }
         else{
@@ -290,26 +290,26 @@ _judgeDestination(
         return JD_OPT_GRP_DBs_OPTLESS;
     }
 
-    _makeEndUsrErrMsg(OPTION_TOO_MANY_CONTENTS, current_options_property -> short_form, current_options_property -> long_form);
+    makeEndUsrErrMsg_(OPTION_TOO_MANY_CONTENTS, current_options_property -> short_form, current_options_property -> long_form);
     return OPTION_FAILURE;
 }
 
 static int /* OPTION_SUCCESS or OPTION_FAILURE */
-_updateOptless(
+updateOptless_(
         int    *optless_num, /* [out] */
         char ***optless,     /* [out] */
         char   *str)
 {
     if(
             isOverflow4Realloc(*optless_num+1, char*) ||
-            (*optless = (char**)realloc(*optless, sizeof(char*)*(*optless_num+1))) == NULL)
+            isNull(*optless = (char**)realloc(*optless, sizeof(char*)*(*optless_num+1))))
     {
         /* out of memory should be handled in errno, not in this library */
         return OPTION_FAILURE;
     }
 
     size_t str_len_plus1 = strlen(str) + 1;
-    if(((*optless)[*optless_num] = (char*)malloc(str_len_plus1)) == NULL)
+    if(isNull((*optless)[*optless_num] = (char*)malloc(str_len_plus1)))
     {
         *optless = realloc(*optless, sizeof(char*)*(*optless_num)); /* reducing */
         /* out of memory should be handled in errno, not in this library */
@@ -322,40 +322,40 @@ _updateOptless(
 }
 
 static int
-_updateOptGrpGP(
+updateOptGrpGP_(
     judgeDestination_errcode_t  direction,
     void                       *assign_value_p)
 {
     switch(direction){
         case JD_OPT_GRPs_OPTION:
             if(
-                    isOverflow4Realloc(_grp_num_g+1, opt_group_t) ||
-                    (_grp_gp = (opt_group_t**)realloc(_grp_gp, sizeof(opt_group_t)*(_grp_num_g+1))) == NULL)
+                    isOverflow4Realloc(grp_num_g_+1, opt_group_t) ||
+                    isNull(grp_gp_ = (opt_group_t**)realloc(grp_gp_, sizeof(opt_group_t)*(grp_num_g_+1))))
             {
                 /* out of memory should be handled in errno, not in this library */
                 return OPTION_FAILURE;
             }
-            if((_grp_gp[_grp_num_g] = (opt_group_t*)malloc(sizeof(opt_group_t))) == NULL){
+            if(isNull(grp_gp_[grp_num_g_] = (opt_group_t*)malloc(sizeof(opt_group_t)))){
                 /* out of memory should be handled in errno, not in this library */
-                _grp_gp = (opt_group_t**)realloc(_grp_gp, sizeof(opt_group_t*)*_grp_num_g); /* reducing */
+                grp_gp_ = (opt_group_t**)realloc(grp_gp_, sizeof(opt_group_t*)*grp_num_g_); /* reducing */
                 return OPTION_FAILURE;
             }
-            _initOptGroupT(_grp_gp[_grp_num_g]);
-            _grp_gp[_grp_num_g] -> priority = *(int *)assign_value_p;
-            _grp_num_g++;
+            initOptGroupT_(grp_gp_[grp_num_g_]);
+            grp_gp_[grp_num_g_] -> priority = *(int *)assign_value_p;
+            grp_num_g_++;
             break;
 
         case JD_OPT_GRPs_CONTENTS:
             {
-                opt_group_t *grp  = _grp_gp[_grp_num_g - 1];
+                opt_group_t *grp  = grp_gp_[grp_num_g_ - 1];
                 if(
                         isOverflow4Realloc(grp->content_num+1, char*) ||
-                        (grp->contents = (char **)realloc(grp->contents, sizeof(char *)*(grp->content_num+1))) == NULL)
+                        isNull(grp->contents = (char **)realloc(grp->contents, sizeof(char *)*(grp->content_num+1))))
                 {
                 /* out of memory should be handled in errno, not in this library */
                     return OPTION_FAILURE;
                 }
-                if((grp->contents[grp->content_num] = (char*)malloc(strlen(assign_value_p)+1)) == NULL){
+                if(isNull(grp->contents[grp->content_num] = (char*)malloc(strlen(assign_value_p)+1))){
                     /* out of memory should be handled in errno, not in this library */
                     grp->contents = (char **)realloc(grp->contents, sizeof(char*)*(grp->content_num)); /* reducing */
                     return OPTION_FAILURE;
@@ -366,7 +366,7 @@ _updateOptGrpGP(
             }
 
         default:
-            _consoleappBugReport(__CONSOLEAPP_UNEXPECTED_CONSTANT_VALUE_IN_SWITCH);
+            consoleappBugReport_(CONSOLEAPP_UNEXPECTED_CONSTANT_VALUE_IN_SWITCH);
             return OPTION_FAILURE;
     }
 
@@ -374,20 +374,20 @@ _updateOptGrpGP(
 }
 
 static int /* OPTION_SUCCESS or OPTION_FAILURE */
-_adaptContentsChecker(void)
+adaptContentsChecker_(void)
 {
-    for(int i=0; i<_grp_num_g; i++){
-        opt_group_t *grp = _grp_gp[i];
-        for(int j=0; j<_prop_num_g; j++){
-            _opt_property_t *prop = _prop_gp[j];
+    for(int i=0; i<grp_num_g_; i++){
+        opt_group_t *grp = grp_gp_[i];
+        for(int j=0; j<prop_num_g_; j++){
+            opt_property_t *prop = prop_gp_[j];
             if(prop->priority == grp->priority){
                 if(
-                        isOverflow4Realloc(_errcode_memo_num_g+1, int) ||
-                        (_errcode_memo_gp = realloc(_errcode_memo_gp, sizeof(int)*(_errcode_memo_num_g+1))) == NULL)
+                        isOverflow4Realloc(errcode_memo_num_g_+1, int) ||
+                        isNull(errcode_memo_gp_ = realloc(errcode_memo_gp_, sizeof(int)*(errcode_memo_num_g_+1))))
                 {
                     goto free_and_exit;
                 }
-                _errcode_memo_gp[_errcode_memo_num_g++] = prop->contentsChecker(grp->contents, grp->content_num);
+                errcode_memo_gp_[errcode_memo_num_g_++] = prop->contentsChecker(grp->contents, grp->content_num);
                 break;
             }
         }
@@ -396,10 +396,10 @@ _adaptContentsChecker(void)
     return OPTION_SUCCESS;
 
 free_and_exit:
-    for(int i=0; i<_errcode_memo_num_g; i++){
-        free(_errcode_memo_gp);
+    for(int i=0; i<errcode_memo_num_g_; i++){
+        free(errcode_memo_gp_);
     }
-    _errcode_memo_gp = 0;
+    errcode_memo_gp_ = 0;
     return OPTION_FAILURE;
 }
 
@@ -416,25 +416,25 @@ regOptProperty( /* opt_property_db_tのエントリを追加する関数 */
 {
     /* [begin] error check */
 
-    if(short_form == NULL){
-        _printAPIusageErrMsg(OPTION_SHORT_FORM_IS_NULL, __func__);
+    if(isNull(short_form)){
+        printAPIusageErrMsg_(OPTION_SHORT_FORM_IS_NULL, __func__);
         return OPTION_FAILURE;
     }
 
     if(content_num_max < content_num_min){
-        _printAPIusageErrMsg(OPTION_MIN_BIGGER_THAN_MAX, __func__);
+        printAPIusageErrMsg_(OPTION_MIN_BIGGER_THAN_MAX, __func__);
         return OPTION_FAILURE;
     }
 
-    for(int i=0; i<_prop_num_g; i++){
-        if(_prop_gp[i]->priority == priority){
-            _printAPIusageErrMsg(OPTION_SAME_PRIORITY, __func__);
+    for(int i=0; i<prop_num_g_; i++){
+        if(prop_gp_[i]->priority == priority){
+            printAPIusageErrMsg_(OPTION_SAME_PRIORITY, __func__);
             return OPTION_FAILURE;
         }
-        if(strcmp(_prop_gp[i]->short_form, short_form) == 0 || 
-           (long_form == NULL || _prop_gp[i]->long_form == NULL || strcmp(_prop_gp[i]->long_form, long_form) == 0))
+        if(strcmp(prop_gp_[i]->short_form, short_form) == 0 || 
+           (isNull(long_form) || isNull(prop_gp_[i]->long_form) || strcmp(prop_gp_[i]->long_form, long_form) == 0))
         {
-            _printAPIusageErrMsg(OPTION_SAME_SHORT_LONG_FORMAT, __func__);
+            printAPIusageErrMsg_(OPTION_SAME_SHORT_LONG_FORMAT, __func__);
             return OPTION_FAILURE;
         }
     }
@@ -442,50 +442,50 @@ regOptProperty( /* opt_property_db_tのエントリを追加する関数 */
     /* [done] error check */
 
     if(
-            isOverflow4Realloc(_prop_num_g+1, _opt_property_t*) ||
-            (_prop_gp = realloc(_prop_gp, sizeof(_opt_property_t*)*(_prop_num_g+1))) == NULL)
+            isOverflow4Realloc(prop_num_g_+1, opt_property_t*) ||
+            isNull(prop_gp_ = realloc(prop_gp_, sizeof(opt_property_t*)*(prop_num_g_+1))))
     {
         /* out of memory should be handled in errno, not in this library */
         return OPTION_FAILURE;
     }
 
-    if((_prop_gp[_prop_num_g] = malloc(sizeof(_opt_property_t))) == NULL){
+    if(isNull(prop_gp_[prop_num_g_] = malloc(sizeof(opt_property_t)))){
         /* out of memory should be handled in errno, not in this library */
-        _prop_gp = realloc(_prop_gp, sizeof(_opt_property_t*)*_prop_num_g); /* reducing */ 
+        prop_gp_ = realloc(prop_gp_, sizeof(opt_property_t*)*prop_num_g_); /* reducing */ 
         return OPTION_FAILURE;
     }
 
-    _initOptPropertyT(_prop_gp[_prop_num_g]);
+    initOptPropertyT_(prop_gp_[prop_num_g_]);
 
 	const size_t short_form_len = strlen(short_form);
-    if((_prop_gp[_prop_num_g]->short_form = (char *)malloc(short_form_len)) == NULL){
+    if(isNull(prop_gp_[prop_num_g_]->short_form = (char *)malloc(short_form_len))){
         goto free_and_exit;
     }
-    memcpy(_prop_gp[_prop_num_g]->short_form, short_form, short_form_len);
+    memcpy(prop_gp_[prop_num_g_]->short_form, short_form, short_form_len);
 
 	const size_t long_form_len = strlen(long_form);
-    if(long_form && (_prop_gp[_prop_num_g]->long_form = (char *)malloc(long_form_len)) == NULL){
+    if(long_form && isNull(prop_gp_[prop_num_g_]->long_form = (char *)malloc(long_form_len))){
         goto free_and_exit;
     }
-	memcpy(_prop_gp[_prop_num_g]->long_form, long_form, long_form_len);
+	memcpy(prop_gp_[prop_num_g_]->long_form, long_form, long_form_len);
 
-    _prop_gp[_prop_num_g]->content_num_min = content_num_min;
-    _prop_gp[_prop_num_g]->content_num_max = content_num_max;
-    _prop_gp[_prop_num_g]->priority        = priority;
-    if(contentsChecker != NULL){
-        _prop_gp[_prop_num_g]->contentsChecker = contentsChecker;
+    prop_gp_[prop_num_g_]->content_num_min = content_num_min;
+    prop_gp_[prop_num_g_]->content_num_max = content_num_max;
+    prop_gp_[prop_num_g_]->priority        = priority;
+    if(isNotNull(contentsChecker)){
+        prop_gp_[prop_num_g_]->contentsChecker = contentsChecker;
     }
 
-    _prop_num_g++;
+    prop_num_g_++;
 
     return OPTION_SUCCESS;
 
 free_and_exit:
     /* out of memory should be handled in errno, not in this library */
-    free(_prop_gp[_prop_num_g]->short_form);
-    free(_prop_gp[_prop_num_g]->long_form);
-    free(_prop_gp[_prop_num_g]);
-    _prop_gp = realloc(_prop_gp, sizeof(_opt_property_t)*_prop_num_g); /* reducing */ 
+    free(prop_gp_[prop_num_g_]->short_form);
+    free(prop_gp_[prop_num_g_]->long_form);
+    free(prop_gp_[prop_num_g_]);
+    prop_gp_ = realloc(prop_gp_, sizeof(opt_property_t)*prop_num_g_); /* reducing */ 
     return OPTION_FAILURE;
 }
 
@@ -498,8 +498,8 @@ groupingOpt( /* cliより取得したmainの引数であるargc, argvとregOptio
 {
     /* [begin] error check */
 
-    if(_prop_gp == NULL){
-        _printAPIusageErrMsg(OPTION_PROP_GP_IS_NULL, __func__);
+    if(isNull(prop_gp_)){
+        printAPIusageErrMsg_(OPTION_PROP_GP_IS_NULL, __func__);
         return OPTION_FAILURE;
     }
 
@@ -508,27 +508,27 @@ groupingOpt( /* cliより取得したmainの引数であるargc, argvとregOptio
     int    new_argc;
     char **new_argv = NULL;
 
-    if(_decodeOptions(argc, argv, &new_argc, &new_argv) != OPTION_SUCCESS){
+    if(decodeOptions_(argc, argv, &new_argc, &new_argv) != OPTION_SUCCESS){
         goto free_and_exit;
     }
 
     for(int i=0; i<new_argc; i++){
         void *assign_value = NULL;
-        switch(_judgeDestination(new_argv[i], &assign_value)){
+        switch(judgeDestination_(new_argv[i], &assign_value)){
             case JD_OPT_GRP_DBs_OPTLESS:
-                if(_updateOptless(optless_num, optless, assign_value) == OPTION_FAILURE){
+                if(updateOptless_(optless_num, optless, assign_value) == OPTION_FAILURE){
                     goto free_and_exit;
                 }
                 break;
 
             case JD_OPT_GRPs_CONTENTS:
-                if(_updateOptGrpGP(JD_OPT_GRPs_CONTENTS, assign_value) == OPTION_FAILURE){
+                if(updateOptGrpGP_(JD_OPT_GRPs_CONTENTS, assign_value) == OPTION_FAILURE){
                     goto free_and_exit;
                 }
                 break;
 
             case JD_OPT_GRPs_OPTION:
-                if(_updateOptGrpGP(JD_OPT_GRPs_OPTION, assign_value) == OPTION_FAILURE){
+                if(updateOptGrpGP_(JD_OPT_GRPs_OPTION, assign_value) == OPTION_FAILURE){
                     goto free_and_exit;
                 }
                 break;
@@ -537,24 +537,24 @@ groupingOpt( /* cliより取得したmainの引数であるargc, argvとregOptio
                 goto free_and_exit;
 
             default:
-                _consoleappBugReport(__CONSOLEAPP_UNEXPECTED_CONSTANT_VALUE_IN_SWITCH);
+                consoleappBugReport_(CONSOLEAPP_UNEXPECTED_CONSTANT_VALUE_IN_SWITCH);
                 goto free_and_exit;
         }
     }
 
     /* TODO: 動くには動くがあんまりいいやり方ではない. 可読性のためにリファクタが必要 */
-    if (_judgeDestination(NULL, NULL) == OPTION_FAILURE){
+    if (judgeDestination_(NULL, NULL) == OPTION_FAILURE){
         goto free_and_exit;
     }
 
-    _adaptContentsChecker();
+    adaptContentsChecker_();
     return OPTION_SUCCESS;
 
 free_and_exit:
-    for(int i=0; i<_grp_num_g; i++){
-        free(_grp_gp[i]);
+    for(int i=0; i<grp_num_g_; i++){
+        free(grp_gp_[i]);
     }
-    _grp_num_g = 0;
+    grp_num_g_ = 0;
     return OPTION_FAILURE;
 }
 
@@ -564,12 +564,12 @@ popOptGroup(void) /* groupingOptにより生成されたopt_group_tのポイン�
     static int cnt = 0;
 
     if(cnt == 0){
-        _sortOptGroup();
+        sortOptGroup_();
     }
 
     opt_group_t *ret = NULL;
-    if(cnt < _grp_num_g){
-        ret = _grp_gp[cnt];
+    if(cnt < grp_num_g_){
+        ret = grp_gp_[cnt];
         cnt++;
     }
 
@@ -582,12 +582,12 @@ popOptErrcode(void) /* regOptionPropertyにて登録したcontentsCheckerを各�
     static int  cnt = 0;
 
     if(cnt == 0){
-        _sortErrcodeMemo();
+        sortErrcodeMemo_();
     }
 
     int ret = OPTION_SUCCESS;
-    if(cnt < _errcode_memo_num_g){
-        ret = _errcode_memo_gp[cnt];
+    if(cnt < errcode_memo_num_g_){
+        ret = errcode_memo_gp_[cnt];
         cnt++;
     }
 
@@ -597,22 +597,22 @@ popOptErrcode(void) /* regOptionPropertyにて登録したcontentsCheckerを各�
 void
 endOptAnalization(void) /* consoleapp/optionにて確保した動的メモリを全て解放する関数 */
 {
-    for(int i=0; i<_prop_num_g; i++){
-        _freeOptProp(_prop_gp[i]);
-        _prop_gp[i] = NULL;
+    for(int i=0; i<prop_num_g_; i++){
+        freeOptProp_(prop_gp_[i]);
+        prop_gp_[i] = NULL;
     }
-    free(_prop_gp);
-    _prop_gp = NULL;
+    free(prop_gp_);
+    prop_gp_ = NULL;
 
-    for(int i=0; i<_grp_num_g; i++){
-        _freeOptGroup(_grp_gp[i]);
-        _grp_gp[i] = NULL;
+    for(int i=0; i<grp_num_g_; i++){
+        freeOptGroup_(grp_gp_[i]);
+        grp_gp_[i] = NULL;
     }
-    free(_grp_gp);
-    _grp_gp = NULL;
+    free(grp_gp_);
+    grp_gp_ = NULL;
 
-    free(_errcode_memo_gp);
-    _prop_num_g = 0;
-    _grp_num_g  = 0;
-    _errcode_memo_num_g = 0;
+    free(errcode_memo_gp_);
+    prop_num_g_ = 0;
+    grp_num_g_  = 0;
+    errcode_memo_num_g_ = 0;
 }

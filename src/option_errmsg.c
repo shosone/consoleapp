@@ -28,7 +28,7 @@
 
 /* ============== static global variables ============== */
 
-static const char *_option_api_usage_errmsg[] = {
+static const char *option_api_usage_errmsg_[] = {
     "API usage error (%s@libconsoleapp.a): the 2nd argument of regOptProperty() cannot be NULL. please set a string of short form of option",
     "API usage error (%s@libconsoleapp.a): in regOptProperty(), the 4th argument content_num_min bigger than 5th argument content_num_max.",
     "API usage error (%s@libconsoleapp.a): option properties have not been registerd yet.",
@@ -36,36 +36,36 @@ static const char *_option_api_usage_errmsg[] = {
     "API usage error (%s@libconsoleapp.a): short_form and long_form registerd by regOptProperty() must be different from each other.",
 };
 
-static const char *_option_end_usr_errmsg[] = {
+static const char *option_end_usr_errmsg_[] = {
     "duplicate same option %s(%s).",
     "the number of contents of option %s(%s) is too many.",
     "the number of contents of option %s(%s) is too little.",
 };
 
-static char *_option_errcause1 = NULL;
-static char *_option_errcause2 = NULL;
+static char *option_errcause1_ = NULL;
+static char *option_errcause2_ = NULL;
 
 /* ============== publish only in option.c ============== */
 
 void
-_printAPIusageErrMsg(
+printAPIusageErrMsg_(
         option_runtime_errno_t errno,
         const char*                func_name)
 {
     option_errno = errno;
-    fprintf(stderr, _option_api_usage_errmsg[errno],  func_name);
+    fprintf(stderr, option_api_usage_errmsg_[errno],  func_name);
     fprintf(stderr, "\n");
 }
 
 void
-_makeEndUsrErrMsg(
+makeEndUsrErrMsg_(
         option_runtime_errno_t errno,
         char *short_form,
         char *long_form)
 {
     option_errno      = errno;
-    _option_errcause1 = short_form;
-    _option_errcause2 = long_form;
+    option_errcause1_ = short_form;
+    option_errcause2_ = long_form;
 }
 
 /* ============== publications ============== */
@@ -84,8 +84,8 @@ optionErrno2msg(
         return "unknown error number.";
     }
     else{
-        errmsg = malloc(strlen(_option_end_usr_errmsg[errno]) + strlen(_option_errcause1) + strlen(_option_errcause2 == NULL ? "" : _option_errcause2));
-        sprintf(errmsg, _option_end_usr_errmsg[errno], _option_errcause1, _option_errcause2 == NULL ? " \b\b" : _option_errcause2); 
+        errmsg = malloc(strlen(option_end_usr_errmsg_[errno]) + strlen(option_errcause1_) + strlen(option_errcause2_ == NULL ? "" : option_errcause2_));
+        sprintf(errmsg, option_end_usr_errmsg_[errno], option_errcause1_, option_errcause2_ == NULL ? " \b\b" : option_errcause2_); 
     }
 
     return errmsg;

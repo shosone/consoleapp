@@ -42,7 +42,7 @@ static const char delete[]         = {0x1b, 0x5b, 0x33, 0x7e, 0x00};
 /* ====================================== */
 
 static char
-_getch(void)
+getch_(void)
 {
     char   buf         = 0;
     struct termios old = {0};
@@ -77,7 +77,7 @@ _getch(void)
 }
 
 static void
-_strndelete( /* NOTE: posの値がstrの範囲内にあるかの確認は呼び出しもとで行っているものとする */
+strndelete_( /* NOTE: posの値がstrの範囲内にあるかの確認は呼び出しもとで行っているものとする */
         size_t    pos,
         char **str) /* [out] */
 {
@@ -101,7 +101,7 @@ _strndelete( /* NOTE: posの値がstrの範囲内にあるかの確認は呼び�
 }
 
 static void
-_strninsert( /* NOTE: posの値がstrの範囲内にあるかの確認は呼び出しもとで行っているものとする */
+strninsert_( /* NOTE: posの値がstrの範囲内にあるかの確認は呼び出しもとで行っているものとする */
         int    pos,
         char **str, /* [out] */
         char   ch)
@@ -130,7 +130,7 @@ _strninsert( /* NOTE: posの値がstrの範囲内にあるかの確認は呼び�
 /* ====================================== */
 
 static int 
-_genCompletionCompare(
+genCompletionCompare_(
     const void* a_,
     const void* b_)
 {
@@ -144,7 +144,7 @@ _genCompletionCompare(
 }
 
 completion_t*
-_genCompletion(
+genCompletion_(
         const char **strings,
               int    entory_num)
 {
@@ -160,7 +160,7 @@ _genCompletion(
     }
     memcpy(strings_copy, strings, sizeof(char *)*entory_num);
 
-    qsort(strings_copy, entory_num, sizeof(char*), _genCompletionCompare);
+    qsort(strings_copy, entory_num, sizeof(char*), genCompletionCompare_);
 
     ret -> entory_num = entory_num;
     ret -> entories   = strings_copy;
@@ -170,7 +170,7 @@ _genCompletion(
 
 /* lenear search */
 static int /* candidate[戻り値]の文字列は先頭にstrを含む文字列になる */
-_search(
+search_(
         int            init_ei,
         char          *str,
         completion_t *candidate)
@@ -193,15 +193,15 @@ _search(
 }
 
 static void
-_completion(
+completion_(
         char          *str,
         completion_t *candidate)
 {
-    int init_i = _search(0, str, candidate);
+    int init_i = search_(0, str, candidate);
 
     if(init_i < candidate->entory_num){
         printf("\n");
-        for(int i=init_i; i<candidate->entory_num; i=_search(i+1, str, candidate)){
+        for(int i=init_i; i<candidate->entory_num; i=search_(i+1, str, candidate)){
             printf("%s  ", candidate->entories[i]);
         }
         printf("\n");
@@ -274,7 +274,7 @@ genRwhCtx(
         return NULL;
     }
 
-    if(!(cpl = _genCompletion(candidates, candidate_num))){
+    if(!(cpl = genCompletion_(candidates, candidate_num))){
         free(ctx);
         return NULL;
     }
@@ -572,7 +572,7 @@ rwh(
     fflush(stdout);
 
     while(1){
-        char ch = _getch();
+        char ch = getch_();
         switch(ch){
             case '\n':
                 if(line){
@@ -585,7 +585,7 @@ rwh(
                 if(cursor_pos != 0){
                     cursor_pos--;
                     line_len--;
-                    _strndelete(cursor_pos, &line);
+                    strndelete_(cursor_pos, &line);
                     line_modified = 1;
                 }
                 break;
@@ -598,7 +598,7 @@ rwh(
                 tmp_len++;
                 switch(judgeShortCut(ctx, tmp)){
                     case JS_NOT_SHORT_CUT:
-                        _strninsert(cursor_pos, &line, ch);
+                        strninsert_(cursor_pos, &line, ch);
                         cursor_pos++;
                         line_len++;
                         line_modified = 1;
@@ -625,7 +625,7 @@ rwh(
                         goto free_and_break;
 
                     case JS_COMPLETION:
-                        _completion(line, ctx->candidate);
+                        completion_(line, ctx->candidate);
                         goto free_and_break;
 
                     case JS_DIVE_HIST:
@@ -672,7 +672,7 @@ rwh(
 
                     case JS_DELETE:
                         if(cursor_pos < line_len){
-                            _strndelete(cursor_pos, &line);
+                            strndelete_(cursor_pos, &line);
                             line_len--;
                             line_modified = 1;
                         }

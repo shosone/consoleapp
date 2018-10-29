@@ -56,7 +56,7 @@ extern int option_errno;
 
 extern char*
 optionErrno2msg(
-         int __errno);
+         int errno);
 
 #ifdef __cplusplus
 }
