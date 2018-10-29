@@ -63,3 +63,4 @@ install(EXPORT consoleapp-export                     # 6.a
     EXPORT_LINK_INTERFACE_LIBRARIES)          # 6.d 同時にリンクすべきライブラリをエクスポートする
 
 add_subdirectory(sample/c)
+add_subdirectory(sample/cpp)

@@ -74,7 +74,7 @@ int option_errno = CONSOLEAPP_DEFAULT_ERRNO;
 
 char*
 optionErrno2msg(
-        option_runtime_errno_t errno)
+        int errno)
 {
     static char *errmsg = NULL;
     free(errmsg);

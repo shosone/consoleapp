@@ -12,8 +12,8 @@ enum {
 /* priority */
 enum {
     /* high */
-    HELP,
     VERSION,
+    HELP,
     PRINT,
     ADD,
     SUB,
@@ -46,19 +46,18 @@ int main(int argc, char *argv[]){
         goto free_and_exit;
     }
 
-    ret = popOptErrcode();
-    switch(ret){
+    switch(popOptErrcode()){
         case ARE_NUMBER_ERR:
             fprintf(stderr, "option error: not a number\n");
+            ret = ARE_NUMBER_ERR;
             goto free_and_exit;
 
         default:
             break;
     }
 
-    opt_group_t *opt_grp_p = NULL;
-    while((opt_grp_p = popOptGroup()) != NULL){
-        switch(opt_grp_p -> priority){
+    for(opt_group_t *grp_p = popOptGroup(); grp_p != NULL; grp_p = popOptGroup()){
+        switch(grp_p -> priority){
             case HELP:
                 printUsage();
                 break;
@@ -68,39 +67,39 @@ int main(int argc, char *argv[]){
                 break;
 
             case PRINT:
-                for(int i=0; i<opt_grp_p->content_num; i++){
-                    printf("%s\n", opt_grp_p->contents[i]);
+                for(int i=0; i<grp_p->content_num; i++){
+                    printf("%s\n", grp_p->contents[i]);
                 }
                 break;
 
             case ADD:
                 {
-                    int a = atoi(opt_grp_p->contents[0]);
-                    int b = atoi(opt_grp_p->contents[1]); 
+                    int a = atoi(grp_p->contents[0]);
+                    int b = atoi(grp_p->contents[1]); 
                     printf("%d + %d = %d\n", a, b, a+b);
                 }
                 break;
 
             case SUB:
                 {
-                    int a = atoi(opt_grp_p->contents[0]);
-                    int b = atoi(opt_grp_p->contents[1]); 
+                    int a = atoi(grp_p->contents[0]);
+                    int b = atoi(grp_p->contents[1]); 
                     printf("%d - %d = %d\n", a, b, a-b);
                 }
                 break;
 
             case MUL:
                 {
-                    int a = atoi(opt_grp_p->contents[0]);
-                    int b = atoi(opt_grp_p->contents[1]); 
+                    int a = atoi(grp_p->contents[0]);
+                    int b = atoi(grp_p->contents[1]); 
                     printf("%d * %d = %d\n", a, b, a*b);
                 }
                 break;
 
             case DIV:
                 {
-                    int a = atoi(opt_grp_p->contents[0]);
-                    int b = atoi(opt_grp_p->contents[1]); 
+                    int a = atoi(grp_p->contents[0]);
+                    int b = atoi(grp_p->contents[1]); 
                     printf("%d / %d = %d\n", a, b, a/b);
                 }
                 break;
@@ -147,7 +146,6 @@ void printUsage(void){
 
 void printVersion(void){
     printf("liboption.a v%s\n", CONSOLEAPP_OPTION_VERSION);
-    printf("\n");
     printf("Copyright (c) This software is provided under the MIT license.\n");
     printf("See \"https://opensource.org/licenses/MIT\" for details.\n");
     printf("\n");
