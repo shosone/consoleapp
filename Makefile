@@ -1,7 +1,7 @@
 ﻿#for build libraries
 CC               := gcc
-CFLAGS_RELEASE   := -Wall -O3 
-CFLAGS_DEBUG     := -Wall -g3 -O0 
+CFLAGS_RELEASE   := -Wall -O3 -std=c99
+CFLAGS_DEBUG     := -Wall -g3 -O0 -std=c99
 ARCHIVER         := ar
 OBJFLAGS         := rcs
 INC_PATH         := ./src
@@ -19,12 +19,12 @@ SAMPLE_EXE_PATH  := ./sample
 # c
 SRC_PATH_CSAMPLE := ./sample/c
 TARGET_CSAMPLE   := prompt_c_sample option_c_sample
-FLAGS_CSAMPLE    := -g3 -Wall -lprompt_debug -loption_debug -O0 
+FLAGS_CSAMPLE    := -g3 -Wall -lprompt_debug -loption_debug -O0 -std=c99
 # cpp
 CPPC               := g++
 SRC_PATH_CPPSAMPLE := ./sample/cpp
 TARGET_CPPSAMPLE   := prompt_cpp_sample option_cpp_sample
-FLAGS_CPPSAMPLE    := -g3 -Wall -lprompt_debug -loption_debug  -O0
+FLAGS_CPPSAMPLE    := -g3 -Wall -lprompt_debug -loption_debug  -O0 
 
 #for install
 LIB_DIR  := /usr/lib
