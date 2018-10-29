@@ -23,15 +23,15 @@
 #include <stdio.h>
 #include "./common.h"
 
-static const char *_consoleapp_bug_report_msg[] = {
+static const char *consoleapp_bug_report_msg_[] = {
     "there may be a bug in liboption.a (;_;): unexpected constant value in switch statement.",
 };
 
 void
-_consoleappBugReport(
+consoleappBugReport_(
     consoleapp_bugcode_t errno)
 {
-    fprintf(stderr, _consoleapp_bug_report_msg[(errno)], NULL);
+    fprintf(stderr, consoleapp_bug_report_msg_[(errno)], NULL);
     fprintf(stderr, "\n");
 }
 

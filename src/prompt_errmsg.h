@@ -24,7 +24,7 @@
 #ifndef PROMPT_ERRMSG_H
 #define PROMPT_ERRMSG_H
 
-#ifdef _win32
+#ifdef _WIN32
 #include "./win32.h"
 #endif
 
