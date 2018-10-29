@@ -25,8 +25,16 @@
 #define CONSOLEAPP_COMMON_H
 #include <limits.h>
 
+#ifndef isNull
+#define isNull(p)    ((p) == NULL)
+#endif
+
 #ifndef isOverflow4Realloc
 #define isOverflow4Realloc(ssize, type) ((ssize) < 0 || ((size_t)(ssize)) > SIZE_MAX/sizeof(type))
+#endif
+
+#ifndef isNotNull
+#define isNotNull(p) ((p) != NULL)
 #endif
 
 #define CONSOLEAPP_DEFAULT_ERRNO      -1
@@ -34,7 +42,7 @@
 #define CONSOLEAPP_RUNTIME_ERRNO_BASE 100
 
 typedef enum{
-    __CONSOLEAPP_UNEXPECTED_CONSTANT_VALUE_IN_SWITCH,
-}consoleapp_bugno_t;
+    CONSOLEAPP_UNEXPECTED_CONSTANT_VALUE_IN_SWITCH,
+}consoleapp_bugcode_t;
 
 #endif

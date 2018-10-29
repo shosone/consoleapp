@@ -29,7 +29,7 @@ static const char *_consoleapp_bug_report_msg[] = {
 
 void
 _consoleappBugReport(
-    consoleapp_bugno_t errno)
+    consoleapp_bugcode_t errno)
 {
     fprintf(stderr, _consoleapp_bug_report_msg[(errno)], NULL);
     fprintf(stderr, "\n");

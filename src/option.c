@@ -31,7 +31,7 @@
 
 extern void
 _consoleappBugReport(
-    consoleapp_bugno_t errno);
+    consoleapp_bugcode_t errno);
 
 /* ================================ imports from option_errmsg.c ===================== */
 
@@ -174,13 +174,13 @@ _decodeOptions(
             (*new_argc_p)++;
             if(
                     isOverflow4Realloc(*new_argc_p, char*) ||
-                    ((*new_argv_p) = (char **)realloc(*new_argv_p, sizeof(char *)*(*new_argc_p))) == NULL)
+                    isNull((*new_argv_p) = (char **)realloc(*new_argv_p, sizeof(char *)*(*new_argc_p))))
             {
                 /* out of memory should be handled in errno, not in this library */
                 goto free_and_exit;
             }
             const size_t copy_src_len_plus1 = strlen(copy_src) + 1;
-            if(((*new_argv_p)[*new_argc_p-1] = (char *)malloc(sizeof(char)*(copy_src_len_plus1))) == NULL){
+            if(isNull((*new_argv_p)[*new_argc_p-1] = (char *)malloc(sizeof(char)*(copy_src_len_plus1)))){
                 /* out of memory should be handled in errno, not in this library */
                 goto free_and_exit;
             }
@@ -192,7 +192,7 @@ _decodeOptions(
                 copy_src[strlen(copy_src)] = delim; /* 分割した文字列をもとに戻す */
             }
         }while(a_part_of_condition && 
-                (((copy_src = strtok(NULL, ",")) != NULL && (delim = ',')) ||
+                ((isNotNull(copy_src = strtok(NULL, ",")) && (delim = ',')) ||
                  ((delim = '\0') && (a_part_of_condition = false))));
     }
 
@@ -230,7 +230,7 @@ _judgeDestination(
     static int   current_options_contents_num_min = 0;
 
     /* if str == NULL, this function was called as finalizing.  */
-    if(str == NULL){
+    if(isNull(str)){
         if(current_options_contents_num < current_options_contents_num_min){
             _makeEndUsrErrMsg(OPTION_TOO_LITTLE_CONTENTS, current_options_property -> short_form, current_options_property -> long_form);
             return OPTION_FAILURE;
@@ -302,14 +302,14 @@ _updateOptless(
 {
     if(
             isOverflow4Realloc(*optless_num+1, char*) ||
-            (*optless = (char**)realloc(*optless, sizeof(char*)*(*optless_num+1))) == NULL)
+            isNull(*optless = (char**)realloc(*optless, sizeof(char*)*(*optless_num+1))))
     {
         /* out of memory should be handled in errno, not in this library */
         return OPTION_FAILURE;
     }
 
     size_t str_len_plus1 = strlen(str) + 1;
-    if(((*optless)[*optless_num] = (char*)malloc(str_len_plus1)) == NULL)
+    if(isNull((*optless)[*optless_num] = (char*)malloc(str_len_plus1)))
     {
         *optless = realloc(*optless, sizeof(char*)*(*optless_num)); /* reducing */
         /* out of memory should be handled in errno, not in this library */
@@ -330,12 +330,12 @@ _updateOptGrpGP(
         case JD_OPT_GRPs_OPTION:
             if(
                     isOverflow4Realloc(_grp_num_g+1, opt_group_t) ||
-                    (_grp_gp = (opt_group_t**)realloc(_grp_gp, sizeof(opt_group_t)*(_grp_num_g+1))) == NULL)
+                    isNull(_grp_gp = (opt_group_t**)realloc(_grp_gp, sizeof(opt_group_t)*(_grp_num_g+1))))
             {
                 /* out of memory should be handled in errno, not in this library */
                 return OPTION_FAILURE;
             }
-            if((_grp_gp[_grp_num_g] = (opt_group_t*)malloc(sizeof(opt_group_t))) == NULL){
+            if(isNull(_grp_gp[_grp_num_g] = (opt_group_t*)malloc(sizeof(opt_group_t)))){
                 /* out of memory should be handled in errno, not in this library */
                 _grp_gp = (opt_group_t**)realloc(_grp_gp, sizeof(opt_group_t*)*_grp_num_g); /* reducing */
                 return OPTION_FAILURE;
@@ -350,12 +350,12 @@ _updateOptGrpGP(
                 opt_group_t *grp  = _grp_gp[_grp_num_g - 1];
                 if(
                         isOverflow4Realloc(grp->content_num+1, char*) ||
-                        (grp->contents = (char **)realloc(grp->contents, sizeof(char *)*(grp->content_num+1))) == NULL)
+                        isNull(grp->contents = (char **)realloc(grp->contents, sizeof(char *)*(grp->content_num+1))))
                 {
                 /* out of memory should be handled in errno, not in this library */
                     return OPTION_FAILURE;
                 }
-                if((grp->contents[grp->content_num] = (char*)malloc(strlen(assign_value_p)+1)) == NULL){
+                if(isNull(grp->contents[grp->content_num] = (char*)malloc(strlen(assign_value_p)+1))){
                     /* out of memory should be handled in errno, not in this library */
                     grp->contents = (char **)realloc(grp->contents, sizeof(char*)*(grp->content_num)); /* reducing */
                     return OPTION_FAILURE;
@@ -366,7 +366,7 @@ _updateOptGrpGP(
             }
 
         default:
-            _consoleappBugReport(__CONSOLEAPP_UNEXPECTED_CONSTANT_VALUE_IN_SWITCH);
+            _consoleappBugReport(CONSOLEAPP_UNEXPECTED_CONSTANT_VALUE_IN_SWITCH);
             return OPTION_FAILURE;
     }
 
@@ -383,7 +383,7 @@ _adaptContentsChecker(void)
             if(prop->priority == grp->priority){
                 if(
                         isOverflow4Realloc(_errcode_memo_num_g+1, int) ||
-                        (_errcode_memo_gp = realloc(_errcode_memo_gp, sizeof(int)*(_errcode_memo_num_g+1))) == NULL)
+                        isNull(_errcode_memo_gp = realloc(_errcode_memo_gp, sizeof(int)*(_errcode_memo_num_g+1))))
                 {
                     goto free_and_exit;
                 }
@@ -416,7 +416,7 @@ regOptProperty( /* opt_property_db_tのエントリを追加する関数 */
 {
     /* [begin] error check */
 
-    if(short_form == NULL){
+    if(isNull(short_form)){
         _printAPIusageErrMsg(OPTION_SHORT_FORM_IS_NULL, __func__);
         return OPTION_FAILURE;
     }
@@ -432,7 +432,7 @@ regOptProperty( /* opt_property_db_tのエントリを追加する関数 */
             return OPTION_FAILURE;
         }
         if(strcmp(_prop_gp[i]->short_form, short_form) == 0 || 
-           (long_form == NULL || _prop_gp[i]->long_form == NULL || strcmp(_prop_gp[i]->long_form, long_form) == 0))
+           (isNull(long_form) || isNull(_prop_gp[i]->long_form) || strcmp(_prop_gp[i]->long_form, long_form) == 0))
         {
             _printAPIusageErrMsg(OPTION_SAME_SHORT_LONG_FORMAT, __func__);
             return OPTION_FAILURE;
@@ -443,13 +443,13 @@ regOptProperty( /* opt_property_db_tのエントリを追加する関数 */
 
     if(
             isOverflow4Realloc(_prop_num_g+1, _opt_property_t*) ||
-            (_prop_gp = realloc(_prop_gp, sizeof(_opt_property_t*)*(_prop_num_g+1))) == NULL)
+            isNull(_prop_gp = realloc(_prop_gp, sizeof(_opt_property_t*)*(_prop_num_g+1))))
     {
         /* out of memory should be handled in errno, not in this library */
         return OPTION_FAILURE;
     }
 
-    if((_prop_gp[_prop_num_g] = malloc(sizeof(_opt_property_t))) == NULL){
+    if(isNull(_prop_gp[_prop_num_g] = malloc(sizeof(_opt_property_t)))){
         /* out of memory should be handled in errno, not in this library */
         _prop_gp = realloc(_prop_gp, sizeof(_opt_property_t*)*_prop_num_g); /* reducing */ 
         return OPTION_FAILURE;
@@ -458,13 +458,13 @@ regOptProperty( /* opt_property_db_tのエントリを追加する関数 */
     _initOptPropertyT(_prop_gp[_prop_num_g]);
 
 	const size_t short_form_len = strlen(short_form);
-    if((_prop_gp[_prop_num_g]->short_form = (char *)malloc(short_form_len)) == NULL){
+    if(isNull(_prop_gp[_prop_num_g]->short_form = (char *)malloc(short_form_len))){
         goto free_and_exit;
     }
     memcpy(_prop_gp[_prop_num_g]->short_form, short_form, short_form_len);
 
 	const size_t long_form_len = strlen(long_form);
-    if(long_form && (_prop_gp[_prop_num_g]->long_form = (char *)malloc(long_form_len)) == NULL){
+    if(long_form && isNull(_prop_gp[_prop_num_g]->long_form = (char *)malloc(long_form_len))){
         goto free_and_exit;
     }
 	memcpy(_prop_gp[_prop_num_g]->long_form, long_form, long_form_len);
@@ -472,7 +472,7 @@ regOptProperty( /* opt_property_db_tのエントリを追加する関数 */
     _prop_gp[_prop_num_g]->content_num_min = content_num_min;
     _prop_gp[_prop_num_g]->content_num_max = content_num_max;
     _prop_gp[_prop_num_g]->priority        = priority;
-    if(contentsChecker != NULL){
+    if(isNotNull(contentsChecker)){
         _prop_gp[_prop_num_g]->contentsChecker = contentsChecker;
     }
 
@@ -498,7 +498,7 @@ groupingOpt( /* cliより取得したmainの引数であるargc, argvとregOptio
 {
     /* [begin] error check */
 
-    if(_prop_gp == NULL){
+    if(isNull(_prop_gp)){
         _printAPIusageErrMsg(OPTION_PROP_GP_IS_NULL, __func__);
         return OPTION_FAILURE;
     }
@@ -537,7 +537,7 @@ groupingOpt( /* cliより取得したmainの引数であるargc, argvとregOptio
                 goto free_and_exit;
 
             default:
-                _consoleappBugReport(__CONSOLEAPP_UNEXPECTED_CONSTANT_VALUE_IN_SWITCH);
+                _consoleappBugReport(CONSOLEAPP_UNEXPECTED_CONSTANT_VALUE_IN_SWITCH);
                 goto free_and_exit;
         }
     }
