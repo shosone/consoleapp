@@ -499,7 +499,7 @@ groupingOpt( /* cliより取得したmainの引数であるargc, argvとregOptio
     /* [begin] error check */
 
     if(isNull(prop_gp_)){
-        printAPIusageErrMsg_(OPTIONPROP_GP__IS_NULL, __func__);
+        printAPIusageErrMsg_(OPTION_PROP_GP_IS_NULL, __func__);
         return OPTION_FAILURE;
     }
 
