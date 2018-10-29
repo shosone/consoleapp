@@ -29,8 +29,8 @@
 #define isNull(p)    ((p) == NULL)
 #endif
 
-#ifndef isOverflowForRealloc
-#define isOverflowForRealloc(ssize, type) ((ssize) < 0 || ((size_t)(ssize)) > SIZE_MAX/sizeof(type))
+#ifndef isOverflow4Realloc
+#define isOverflow4Realloc(ssize, type) ((ssize) < 0 || ((size_t)(ssize)) > SIZE_MAX/sizeof(type))
 #endif
 
 #ifndef isNotNull

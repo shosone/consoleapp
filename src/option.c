@@ -173,7 +173,7 @@ _decodeOptions(
         do{
             (*new_argc_p)++;
             if(
-                    isOverflowForRealloc(*new_argc_p, char*) ||
+                    isOverflow4Realloc(*new_argc_p, char*) ||
                     isNull((*new_argv_p) = (char **)realloc(*new_argv_p, sizeof(char *)*(*new_argc_p))))
             {
                 /* out of memory should be handled in errno, not in this library */
@@ -301,7 +301,7 @@ _updateOptless(
         char   *str)
 {
     if(
-            isOverflowForRealloc(*optless_num+1, char*) ||
+            isOverflow4Realloc(*optless_num+1, char*) ||
             isNull(*optless = (char**)realloc(*optless, sizeof(char*)*(*optless_num+1))))
     {
         /* out of memory should be handled in errno, not in this library */
@@ -329,7 +329,7 @@ _updateOptGrpGP(
     switch(direction){
         case JD_OPT_GRPs_OPTION:
             if(
-                    isOverflowForRealloc(_grp_num_g+1, opt_group_t) ||
+                    isOverflow4Realloc(_grp_num_g+1, opt_group_t) ||
                     isNull(_grp_gp = (opt_group_t**)realloc(_grp_gp, sizeof(opt_group_t)*(_grp_num_g+1))))
             {
                 /* out of memory should be handled in errno, not in this library */
@@ -349,7 +349,7 @@ _updateOptGrpGP(
             {
                 opt_group_t *grp  = _grp_gp[_grp_num_g - 1];
                 if(
-                        isOverflowForRealloc(grp->content_num+1, char*) ||
+                        isOverflow4Realloc(grp->content_num+1, char*) ||
                         isNull(grp->contents = (char **)realloc(grp->contents, sizeof(char *)*(grp->content_num+1))))
                 {
                 /* out of memory should be handled in errno, not in this library */
@@ -382,7 +382,7 @@ _adaptContentsChecker(void)
             _opt_property_t *prop = _prop_gp[j];
             if(prop->priority == grp->priority){
                 if(
-                        isOverflowForRealloc(_errcode_memo_num_g+1, int) ||
+                        isOverflow4Realloc(_errcode_memo_num_g+1, int) ||
                         isNull(_errcode_memo_gp = realloc(_errcode_memo_gp, sizeof(int)*(_errcode_memo_num_g+1))))
                 {
                     goto free_and_exit;
@@ -442,7 +442,7 @@ regOptProperty( /* opt_property_db_tのエントリを追加する関数 */
     /* [done] error check */
 
     if(
-            isOverflowForRealloc(_prop_num_g+1, _opt_property_t*) ||
+            isOverflow4Realloc(_prop_num_g+1, _opt_property_t*) ||
             isNull(_prop_gp = realloc(_prop_gp, sizeof(_opt_property_t*)*(_prop_num_g+1))))
     {
         /* out of memory should be handled in errno, not in this library */
